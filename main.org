@@ -20,7 +20,44 @@
 
    #+end_src
 * structures
-  Le strutture sono 
+  Le strutture sono gruppi di variabili che rapressentano un
+  oggetto della vita reale.
+** utente
+   #+begin_src c :tangle yes
+struct Utente{
+   int id;
+   float budget;
+};
+
+   #+end_src
+** Transazione
+   Una transazione è caratterizzata dalle seguenti informazioni:
+   • timestamp della transazione con risoluzione dei nanosecondi (si 
+     veda funzione clock_gettime(...))
+   • sender (implicito, in quanto è l’utente che ha generato la 
+     transazione)
+   • receiver, utente destinatario della somma
+   • quantità di denaro inviata.
+   • reward, denaro pagato dal sender al nodo che processa la 
+     transazione.
+
+   La transazione è inviata dal processo utente che la genera ad uno 
+   dei processi nodo, scelto a caso.
+   #+begin_src c :tangle yes
+struct Transazione{
+   struct Utente sender;
+   struct Utente receiver;
+   float quantita;
+   float reward;
+};
+
+   #+end_src
+** Node
+   #+begin_src c :tangle yes
+struct Nodo{
+
+};
+   #+end_src
 
 * main
   #+begin_src c :tangle yes
