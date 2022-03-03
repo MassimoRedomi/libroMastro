@@ -36,15 +36,10 @@ struct Transazione{
 void* utente(void* conf){
 
 }
-struct Utente{
-   int id;
-   float budget;
-};
 
-struct Nodo{
-   int id;
-   /*unsigned Transazione block[];*/
-};
+void* nodo(void* conf){
+
+}
 
 /*Un picollo metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero*/

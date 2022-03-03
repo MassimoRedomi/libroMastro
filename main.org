@@ -96,18 +96,14 @@ struct Transazione{
 void* utente(void* conf){
 
 }
-struct Utente{
-   int id;
-   float budget;
-};
 
    #+end_src
 ** Node
    #+begin_src c :tangle yes
-struct Nodo{
-   int id;
-   /*unsigned Transazione block[];*/
-};
+void* nodo(void* conf){
+
+}
+
    #+end_src
 
 * lettura della configurazione
