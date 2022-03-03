@@ -38,6 +38,7 @@
 | SO_TP_SIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
 | SO_MIN_TRANS_PROC_NSEC,               | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
 | SO_MAX_TRANS_PROC_NSEC                | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
+| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                    |
 | SO_SIM_SESC                           | durata della simulazione                                                                                         |
 | SO_NUM_FRIENDS (solo versione max 30) | numero di nodi amici dei processi nodo (solo per la versione full)                                               |
 | SO_HOPS (solo versione max 30)        | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
@@ -55,42 +56,49 @@ struct readStruct{
    int SO_TP_SIZE;/*numero massimo di transazioni nella transaction pool dei processi nodo*/
    int SO_MIN_TRANS_PROC_NSEC;/*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
    int SO_MAX_TRANS_PROC_NSEC;/*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
-   int SO_SIM_SESC;/*durata della simulazione*/
-   int SO_NUM_FRIENDS;/*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
+   int SO_REGISTRY_SIZE;
+   int SO_SIM_SEC;/*durata della simulazione*/
+   int SO_FRIENDS_NUM;/*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
    int SO_HOPS;/*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
 }configurazione;
 
 #+end_src
    Questa struttura è gia dichiarata con la variabile _configurazione_ 
-   perche solo c'è una lettura delle variabili di configurazione.
+  perche solo c'è una lettura delle variabili di configurazione.
 
-** utente
-   #+begin_src c :tangle yes
-struct Utente{
-   int id;
-   float budget;
+** Transazione
+  Una transazione è caratterizzata dalle seguenti informazioni:
+  • timestamp della transazione con risoluzione dei nanosecondi (si 
+    veda funzione clock_gettime(...))
+  • sender (implicito, in quanto è l’utente che ha generato la 
+    transazione)
+  • receiver, utente destinatario della somma
+  • quantità di denaro inviata.
+  • reward, denaro pagato dal sender al nodo che processa la 
+    transazione.
+
+  La transazione è inviata dal processo utente che la genera ad uno 
+  dei processi nodo, scelto a caso.
+  #+begin_src c :tangle yes
+struct Transazione{
+   int sender;
+   int receiver;
+   float quantita;
+   float reward;
 };
 
    #+end_src
-** Transazione
-   Una transazione è caratterizzata dalle seguenti informazioni:
-   • timestamp della transazione con risoluzione dei nanosecondi (si 
-     veda funzione clock_gettime(...))
-   • sender (implicito, in quanto è l’utente che ha generato la 
-     transazione)
-   • receiver, utente destinatario della somma
-   • quantità di denaro inviata.
-   • reward, denaro pagato dal sender al nodo che processa la 
-     transazione.
-
-   La transazione è inviata dal processo utente che la genera ad uno 
-   dei processi nodo, scelto a caso.
+* funzioni in parallelo 
+  questo spazio è riservato per le funzioni del multithread
+** utente
    #+begin_src c :tangle yes
-struct Transazione{
-   struct Utente sender;
-   struct Utente receiver;
-   float quantita;
-   float reward;
+
+void* utente(void* conf){
+
+}
+struct Utente{
+   int id;
+   float budget;
 };
 
    #+end_src
@@ -102,6 +110,49 @@ struct Nodo{
 };
    #+end_src
 
+* lettura della configurazione
+#+begin_src c :tangle yes
+/*Un picollo metodo che fa un fgets(con gli stessi parametri e lo 
+ritorna come un valore intero*/
+int readAndInt(char *str, int n, FILE *stream){
+   fgets(str,n,stream);
+   printf("%d\n",atoi(str));/*manual debug*/
+   return atoi(str);
+}
+/*funzione che cerca la maniera */
+struct readStruct readconf(char fileName[]){
+   /*secondo lo std c89 tutte le variabile devono 
+   essere dichiarate prima del primo codice */
+   struct readStruct lec;
+   FILE *file= fopen(fileName, "r");
+
+   if(!file){
+      printf("non si trova il config file.\n");
+      exit(EXIT_FAILURE);
+   }else{
+      char line[20];/*str per prendere le righe*/
+
+      /*inserisco le variabili riga a riga alla struttura.*/
+      configurazione.SO_USERS_NUM = readAndInt(line,10,file);
+      configurazione.SO_NODES_NUM = readAndInt(line,10,file);
+      configurazione.SO_BUDGET_INIT = readAndInt(line,10,file);
+      configurazione.SO_REWARD = readAndInt(line,10,file);
+      configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,10,file);
+      configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,10,file);
+      configurazione.SO_RETRY = readAndInt(line,10,file);
+      configurazione.SO_TP_SIZE = readAndInt(line,10,file);
+      configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,10,file);
+      configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,10,file);
+      configurazione.SO_REGISTRY_SIZE = readAndInt(line,10,file);
+      configurazione.SO_SIM_SEC = readAndInt(line,10,file);
+      configurazione.SO_FRIENDS_NUM = readAndInt(line,10,file);
+      configurazione.SO_HOPS = readAndInt(line,10,file);
+   }
+   fclose(file);/*chiusura del file.*/
+   return lec;
+}
+
+#+end_src
 * main
   #+begin_src c :tangle yes
 int main(int argc,char *argv[]){
@@ -113,6 +164,7 @@ int main(int argc,char *argv[]){
       exit(EXIT_FAILURE);
    }else{
       printf("tutto a posto\n");
+      readconf(argv[1]);
    }
    return 0;
 }
