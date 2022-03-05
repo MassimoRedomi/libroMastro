@@ -49,7 +49,7 @@ int readAndInt(char *str, int n, FILE *stream){
    return atoi(str);
 }
 /*funzione che cerca la maniera */
-struct readStruct readconf(char fileName[]){
+void readconf(char fileName[]){
    /*secondo lo std c89 tutte le variabile devono 
    essere dichiarate prima del primo codice */
    struct readStruct lec;
@@ -78,7 +78,40 @@ struct readStruct readconf(char fileName[]){
       configurazione.SO_HOPS = readAndInt(line,10,file);
    }
    fclose(file);/*chiusura del file.*/
-   return lec;
+}
+
+/*scritura manuale dei valori del sistema.*/
+void writeConf(){
+   printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
+   printf("SO_USERS_NUM: ");
+   scanf("%d",&configurazione.SO_USERS_NUM);
+   printf("SO_NODES_NUM: ");
+   scanf("%d",&configurazione.SO_NODES_NUM);
+   printf("SO_BUDGET_INIT: ");
+   scanf("%d",&configurazione.SO_BUDGET_INIT);
+   printf("SO_REWARD: ");
+   scanf("%d",&configurazione.SO_REWARD);
+   printf("SO_MIN_TRANS_GEN_NSEC: ");
+   scanf("%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
+   printf("SO_MAX_TRANS_GEN_NSEC: ");
+   scanf("%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
+   printf("SO_RETRY: ");
+   scanf("%d",&configurazione.SO_RETRY);
+   printf("SO_TP_SIZE: ");
+   scanf("%d",&configurazione.SO_TP_SIZE);
+   printf("SO_MIN_TRANS_PROC_NSEC: ");
+   scanf("%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
+   printf("SO_MAX_TRANS_PROC_NSEC: ");
+   scanf("%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
+   printf("SO_REGISTRY_SIZE: ");
+   scanf("%d",&configurazione.SO_REGISTRY_SIZE);
+   printf("SO_SIM_SEC: ");
+   scanf("%d",&configurazione.SO_SIM_SEC);
+   printf("SO_FRIENDS_NUM: ");
+   scanf("%d",&configurazione.SO_FRIENDS_NUM);
+   printf("SO_HOPS: ");
+   scanf("%d",&configurazione.SO_HOPS);
+
 }
 
 int main(int argc,char *argv[]){
@@ -89,8 +122,12 @@ int main(int argc,char *argv[]){
       printf("troppi argomenti.\n");
       exit(EXIT_FAILURE);
    }else{
-      printf("tutto a posto\n");
-      readconf(argv[1]);
+      /*in caso di voler inserire i valori a mano*/
+      if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
+         writeConf();
+      }else{
+         readconf(argv[1]);/*lettura del file*/
+      }
    }
    return 0;
 }
