@@ -6,7 +6,7 @@
 
 #define clear() printf("\033[H\033[J")
 
-#include <unistd.h> /*Header file per sleep()*/
+#include <unistd.h> /*Header per sleep()*/
 #include <pthread.h> /*per fare i thread*/
 
 struct readStruct{
@@ -18,23 +18,31 @@ struct readStruct{
    int SO_MAX_TRANS_GEN_NSEC;/*massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
    int SO_RETRY;/*numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina*/
    int SO_TP_SIZE;/*numero massimo di transazioni nella transaction pool dei processi nodo*/
+   int SO_BLOCK_SIZE;/*numero di transazioni contenute in un blocco*/
    int SO_MIN_TRANS_PROC_NSEC;/*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
    int SO_MAX_TRANS_PROC_NSEC;/*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
-   int SO_REGISTRY_SIZE;
+   int SO_REGISTRY_SIZE;/*numero massimo di blocchi nel libro mastro*/
    int SO_SIM_SEC;/*durata della simulazione*/
    int SO_FRIENDS_NUM;/*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
    int SO_HOPS;/*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
 }configurazione;
 
 struct Transazione{
+   time_t timestamp;
    int sender;
    int receiver;
    float quantita;
    float reward;
 };
 
-void* utente(void* conf){
+struct Transazione *libroMastro;
 
+void* utente(void* conf){
+   int budget = configurazione.SO_BUDGET_INIT;
+   int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
+   /*int *myid = (int *)conf;*/
+   int myid = pthread_self();
+   printf("Nuovo thread creato nel id:%d\n",myid);
 }
 
 void* nodo(void* conf){
@@ -103,20 +111,21 @@ void writeConf(){
    scanf("%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
    printf("SO_MAX_TRANS_PROC_NSEC: ");
    scanf("%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
-   printf("SO_REGISTRY_SIZE: ");
-   scanf("%d",&configurazione.SO_REGISTRY_SIZE);
    printf("SO_SIM_SEC: ");
    scanf("%d",&configurazione.SO_SIM_SEC);
    printf("SO_FRIENDS_NUM: ");
    scanf("%d",&configurazione.SO_FRIENDS_NUM);
    printf("SO_HOPS: ");
    scanf("%d",&configurazione.SO_HOPS);
+   clear();
 
 }
 
 int main(int argc,char *argv[]){
+   int i;
+   pthread_t tid;
    if(argc<2){
-      printf("si aspettava un file con la configurazione.\n");
+      printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
       exit(EXIT_FAILURE);
    }else if(argc>2){
       printf("troppi argomenti.\n");
@@ -128,6 +137,22 @@ int main(int argc,char *argv[]){
       }else{
          readconf(argv[1]);/*lettura del file*/
       }
+      
+      /*questi valori sono inseriti in compilazione
+      ancora non sono sicuro di come si fa*/
+      configurazione.SO_BLOCK_SIZE=10;
+      configurazione.SO_REGISTRY_SIZE=1000;
+
+      /*now that we have all the variables we can start the process
+      master*/
+
+      libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));
+      /*generatore dei utenti e nodi*/
+      for(i=0;i<configurazione.SO_USERS_NUM;i++){
+         tid=i;
+         pthread_create(&tid,NULL,utente,(void *) &tid);
+      }
+
    }
    return 0;
 }
