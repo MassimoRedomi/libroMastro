@@ -36,15 +36,20 @@
 | SO_MAX_TRANS_GEN_NSEC                 | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
 | SO_RETRY                              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
 | SO_TP_SIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
+| SO_BLOCK_SIZE                         | numero di transazioni contenute in un blocco                                                                     |
 | SO_MIN_TRANS_PROC_NSEC,               | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
 | SO_MAX_TRANS_PROC_NSEC                | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
-| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                    |
+| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                      |
 | SO_SIM_SESC                           | durata della simulazione                                                                                         |
 | SO_NUM_FRIENDS (solo versione max 30) | numero di nodi amici dei processi nodo (solo per la versione full)                                               |
 | SO_HOPS (solo versione max 30)        | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 |---------------------------------------+------------------------------------------------------------------------------------------------------------------|
+   Anche e' vero che si poteva leggere tutte le variabili senza metterlo
+   in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto 
+   cosi.
 #+begin_src c :tangle yes
 
+/*strutruttura della configurazione.*/
 struct readStruct{
    int SO_USERS_NUM;/*numero di processi utente*/
    int SO_NODES_NUM;/*numero di processi nodo*/
@@ -123,7 +128,9 @@ int readAndInt(char *str, int n, FILE *stream){
    printf("%d\n",atoi(str));/*manual debug*/
    return atoi(str);
 }
-/*funzione che cerca la maniera */
+/*funzione che cerca la maniera di leggere il config file.
+/*metodo basato in codice di stackoverflow per leggere file come
+una unica struttura.*/
 void readconf(char fileName[]){
    /*secondo lo std c89 tutte le variabile devono 
    essere dichiarate prima del primo codice */
