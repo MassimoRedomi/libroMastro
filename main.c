@@ -9,6 +9,7 @@
 #include <unistd.h> /*Header per sleep()*/
 #include <pthread.h> /*per fare i thread*/
 
+/*strutruttura della configurazione.*/
 struct readStruct{
    int SO_USERS_NUM;/*numero di processi utente*/
    int SO_NODES_NUM;/*numero di processi nodo*/
@@ -56,7 +57,9 @@ int readAndInt(char *str, int n, FILE *stream){
    printf("%d\n",atoi(str));/*manual debug*/
    return atoi(str);
 }
-/*funzione che cerca la maniera */
+/*funzione che cerca la maniera di leggere il config file.
+/*metodo basato in codice di stackoverflow per leggere file come
+una unica struttura.*/
 void readconf(char fileName[]){
    /*secondo lo std c89 tutte le variabile devono 
    essere dichiarate prima del primo codice */
