@@ -185,7 +185,7 @@
 | SO_TP_SIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
 | SO_MIN_TRANS_PROC_NSEC,               | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
 | SO_MAX_TRANS_PROC_NSEC                | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
-| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                    |
+| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                      |
 | SO_SIM_SESC                           | durata della simulazione                                                                                         |
 | SO_NUM_FRIENDS (solo versione max 30) | numero di nodi amici dei processi nodo (solo per la versione full)                                               |
 | SO_HOPS (solo versione max 30)        | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
