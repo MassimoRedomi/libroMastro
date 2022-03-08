@@ -185,14 +185,15 @@
 | SO_TP_SIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
 | SO_MIN_TRANS_PROC_NSEC,               | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
 | SO_MAX_TRANS_PROC_NSEC                | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
-| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                      |
+| SO_REGISTRY_SIZE                      | numero massimo di blocchi nel libro mastro.                                                                    |
 | SO_SIM_SESC                           | durata della simulazione                                                                                         |
 | SO_NUM_FRIENDS (solo versione max 30) | numero di nodi amici dei processi nodo (solo per la versione full)                                               |
 | SO_HOPS (solo versione max 30)        | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 |---------------------------------------+------------------------------------------------------------------------------------------------------------------|
 
-  Un cambiamento dei precedenti parametri non deve determinare una nuova compilazione dei sorgenti.
-  Invece, i seguenti parametri sono letti a tempo di compilazione:
+Un cambiamento dei precedenti parametri non deve determinare una nuova compilazione dei sorgenti.
+Invece, i seguenti parametri sono letti a tempo di compilazione:
+
 |------------------+----------------------------------------------|
 | variable         | description                                  |
 |------------------+----------------------------------------------|
@@ -200,8 +201,8 @@
 | SO_BLOCK_SIZE    | numero di transazioni contenute in un blocco |
 |------------------+----------------------------------------------|
   
-  La seguente tabella elenca valori per alcune configurazioni di esempio da testare. Si tenga presente che il progetto
-  deve poter funzionare anche con altri parametri.
+La seguente tabella elenca valori per alcune configurazioni di esempio da testare. Si tenga presente che il progetto
+deve poter funzionare anche con altri parametri.
 
 |------------------------------+--------------+-----------+-----------+-----------|
 | parametro                    | letto a...   |   conf #1 |   conf #2 |   conf #3 |
