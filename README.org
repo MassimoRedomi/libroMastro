@@ -200,8 +200,8 @@
 | SO_BLOCK_SIZE    | numero di transazioni contenute in un blocco |
 |------------------+----------------------------------------------|
   
-La seguente tabella elenca valori per alcune configurazioni di esempio da testare. Si tenga presente che il progetto
-deve poter funzionare anche con altri parametri.
+  La seguente tabella elenca valori per alcune configurazioni di esempio da testare. Si tenga presente che il progetto
+  deve poter funzionare anche con altri parametri.
 
 |------------------------------+--------------+-----------+-----------+-----------|
 | parametro                    | letto a...   |   conf #1 |   conf #2 |   conf #3 |
