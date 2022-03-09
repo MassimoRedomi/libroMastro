@@ -18,9 +18,11 @@
 
    #+end_src
 ** Constants
-   Le costanti sono definite all'inizio come se fosse 
-   definito nella compilazione come l'hanno chiesto 
-   nella documentazione del progetto.
+   Le costanti sono definite all'inizio come se fosse definito nella 
+   compilazione come l'hanno chiesto nella documentazione del progetto. 
+   Questo permette definire la grandezza delle ARRAYS di transazioni,
+   che sono il libro mastro e il blocco di transazioni di ogni nodo.
+
   #+begin_src c :tangle yes
 #define SO_BLOCK_SIZE 10
 #define SO_REGISTRY_SIZE 1000
