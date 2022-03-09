@@ -4,10 +4,12 @@
 #include <stdbool.h>/*aggiunge i boolean var*/
 #include <math.h>
 
-#define clear() printf("\033[H\033[J")
-
 #include <unistd.h> /*Header per sleep()*/
 #include <pthread.h> /*per fare i thread*/
+
+#define SO_BLOCK_SIZE 10
+#define SO_REGISTRY_SIZE 1000
+#define clear() printf("\033[H\033[J")
 
 /*strutruttura della configurazione.*/
 struct readStruct{
@@ -19,10 +21,10 @@ struct readStruct{
    int SO_MAX_TRANS_GEN_NSEC;/*massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
    int SO_RETRY;/*numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina*/
    int SO_TP_SIZE;/*numero massimo di transazioni nella transaction pool dei processi nodo*/
-   int SO_BLOCK_SIZE;/*numero di transazioni contenute in un blocco*/
+   /*int SO_BLOCK_SIZE;/*numero di transazioni contenute in un blocco*/
    int SO_MIN_TRANS_PROC_NSEC;/*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
    int SO_MAX_TRANS_PROC_NSEC;/*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
-   int SO_REGISTRY_SIZE;/*numero massimo di blocchi nel libro mastro*/
+   /*int SO_REGISTRY_SIZE;/*numero massimo di blocchi nel libro mastro*/
    int SO_SIM_SEC;/*durata della simulazione*/
    int SO_FRIENDS_NUM;/*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
    int SO_HOPS;/*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
@@ -36,7 +38,7 @@ struct Transazione{
    float reward;
 };
 
-struct Transazione *libroMastro;
+struct Transazione libroMastro[SO_REGISTRY_SIZE];
 
 void* utente(void* conf){
    int budget = configurazione.SO_BUDGET_INIT;
@@ -83,7 +85,7 @@ void readconf(char fileName[]){
       configurazione.SO_TP_SIZE = readAndInt(line,10,file);
       configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,10,file);
       configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,10,file);
-      configurazione.SO_REGISTRY_SIZE = readAndInt(line,10,file);
+      /*configurazione.SO_REGISTRY_SIZE = readAndInt(line,10,file);*/
       configurazione.SO_SIM_SEC = readAndInt(line,10,file);
       configurazione.SO_FRIENDS_NUM = readAndInt(line,10,file);
       configurazione.SO_HOPS = readAndInt(line,10,file);
@@ -141,15 +143,10 @@ int main(int argc,char *argv[]){
          readconf(argv[1]);/*lettura del file*/
       }
       
-      /*questi valori sono inseriti in compilazione
-      ancora non sono sicuro di come si fa*/
-      configurazione.SO_BLOCK_SIZE=10;
-      configurazione.SO_REGISTRY_SIZE=1000;
-
       /*now that we have all the variables we can start the process
       master*/
 
-      libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));
+      /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei utenti e nodi*/
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
          tid=i;
