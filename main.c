@@ -44,10 +44,10 @@ int libroCounter=0;
 void* utente(void* conf){
    int budget = configurazione.SO_BUDGET_INIT;
    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
-   int *myid = (int *)conf;
+   int *id = (int *)conf;
    int mythr = pthread_self();
    int tentativi = 0;
-   printf("Utente #%d creato nel thread %d\n",*myid,mythr);
+   printf("Utente #%d creato nel thread %d\n",*id,mythr);
    while(tentativi<configurazione.SO_RETRY){
       if(budget>2){
          /*qui va la struttura della transazione*/
@@ -61,8 +61,12 @@ void* utente(void* conf){
 
 void* nodo(void* conf){
    int counter=0;/*contatore della quantita di transazioni nel blocco*/
+   int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
    struct Transazione blocco[SO_BLOCK_SIZE];
    struct Transazione pool[configurazione.SO_TP_SIZE];/*=malloc(configurazione.SO_TP_SIZE * (4 * sizeof(int)) * sizeof(time_t)));*/
+   int *id = (int *)conf;
+   int mythr = pthread_self();
+   printf("Nodo #%d creato nel thread %d\n",*id,mythr);
 }
 
 /*Un picollo metodo che fa un fgets(con gli stessi parametri e lo 
@@ -160,7 +164,11 @@ int main(int argc,char *argv[]){
       master*/
 
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
-      /*generatore dei utenti e nodi*/
+      /*generatore dei nodi*/
+      for(i=0;i<configurazione.SO_NODES_NUM;i++){
+         pthread_create(&tid,NULL,nodo,(void *)&i);
+      }
+      /*generatore dei utenti*/
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
          /*tid=i;*/
          pthread_create(&tid,NULL,utente,(void *)&i);
