@@ -99,31 +99,45 @@ struct Transazione{
    time_t timestamp;
    int sender;
    int receiver;
-   float quantita;
-   float reward;
+   int quantita;
+   int reward;
 };
 
-struct Transazione libroMastro[SO_REGISTRY_SIZE];
+struct Transazione libroMastro[SO_REGISTRY_SIZE][SO_BLOCK_SIZE];
+int libroCounter=0;
 
    #+end_src
 * funzioni in parallelo 
   questo spazio è riservato per le funzioni del multithread
+
 ** utente
    #+begin_src c :tangle yes
 
 void* utente(void* conf){
    int budget = configurazione.SO_BUDGET_INIT;
    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
-   /*int *myid = (int *)conf;*/
-   int myid = pthread_self();
-   printf("Nuovo thread creato nel id:%d\n",myid);
+   int *myid = (int *)conf;
+   int mythr = pthread_self();
+   int tentativi = 0;
+   printf("Utente #%d creato nel thread %d\n",*myid,mythr);
+   while(tentativi<configurazione.SO_RETRY){
+      if(budget>2){
+         /*qui va la struttura della transazione*/
+      }else{
+         tentativi++;
+      }
+      /*sceglie il tempo a caso*/
+      sleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);
+   }
 }
 
    #+end_src
 ** Node
    #+begin_src c :tangle yes
 void* nodo(void* conf){
-
+   int counter=0;/*contatore della quantita di transazioni nel blocco*/
+   struct Transazione blocco[SO_BLOCK_SIZE];
+   struct Transazione pool[configurazione.SO_TP_SIZE];/*=malloc(configurazione.SO_TP_SIZE * (4 * sizeof(int)) * sizeof(time_t)));*/
 }
 
    #+end_src
@@ -235,8 +249,8 @@ int main(int argc,char *argv[]){
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei utenti e nodi*/
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
-         tid=i;
-         pthread_create(&tid,NULL,utente,(void *) &tid);
+         /*tid=i;*/
+         pthread_create(&tid,NULL,utente,(void *)&i);
       }
 
    }
