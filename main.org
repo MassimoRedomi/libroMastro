@@ -112,35 +112,42 @@ int libroCounter=0;
 
 ** utente
    #+begin_src c :tangle yes
-
+int *listUtenti;
 void* utente(void* conf){
    int budget = configurazione.SO_BUDGET_INIT;
    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
    int *id = (int *)conf;
    int mythr = pthread_self();
    int tentativi = 0;
+   listUtenti[*id] = budget;
    printf("Utente #%d creato nel thread %d\n",*id,mythr);
    while(tentativi<configurazione.SO_RETRY){
       if(budget>2){
          /*qui va la struttura della transazione*/
+
       }else{
          tentativi++;
       }
-      /*sceglie il tempo a caso*/
-      sleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);
+      /*nanosleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);*/
+      tentativi++;
    }
 }
 
    #+end_src
 ** Node
+   I nodi hanno bisogno anche di un sistema di semafori e di mailbox per ricevere le transazioni.
    #+begin_src c :tangle yes
+int *semafori;
+struct Transazione *mailbox;
 void* nodo(void* conf){
    int counter=0;/*contatore della quantita di transazioni nel blocco*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
    struct Transazione blocco[SO_BLOCK_SIZE];
    struct Transazione pool[configurazione.SO_TP_SIZE];/*=malloc(configurazione.SO_TP_SIZE * (4 * sizeof(int)) * sizeof(time_t)));*/
+   int mythr; 
    int *id = (int *)conf;
-   int mythr = pthread_self();
+   semafori[*id]=0;
+   mythr = pthread_self();
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
 }
 
@@ -252,14 +259,17 @@ int main(int argc,char *argv[]){
 
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei nodi*/
+      semafori=malloc(configurazione.SO_NODES_NUM * sizeof(int));
+      mailbox=malloc(configurazione.SO_NODES_NUM * (4 * sizeof(int)) * sizeof(time_t));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
          pthread_create(&tid,NULL,nodo,(void *)&i);
       }
       /*generatore dei utenti*/
+      listUtenti=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
          pthread_create(&tid,NULL,utente,(void *)&i);
       }
-      sleep(configurazione.SO_SIM_SEC*1000);
+      sleep(configurazione.SO_SIM_SEC);
 
    }
    return 0;
