@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>/*aggiunge i boolean var*/
-#include <math.h>
    #+end_src
 
 ** specific libraries
@@ -103,12 +102,24 @@ struct Transazione{
    int reward;
 };
 
-struct Transazione libroMastro[SO_REGISTRY_SIZE][SO_BLOCK_SIZE];
+struct Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];
 int libroCounter=0;
 
    #+end_src
 * funzioni in parallelo 
   questo spazio è riservato per le funzioni del multithread
+** semafori
+   i semafori vengono usati per gestire il flusso del programma.
+   e sopratutto non accedono diversi processi allo stesso tempo
+   allo stesso dato. Uguale a un semaforo normale ci sono 3 stati:
+*** 0 avanti
+    il processo puo accedere diretamente al dato.
+*** >0 aspetta
+    il processo deve ancora aspettare per accedere a questo dato
+    o direttamente cercare un'alternativa a questo.
+*** -1 morto
+    Questo dato non funziona ne funzionara mai, il processo che 
+    corrisponde a questo dato è gia finito.
 
 ** utente
    #+begin_src c :tangle yes
@@ -140,15 +151,44 @@ void* utente(void* conf){
 int *semafori;
 struct Transazione *mailbox;
 void* nodo(void* conf){
-   int counter=0;/*contatore della quantita di transazioni nel blocco*/
+   int i;
+   int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
+   int counterPool=0;/*contatore della quantita di transazioni nella pool*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
    struct Transazione blocco[SO_BLOCK_SIZE];
-   struct Transazione pool[configurazione.SO_TP_SIZE];/*=malloc(configurazione.SO_TP_SIZE * (4 * sizeof(int)) * sizeof(time_t)));*/
+   struct Transazione pool[configurazione.SO_TP_SIZE];
    int mythr; 
    int *id = (int *)conf;
    semafori[*id]=0;
    mythr = pthread_self();
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
+   while(semafori[*id]!=-1){
+      if(semafori[*id]==1){
+         /*scrivo la nuova transazione nel blocco e nella pool*/
+         pool[counterPool]=mailbox[*id];
+	 blocco[counterBlock]=mailbox[*id];
+	 
+	 /*incremento i contatori di posizione di pool e block*/
+	 counterBlock++;
+	 counterPool++;
+	 
+	 if(counterBlock == SO_BLOCK_SIZE - 1){
+	    /*si aggiunge una nuova transazione come chiusura del blocco*/
+	    for(i=0;i< SO_BLOCK_SIZE;i++){
+	       libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
+	    }
+	    /*si spostano i contatori*/
+	    counterBlock=0;
+	    libroCounter++;
+	 }
+	 
+      }
+      if(counterPool>= configurazione.SO_TP_SIZE){
+         semafori[*id]=-1;/*il nodo si dichiara morto nel semaforo perche la pool è piena*/
+      }else{
+         semafori[*id]=0;/*stabilisco il semaforo come di nuovo disponibile*/
+      }
+   }
 }
 
    #+end_src
