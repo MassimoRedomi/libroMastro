@@ -1,5 +1,28 @@
 #+title: Libro Mastro
 #+author: José Santos L.
+* Compilazione
+  La compilazione è compresa in un MAKEFILE per passare tutti i 
+  parametri:
+#+begin_src makefile :tangle Makefile
+all:
+	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
+
+#+end_src
+** std=89  
+   set the language standard C89.
+** pthread
+   Setting the binary for thread processing.
+** pedantic
+** _GNU_SOURCE
+   enables GNU extensions to the C and OS standards supported by the 
+   GNU C library.
+** SO_BLOCK_SIZE
+   The size of the block in the simulation.
+** SO_REGISTRY_SIZE
+   The max size of the libro mastro.
+** -lm
+   Compiles against the shared library.
+
 * Headers
 ** Basic libraries
    sono librerie che non credo di aver bisogno di spiegare cosa fanno.
@@ -15,21 +38,17 @@
 #include <unistd.h> /*Header per sleep()*/
 #include <pthread.h> /*per fare i thread*/
 
-   #+end_src
-** Constants
-   Le costanti sono definite all'inizio come se fosse definito nella 
-   compilazione come l'hanno chiesto nella documentazione del progetto. 
-   Questo permette definire la grandezza delle ARRAYS di transazioni,
-   che sono il libro mastro e il blocco di transazioni di ogni nodo.
+#define clear() printf("\033[H\033[J") /*clear the screen*/
 
-  #+begin_src c :tangle yes
-#define SO_BLOCK_SIZE 10
-#define SO_REGISTRY_SIZE 1000
-#define clear() printf("\033[H\033[J") 
-  #+end_src
+   #+end_src
+
 * structures
   Le strutture sono gruppi di variabili che rapressentano un
-  oggetto della vita reale.
+ oggetto della vita reale.
+** Constants
+   le constanti _SO_BLOCK_SIZE_ e _SO_REGISTRY_SIZE_ sono definite nel 
+   MAKEFILE per essere definiti nella compilazione come lo chiede il
+   PDF del progetto.
 ** ReadStruct
    questa struttura solo serve per avere un archivio di dati ordinati
    dei dati letti del file di configurazione. questi dati sono:

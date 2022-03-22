@@ -1,5 +1,2 @@
 all:
-	gcc -std=c89 -D_GNU_SOURCE -pthread -pedantic main.c -lm -o main
-testing:
-	gcc test.c -lm -o test
-	./test
+	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main

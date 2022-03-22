@@ -6,9 +6,7 @@
 #include <unistd.h> /*Header per sleep()*/
 #include <pthread.h> /*per fare i thread*/
 
-#define SO_BLOCK_SIZE 10
-#define SO_REGISTRY_SIZE 1000
-#define clear() printf("\033[H\033[J")
+#define clear() printf("\033[H\033[J") /*clear the screen*/
 
 /*strutruttura della configurazione.*/
 struct readStruct{
