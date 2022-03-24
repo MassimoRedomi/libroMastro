@@ -8,7 +8,7 @@ all:
 	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
 
 #+end_src
-** std=89  
+** std=c89  
    set the language standard C89.
 ** pthread
    Setting the binary for thread processing.
