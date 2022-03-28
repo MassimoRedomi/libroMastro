@@ -10,5 +10,5 @@
     avisar que ya tengo igualmente escrito ambos procedimientos.
 
 * DONE agregar delay nanoseconds aleatorio al final de utente y nodo
-* TODO UTENTE: construir transacción 
+* WORKING UTENTE: construir transacción 
 * DONE UTENTE: busqueda del nodo libre
