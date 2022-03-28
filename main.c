@@ -27,47 +27,70 @@ struct readStruct{
    int SO_HOPS;/*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
 }configurazione;
 
-struct Transazione{
+typedef struct Transazione{
    time_t timestamp;
    int sender;
    int receiver;
    int quantita;
    int reward;
-};
+}Transazione;
 
-struct Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];
-int libroCounter=0;
+Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
+int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
+time_t now;
 
-int *listUtenti;
+/*variabili condivise tra diversi thread.*/
+int *listUtenti;/*thread id di ogni utente*/
+int *semafori;/*semafori per accedere/bloccare un nodo*/
+Transazione *mailbox;/*struttura per condividere */
+
 void* utente(void* conf){
+   int i;
    int budget = configurazione.SO_BUDGET_INIT;
    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
    int *id = (int *)conf;
    int mythr = pthread_self();
    int tentativi = 0;
-   listUtenti[*id] = budget;
+   listUtenti[*id] = mythr;
    printf("Utente #%d creato nel thread %d\n",*id,mythr);
    while(tentativi<configurazione.SO_RETRY){
       if(budget>2){
          /*qui va la struttura della transazione*/
-
+	 Transazione transaccion;
+	 transaccion.timestamp = difftime(time(0),now);/*calculate tr from simulation*/
+	 transaccion.sender=mythr;
+	 
+	 /*ricerca del riceiver*/
+	 do{
+	    i= rand() % configurazione.SO_USERS_NUM;
+	 }while(i==*id || listUtenti[i]==-1);
+	 transaccion.receiver = listUtenti[i];
+	 
+	 /*ricerca del nodo*/
+	 do{
+	    i = rand() % configurazione.SO_NODES_NUM;
+	 }while(semafori[i]!=0);
+	 semafori[i]=1;
+	 mailbox[i] = transaccion;
+	 
       }else{
          tentativi++;
       }
-      /*nanosleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);*/
+      usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);
       tentativi++;
+      if(tentativi >= configurazione.SO_RETRY){
+      listUtenti[*id]=-1;
+      }
    }
 }
 
-int *semafori;
-struct Transazione *mailbox;
 void* nodo(void* conf){
    int i;
    int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
-   struct Transazione blocco[SO_BLOCK_SIZE];
-   struct Transazione pool[configurazione.SO_TP_SIZE];
+   Transazione blocco[SO_BLOCK_SIZE];
+   Transazione pool[configurazione.SO_TP_SIZE];
    int mythr; 
    int *id = (int *)conf;
    semafori[*id]=0;
@@ -99,6 +122,7 @@ void* nodo(void* conf){
       }else{
          semafori[*id]=0;/*stabilisco il semaforo come di nuovo disponibile*/
       }
+      usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
    }
 }
 
@@ -195,6 +219,8 @@ int main(int argc,char *argv[]){
       
       /*now that we have all the variables we can start the process
       master*/
+      
+      now = time(0);/* el tiempo de ahora*/
 
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei nodi*/
