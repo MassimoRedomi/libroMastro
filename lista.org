@@ -1,0 +1,14 @@
+* TODO lista de preguntas para el profesor
+** condizione di compilazione
+*** TODO si puo aggiungere piu orgomenti alla compilazione?
+*** TODO si mettono le variabili nella compilazione come flags?
+*** TODO c'è bisogno di fare piu cose nel Makefile?
+** Documentazione del codice
+*** TODO si puo usare org-mode o unicamente si puo comentare il codice?
+** ingresso di variabili
+*** TODO le variabili si mettono come lettura di file o scritto a mano
+    avisar que ya tengo igualmente escrito ambos procedimientos.
+
+* DONE agregar delay nanoseconds aleatorio al final de utente y nodo
+* TODO UTENTE: construir transacción 
+* TODO UTENTE: busqueda del nodo libre
