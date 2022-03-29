@@ -37,6 +37,7 @@ typedef struct Transazione{
 
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
+int libroluck=0;/*luchetto per accedere solo un nodo alla volta*/
 time_t now;
 
 /*atomic function for semaforo*/
@@ -51,6 +52,7 @@ bool P(int n){
 
 /*variabili condivise tra diversi thread.*/
 int *listUtenti;/*thread id di ogni utente*/
+int *budgetlist;/*un registro del budget di ogni utente fino all ultimo aggiornameto del libro mastro*/
 int *semafori;/*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 
@@ -61,10 +63,24 @@ void* utente(void* conf){
    int *id = (int *)conf;
    int mythr = pthread_self();
    int tentativi = 0;
-   listUtenti[*id] = mythr;
-   printf("Utente #%d creato nel thread %d\n",*id,mythr);
+   int lastUpdate = 0;/*questo controlla l'ultima verzione del libro mastro*/
+   listUtenti[*id] = mythr;/*publico el id de mi thread*/
+   budgetlist[*id] = budget;/*publico el budget de mi usuario*/
+      printf("Utente #%d creato nel thread %d\n",*id,mythr);
    while(tentativi<configurazione.SO_RETRY){
-      if(budget>2){
+      if(lastUpdate != libroCounter ){
+         /*qui viene il processo di aggiornare il budget in base al libro mastro*/
+	 for(i=lastUpdate*SO_BLOCK_SIZE;i<(lastUpdate+1)*SO_BLOCK_SIZE;i++){
+	    /*se il riceiver e uguale al id del thread, si aggiunge la
+	    quantita al budget*/
+	    if(libroMastro[i].receiver == mythr){
+	       budget += libroMastro[i].quantita;
+
+	    }
+	 }
+	 lastUpdate++;/*avanza a la seguiente version*/
+
+      }else if(budget>2){
          /*qui va la struttura della transazione*/
 	 Transazione transaccion;
 	 transaccion.timestamp = difftime(time(0),now);/*calculate tr from simulation*/
