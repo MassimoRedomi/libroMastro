@@ -161,6 +161,7 @@ bool P(int n){
 
 /*variabili condivise tra diversi thread.*/
 int *listUtenti;/*thread id di ogni utente*/
+int *budgetlist;/*un registro del budget di ogni utente fino all ultimo aggiornameto del libro mastro*/
 int *semafori;/*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 
