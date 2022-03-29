@@ -192,6 +192,7 @@ void* utente(void* conf){
 	    }
 	 }
 	 lastUpdate++;/*avanza a la seguiente version*/
+	 budgetlist[*id] = budget;/*pubblica il nuovo budget al budgetlist.*/
 
       }else if(budget>2){
          /*qui va la struttura della transazione*/
