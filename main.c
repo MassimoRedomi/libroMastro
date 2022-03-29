@@ -39,6 +39,16 @@ Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 time_t now;
 
+/*atomic function for semaforo*/
+bool P(int n){
+   if(n==0){
+      n++;
+      return true;
+   }else{
+      return false;
+   }
+}
+
 /*variabili condivise tra diversi thread.*/
 int *listUtenti;/*thread id di ogni utente*/
 int *semafori;/*semafori per accedere/bloccare un nodo*/
@@ -70,7 +80,7 @@ void* utente(void* conf){
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;
 	 }while(semafori[i]!=0);
-	 semafori[i]=1;
+	 semafori[i] = 1;
 	 mailbox[i] = transaccion;
 	 
       }else{

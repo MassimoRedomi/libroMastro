@@ -128,7 +128,7 @@ time_t now;
    #+end_src
 * funzioni in parallelo 
   questo spazio è riservato per le funzioni del multithread
-** semafori
+** memoria condivisa
    i semafori vengono usati per gestire il flusso del programma.
    e sopratutto non accedono diversi processi allo stesso tempo
    allo stesso dato. Uguale a un semaforo normale ci sono 3 stati:
@@ -140,6 +140,21 @@ time_t now;
 *** -1 morto
     Questo dato non funziona ne funzionara mai, il processo che 
     corrisponde a questo dato è gia finito.
+*** P(verificare)
+    funzione atomica che compara e blocca una variabile condivisa.
+    questo ci evita che asincronamente due threads trovano il _lock_
+    aperto per modificare una variabile
+    #+begin_src c :tangle yes
+/*atomic function for semaforo*/
+bool P(int n){
+   if(n==0){
+      n++;
+      return true;
+   }else{
+      return false;
+   }
+}
+    #+end_src
 
 *** lista de semafori e altre dati condivise tra i diversi thread:
     #+begin_src c :tangle yes
