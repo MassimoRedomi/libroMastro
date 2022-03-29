@@ -192,8 +192,7 @@ void* utente(void* conf){
 	 /*ricerca del nodo*/
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;
-	 }while(semafori[i]!=0);
-	 semafori[i] = 1;
+	 }while(P(semafori[i]));
 	 mailbox[i] = transaccion;
 	 
       }else{
