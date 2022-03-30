@@ -8,6 +8,7 @@
 ** ingresso di variabili
 *** TODO le variabili si mettono come lettura di file o scritto a mano
     avisar que ya tengo igualmente escrito ambos procedimientos.
+*** TODO si usa int o float per il budget e quantita di transazione?
 
 * DONE agregar delay nanoseconds aleatorio al final de utente y nodo
 * WORKING UTENTE: construir transacción 
