@@ -145,9 +145,7 @@ void* nodo(void* conf){
 	 }
 	 
       }
-      if(counterPool>= configurazione.SO_TP_SIZE){
-         sem_destroy(&semafori[*id]);/*il nodo si dichiara morto nel semaforo perche la pool è piena*/
-      }else{
+      if(counterPool < configurazione.SO_TP_SIZE){
          sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
       }
       usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
