@@ -5,6 +5,7 @@
 
 #include <unistd.h> /*Header per sleep()*/
 #include <pthread.h> /*per fare i thread*/
+#include <semaphore.h> /*aggiungi i semafori*/
 
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 
@@ -37,23 +38,13 @@ typedef struct Transazione{
 
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
-int libroluck=0;/*luchetto per accedere solo un nodo alla volta*/
+sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 time_t now;
-
-/*atomic function for semaforo*/
-bool P(int n){
-   if(n==0){
-      n++;
-      return true;
-   }else{
-      return false;
-   }
-}
 
 /*variabili condivise tra diversi thread.*/
 int *listUtenti;/*thread id di ogni utente*/
 int *budgetlist;/*un registro del budget di ogni utente fino all ultimo aggiornameto del libro mastro*/
-int *semafori;/*semafori per accedere/bloccare un nodo*/
+sem_t *semafori;/*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 
 void* utente(void* conf){
@@ -96,7 +87,7 @@ void* utente(void* conf){
 	 /*ricerca del nodo*/
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;
-	 }while(P(semafori[i]));
+	 }while(sem_trywait(&semafori[i])!=0);/*se non c'e biosgno di aspettare, entra*/
 	 mailbox[i] = transaccion;
 	 
       }else{
@@ -111,6 +102,7 @@ void* utente(void* conf){
 }
 
 void* nodo(void* conf){
+   /*creazioni dei dati del nodo*/
    int i;
    int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
@@ -119,11 +111,17 @@ void* nodo(void* conf){
    Transazione pool[configurazione.SO_TP_SIZE];
    int mythr; 
    int *id = (int *)conf;
-   semafori[*id]=0;
+   int semvalue;/*valore del semaforo*/
+   sem_init(&semafori[*id],0,0);/*inizializa il semaforo in 0*/
    mythr = pthread_self();
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
-   while(semafori[*id]!=-1){
-      if(semafori[*id]==1){
+   
+   /*inizio del funzionamento*/
+   while(counterPool >= configurazione.SO_TP_SIZE){
+   
+      /*aggiorno il valore del semaforo*/
+      sem_getvalue(&semafori[*id],&semvalue);
+      if(semvalue!=0){
          /*scrivo la nuova transazione nel blocco e nella pool*/
          pool[counterPool]=mailbox[*id];
 	 blocco[counterBlock]=mailbox[*id];
@@ -134,19 +132,23 @@ void* nodo(void* conf){
 	 
 	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    /*si aggiunge una nuova transazione come chiusura del blocco*/
+	    /*todavia falta meter la ultima transaccion*/
+
+	    sem_wait(&libroluck);
 	    for(i=0;i< SO_BLOCK_SIZE;i++){
 	       libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
 	    }
 	    /*si spostano i contatori*/
-	    counterBlock=0;
 	    libroCounter++;
+	    sem_post(&libroluck);
+	    counterBlock=0;
 	 }
 	 
       }
       if(counterPool>= configurazione.SO_TP_SIZE){
-         semafori[*id]=-1;/*il nodo si dichiara morto nel semaforo perche la pool è piena*/
+         sem_destroy(&semafori[*id]);/*il nodo si dichiara morto nel semaforo perche la pool è piena*/
       }else{
-         semafori[*id]=0;/*stabilisco il semaforo come di nuovo disponibile*/
+         sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
       }
       usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
    }
@@ -247,10 +249,11 @@ int main(int argc,char *argv[]){
       master*/
       
       now = time(0);/* el tiempo de ahora*/
+      sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
 
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei nodi*/
-      semafori=malloc(configurazione.SO_NODES_NUM * sizeof(int));
+      semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
       mailbox=malloc(configurazione.SO_NODES_NUM * (4 * sizeof(int)) * sizeof(time_t));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
          pthread_create(&tid,NULL,nodo,(void *)&i);
