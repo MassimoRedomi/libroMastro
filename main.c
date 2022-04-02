@@ -10,7 +10,7 @@
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 
 /*strutruttura della configurazione.*/
-struct readStruct{
+struct Configurazione{
    int SO_USERS_NUM;/*numero di processi utente*/
    int SO_NODES_NUM;/*numero di processi nodo*/
    int SO_BUDGET_INIT;/*budget iniziale di ciascun processo utente*/
@@ -167,7 +167,6 @@ una unica struttura.*/
 void readconf(char fileName[]){
    /*secondo lo std c89 tutte le variabile devono 
    essere dichiarate prima del primo codice */
-   struct readStruct lec;
    FILE *file= fopen(fileName, "r");
 
    if(!file){

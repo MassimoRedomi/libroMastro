@@ -13,3 +13,4 @@
 * DONE agregar delay nanoseconds aleatorio al final de utente y nodo
 * WORKING UTENTE: construir transacción 
 * DONE UTENTE: busqueda del nodo libre
+* DONE change the semaphores for real semaphores.
