@@ -72,31 +72,50 @@ void* utente(void* conf){
 	 lastUpdate++;/*avanza a la seguiente version*/
 	 budgetlist[*id] = budget;/*pubblica il nuovo budget al budgetlist.*/
 
-      }else if(budget>2){
+      }else if(budget>=2){
          /*qui va la struttura della transazione*/
 	 Transazione transaccion;
 	 transaccion.timestamp = difftime(time(0),now);/*calculate tr from simulation*/
-	 transaccion.sender=mythr;
+	 transaccion.sender=mythr;/*set sender*/
+	 
+	 transaccion.quantita = (rand() % ((budget - 2) + 1)) + 2;/*set quantita a caso*/
+	 transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
+	 
+	 /*se il reward non arriva a 1, allora diventa 1*/
+	 if(transaccion.reward < 1){
+	    transaccion.reward = 1;
+	 }
 	 
 	 /*ricerca del riceiver*/
 	 do{
+	    tentativi++;
 	    i= rand() % configurazione.SO_USERS_NUM;
-	 }while(i==*id || listUtenti[i]==-1);
+	 }while(i==*id || listUtenti[i]==-1 || tentativi> configurazione.SO_RETRY);
 	 transaccion.receiver = listUtenti[i];
+	 
+	 if(tentativi > configurazione.SO_RETRY){
+	    break;
+	 }else{
+	    tentativi=0;
+	 }
 	 
 	 /*ricerca del nodo*/
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;
-	 }while(sem_trywait(&semafori[i])!=0);/*se non c'e biosgno di aspettare, entra*/
+	 }while(sem_trywait(&semafori[i])!=0 || tentativi > configurazione.SO_RETRY);/*se non c'e biosgno di aspettare, entra*/
 	 mailbox[i] = transaccion;
-	 
+	 if(tentativi > configurazione.SO_RETRY){
+	    break;
+	 }else{
+	    budget = budget - transaccion.quantita - transaccion.reward; /*elimina quantita y reward del budget*/
+	 }
+
       }else{
          tentativi++;
       }
       usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);
-      tentativi++;
       if(tentativi >= configurazione.SO_RETRY){
-      listUtenti[*id]=-1;
+         listUtenti[*id]=-1;/*ferma il procceso*/
       }
    }
 }
@@ -106,9 +125,12 @@ void* nodo(void* conf){
    int i;
    int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
+   int sommaTotale=0;/*somma totale di tutti i blocchi lavorati*/
+   int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
    Transazione blocco[SO_BLOCK_SIZE];
    Transazione pool[configurazione.SO_TP_SIZE];
+   Transazione finalReward;
    int mythr; 
    int *id = (int *)conf;
    int semvalue;/*valore del semaforo*/
@@ -117,7 +139,7 @@ void* nodo(void* conf){
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
    
    /*inizio del funzionamento*/
-   while(counterPool >= configurazione.SO_TP_SIZE){
+   while(counterPool < configurazione.SO_TP_SIZE){
    
       /*aggiorno il valore del semaforo*/
       sem_getvalue(&semafori[*id],&semvalue);
@@ -125,6 +147,10 @@ void* nodo(void* conf){
          /*scrivo la nuova transazione nel blocco e nella pool*/
          pool[counterPool]=mailbox[*id];
 	 blocco[counterBlock]=mailbox[*id];
+
+	 /*somma il reward*/
+	 sommaBlocco = blocco[counterBlock].reward;
+	 sommaTotale = blocco[counterBlock].reward;
 	 
 	 /*incremento i contatori di posizione di pool e block*/
 	 counterBlock++;
@@ -132,7 +158,13 @@ void* nodo(void* conf){
 	 
 	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    /*si aggiunge una nuova transazione come chiusura del blocco*/
-	    /*todavia falta meter la ultima transaccion*/
+	    finalReward.timestamp = difftime(time(0),now);/*momento attuale della simulazione*/
+	    finalReward.sender = -1;/*-1*/
+	    finalReward.receiver = *id;/*identificatore del nodo*/
+	    finalReward.quantita = sommaBlocco;/*somma di tutti i reward*/
+	    finalReward.reward = 0;
+	    
+	    blocco[counterBlock]= finalReward;/*aggiunge la transazione al blocco.*/
 
 	    sem_wait(&libroluck);
 	    for(i=0;i< SO_BLOCK_SIZE;i++){
@@ -142,6 +174,7 @@ void* nodo(void* conf){
 	    libroCounter++;
 	    sem_post(&libroluck);
 	    counterBlock=0;
+	    sommaBlocco=0;
 	 }
 	 
       }
