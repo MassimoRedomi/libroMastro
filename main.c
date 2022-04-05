@@ -42,6 +42,7 @@ time_t startSimulation;
 /*variabili condivise tra diversi thread.*/
 int *listUtenti;/*thread id di ogni utente*/
 int *budgetlist;/*un registro del budget di ogni utente fino all ultimo aggiornameto del libro mastro*/
+int *rewardlist;/*un registro publico del reward totale di ogni nodo.*/
 sem_t *semafori;/*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 
@@ -125,7 +126,6 @@ void* nodo(void* conf){
    int i;
    int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
-   int sommaTotale=0;/*somma totale di tutti i blocchi lavorati*/
    int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
    Transazione blocco[SO_BLOCK_SIZE];
@@ -150,8 +150,8 @@ void* nodo(void* conf){
 
 	 /*somma il reward*/
 	 sommaBlocco = blocco[counterBlock].reward;
-	 sommaTotale = blocco[counterBlock].reward;
-	 
+	 rewardlist[*id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
+
 	 /*incremento i contatori di posizione di pool e block*/
 	 counterBlock++;
 	 counterPool++;
@@ -175,13 +175,13 @@ void* nodo(void* conf){
 	    sem_post(&libroluck);
 	    counterBlock=0;
 	    sommaBlocco=0;
+	    usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
 	 }
 	 
       }
       if(counterPool < configurazione.SO_TP_SIZE){
          sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
       }
-      usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
    }
 }
 
@@ -297,6 +297,7 @@ int main(int argc,char *argv[]){
 
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei nodi*/
+      rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
       semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
       mailbox=malloc(configurazione.SO_NODES_NUM * (4 * sizeof(int)) * sizeof(time_t));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
@@ -308,6 +309,7 @@ int main(int argc,char *argv[]){
       budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
          pthread_create(&tid,NULL,utente,(void *)&i);
+	 usleep(100);
       }
       
       /*now start the master process*/
@@ -319,37 +321,35 @@ int main(int argc,char *argv[]){
 	 /*show last update*/
 	 printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 	 /*conta la quantita di utenti attivi*/
-	 counterAttivi=0;
-	 for(i=0; i< configurazione.SO_USERS_NUM; i++){
-	    if(listUtenti[i]!=-1){
-	       counterAttivi++;
-	    }
-	 }
-	 printf("Utenti attivi: %d\n",counterAttivi);
 	 
+	 printf("Utenti:\n");
+	 counterAttivi=0;
 	 /*mostra il budget di ogni utente*/
 	 for(i=0; i<configurazione.SO_USERS_NUM; i++){
-	    test = listUtenti[i]!=-1;/*todavia no funciona*/
+	    test = listUtenti[i]!=-1;
+	    if(test)
+	       counterAttivi++;
 	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
 	    if(i%9==0)
 	       printf("\n");
 	 }
-	 /*solo por confirmar*/
-	 for(i=0;i<libroCounter;i++){
-            printf("%f: %d %d %d\n",libroMastro[i].timestamp,libroMastro[i].sender,libroMastro[i].receiver, libroMastro[i].quantita);
-         }
-	 
-	 /*mostra i semafori */
-	 printf("\nSemafori: ");
+	 printf("\nattivi: %d\n",counterAttivi);
+	 	 
+	 /*mostra i nodi con i suoi semafori */
+	 printf("\nnodi: \n");
 	 for(i=0; i<configurazione.SO_NODES_NUM; i++){
 	    sem_getvalue(&semafori[i],&counterAttivi);
-	    printf("%d\t",counterAttivi);
+	    printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
 	 }
 	 printf("\n");
 
          now = difftime(time(0), startSimulation);
       }
-      
+
+      /*solo por confirmar al final*/
+      for(i=0;i<libroCounter;i++){
+         printf("%f: %d %d %d\n",libroMastro[i].timestamp,libroMastro[i].sender,libroMastro[i].receiver, libroMastro[i].quantita);
+      }
             
 
    }

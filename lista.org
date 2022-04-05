@@ -10,8 +10,8 @@
     avisar que ya tengo igualmente escrito ambos procedimientos.
 *** DONE si usa int o float per il budget e quantita di transazione?
 
-* WORKING Main
-** WORKING lectura cada un segundo
+* FEEDBACK Main
+** FEEDBACK lectura cada un segundo
 ** TODO comunicar el main con hilos
 ** TODO sync time al publico
 
@@ -21,8 +21,9 @@
 ** TODO cambiar el sistema de tentativi 
    saltar una alerta cuando llega al numero de intentos maximo.
 ** DONE agregar delay nanoseconds aleatorio al final de utente 
-* TODO NODO
+* DONE NODO
 ** DONE change the semaphores for real semaphores.
-** TODO cambiar tiempo de espera del nodo
+** DONE cambiar tiempo de espera del nodo
   no de una transaccion a otra, sino que entre un bloque y otro.
+** DONE cambiar la suma de rewards a una lista externa para permitir que lo lea el proceso maestro
 * DONE lectura de variables
