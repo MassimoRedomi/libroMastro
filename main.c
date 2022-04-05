@@ -19,17 +19,15 @@ struct Configurazione{
    int SO_MAX_TRANS_GEN_NSEC;/*massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
    int SO_RETRY;/*numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina*/
    int SO_TP_SIZE;/*numero massimo di transazioni nella transaction pool dei processi nodo*/
-   /*int SO_BLOCK_SIZE;/*numero di transazioni contenute in un blocco*/
    int SO_MIN_TRANS_PROC_NSEC;/*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
    int SO_MAX_TRANS_PROC_NSEC;/*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
-   /*int SO_REGISTRY_SIZE;/*numero massimo di blocchi nel libro mastro*/
    int SO_SIM_SEC;/*durata della simulazione*/
    int SO_FRIENDS_NUM;/*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
    int SO_HOPS;/*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
 }configurazione;
 
 typedef struct Transazione{
-   time_t timestamp;
+   double timestamp;
    int sender;
    int receiver;
    int quantita;
@@ -39,7 +37,7 @@ typedef struct Transazione{
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
-time_t now;
+time_t startSimulation;
 
 /*variabili condivise tra diversi thread.*/
 int *listUtenti;/*thread id di ogni utente*/
@@ -57,7 +55,7 @@ void* utente(void* conf){
    int lastUpdate = 0;/*questo controlla l'ultima verzione del libro mastro*/
    listUtenti[*id] = mythr;/*publico el id de mi thread*/
    budgetlist[*id] = budget;/*publico el budget de mi usuario*/
-      printf("Utente #%d creato nel thread %d\n",*id,mythr);
+   printf("Utente #%d creato nel thread %d\n",*id,mythr);
    while(tentativi<configurazione.SO_RETRY){
       if(lastUpdate != libroCounter ){
          /*qui viene il processo di aggiornare il budget in base al libro mastro*/
@@ -75,7 +73,7 @@ void* utente(void* conf){
       }else if(budget>=2){
          /*qui va la struttura della transazione*/
 	 Transazione transaccion;
-	 transaccion.timestamp = difftime(time(0),now);/*calculate tr from simulation*/
+	 transaccion.timestamp = difftime(time(0),startSimulation);/*calculate tr from simulation*/
 	 transaccion.sender=mythr;/*set sender*/
 	 
 	 transaccion.quantita = (rand() % ((budget - 2) + 1)) + 2;/*set quantita a caso*/
@@ -87,10 +85,11 @@ void* utente(void* conf){
 	 }
 	 
 	 /*ricerca del riceiver*/
+	 /*debo reparar lo de los intentos*/
 	 do{
 	    tentativi++;
 	    i= rand() % configurazione.SO_USERS_NUM;
-	 }while(i==*id || listUtenti[i]==-1 || tentativi> configurazione.SO_RETRY);
+	 }while(i==*id || listUtenti[i]==-1);
 	 transaccion.receiver = listUtenti[i];
 	 
 	 if(tentativi > configurazione.SO_RETRY){
@@ -102,7 +101,8 @@ void* utente(void* conf){
 	 /*ricerca del nodo*/
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;
-	 }while(sem_trywait(&semafori[i])!=0 || tentativi > configurazione.SO_RETRY);/*se non c'e biosgno di aspettare, entra*/
+	 }while(sem_trywait(&semafori[i])!=0);/*se non c'e biosgno di aspettare, entra*/
+	 sem_wait(&semafori[i]);
 	 mailbox[i] = transaccion;
 	 if(tentativi > configurazione.SO_RETRY){
 	    break;
@@ -158,7 +158,7 @@ void* nodo(void* conf){
 	 
 	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    /*si aggiunge una nuova transazione come chiusura del blocco*/
-	    finalReward.timestamp = difftime(time(0),now);/*momento attuale della simulazione*/
+	    finalReward.timestamp = difftime(time(0),startSimulation);/*momento attuale della simulazione*/
 	    finalReward.sender = -1;/*-1*/
 	    finalReward.receiver = *id;/*identificatore del nodo*/
 	    finalReward.quantita = sommaBlocco;/*somma di tutti i reward*/
@@ -189,7 +189,6 @@ void* nodo(void* conf){
 ritorna come un valore intero*/
 int readAndInt(char *str, int n, FILE *stream){
    fgets(str,n,stream);
-   printf("%d\n",atoi(str));/*manual debug*/
    return atoi(str);
 }
 /*funzione che cerca la maniera di leggere il config file.
@@ -207,20 +206,32 @@ void readconf(char fileName[]){
       char line[20];/*str per prendere le righe*/
 
       /*inserisco le variabili riga a riga alla struttura.*/
-      configurazione.SO_USERS_NUM = readAndInt(line,10,file);
-      configurazione.SO_NODES_NUM = readAndInt(line,10,file);
-      configurazione.SO_BUDGET_INIT = readAndInt(line,10,file);
-      configurazione.SO_REWARD = readAndInt(line,10,file);
-      configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,10,file);
-      configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,10,file);
-      configurazione.SO_RETRY = readAndInt(line,10,file);
-      configurazione.SO_TP_SIZE = readAndInt(line,10,file);
-      configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,10,file);
-      configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,10,file);
-      /*configurazione.SO_REGISTRY_SIZE = readAndInt(line,10,file);*/
-      configurazione.SO_SIM_SEC = readAndInt(line,10,file);
-      configurazione.SO_FRIENDS_NUM = readAndInt(line,10,file);
-      configurazione.SO_HOPS = readAndInt(line,10,file);
+      configurazione.SO_USERS_NUM = readAndInt(line,20,file);
+      printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
+      configurazione.SO_NODES_NUM = readAndInt(line,20,file);
+      printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
+      configurazione.SO_BUDGET_INIT = readAndInt(line,20,file);
+      printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
+      configurazione.SO_REWARD = readAndInt(line,20,file);
+      printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
+      configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,20,file);
+      printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
+      configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,20,file);
+      printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
+      configurazione.SO_RETRY = readAndInt(line,20,file);
+      printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
+      configurazione.SO_TP_SIZE = readAndInt(line,20,file);
+      printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
+      configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,20,file);
+      printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
+      configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,20,file);
+      printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
+      configurazione.SO_SIM_SEC = readAndInt(line,20,file);
+      printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
+      configurazione.SO_FRIENDS_NUM = readAndInt(line,20,file);
+      printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
+      configurazione.SO_HOPS = readAndInt(line,20,file);
+      printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
    }
    fclose(file);/*chiusura del file.*/
 }
@@ -260,7 +271,10 @@ void writeConf(){
 
 int main(int argc,char *argv[]){
    int i;
+   float now;
+   bool test;
    pthread_t tid;
+   int counterAttivi;
    if(argc<2){
       printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
       exit(EXIT_FAILURE);
@@ -278,7 +292,7 @@ int main(int argc,char *argv[]){
       /*now that we have all the variables we can start the process
       master*/
       
-      now = time(0);/* el tiempo de ahora*/
+      startSimulation = time(0);/* el tiempo de ahora*/
       sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
 
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
@@ -287,13 +301,56 @@ int main(int argc,char *argv[]){
       mailbox=malloc(configurazione.SO_NODES_NUM * (4 * sizeof(int)) * sizeof(time_t));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
          pthread_create(&tid,NULL,nodo,(void *)&i);
+	 usleep(100);
       }
       /*generatore dei utenti*/
       listUtenti=malloc(configurazione.SO_USERS_NUM * sizeof(int));
+      budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
          pthread_create(&tid,NULL,utente,(void *)&i);
       }
-      sleep(configurazione.SO_SIM_SEC);
+      
+      /*now start the master process*/
+      now = difftime(time(0), startSimulation);
+      while(now < configurazione.SO_SIM_SEC){
+         sleep(1);
+	 clear();
+	 
+	 /*show last update*/
+	 printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
+	 /*conta la quantita di utenti attivi*/
+	 counterAttivi=0;
+	 for(i=0; i< configurazione.SO_USERS_NUM; i++){
+	    if(listUtenti[i]!=-1){
+	       counterAttivi++;
+	    }
+	 }
+	 printf("Utenti attivi: %d\n",counterAttivi);
+	 
+	 /*mostra il budget di ogni utente*/
+	 for(i=0; i<configurazione.SO_USERS_NUM; i++){
+	    test = listUtenti[i]!=-1;/*todavia no funciona*/
+	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
+	    if(i%9==0)
+	       printf("\n");
+	 }
+	 /*solo por confirmar*/
+	 for(i=0;i<libroCounter;i++){
+            printf("%f: %d %d %d\n",libroMastro[i].timestamp,libroMastro[i].sender,libroMastro[i].receiver, libroMastro[i].quantita);
+         }
+	 
+	 /*mostra i semafori */
+	 printf("\nSemafori: ");
+	 for(i=0; i<configurazione.SO_NODES_NUM; i++){
+	    sem_getvalue(&semafori[i],&counterAttivi);
+	    printf("%d\t",counterAttivi);
+	 }
+	 printf("\n");
+
+         now = difftime(time(0), startSimulation);
+      }
+      
+            
 
    }
    return 0;

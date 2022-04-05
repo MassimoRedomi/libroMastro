@@ -8,15 +8,21 @@
 ** ingresso di variabili
 *** DONE le variabili si mettono come lettura di file o scritto a mano
     avisar que ya tengo igualmente escrito ambos procedimientos.
-*** TODO si usa int o float per il budget e quantita di transazione?
+*** DONE si usa int o float per il budget e quantita di transazione?
 
-* TODO Main
-** TODO lectura cada un segundo
+* WORKING Main
+** WORKING lectura cada un segundo
 ** TODO comunicar el main con hilos
 ** TODO sync time al publico
 
-* DONE agregar delay nanoseconds aleatorio al final de utente y nodo
-* DONE UTENTE
+* TODO UTENTE
 ** DONE construir transacción 
 ** DONE busqueda del nodo libre
-* DONE change the semaphores for real semaphores.
+** TODO cambiar el sistema de tentativi 
+   saltar una alerta cuando llega al numero de intentos maximo.
+** DONE agregar delay nanoseconds aleatorio al final de utente 
+* TODO NODO
+** DONE change the semaphores for real semaphores.
+** TODO cambiar tiempo de espera del nodo
+  no de una transaccion a otra, sino que entre un bloque y otro.
+* DONE lectura de variables
