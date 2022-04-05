@@ -242,6 +242,7 @@ void* nodo(void* conf){
    int *id = (int *)conf;
    int semvalue;/*valore del semaforo*/
    sem_init(&semafori[*id],0,0);/*inizializa il semaforo in 0*/
+   rewardlist[*id]=0;
    mythr = pthread_self();
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
    
