@@ -18,9 +18,12 @@
 * TODO UTENTE
 ** DONE construir transacción 
 ** DONE busqueda del nodo libre
+** DONE agregar delay nanoseconds aleatorio al final de utente 
 ** TODO cambiar el sistema de tentativi 
    saltar una alerta cuando llega al numero de intentos maximo.
-** DONE agregar delay nanoseconds aleatorio al final de utente 
+** DONE hacer transacciones en el mismo loop que se actualiza
+** DONE funcion de aggiornamento con libro mastro
+** WORKING hacer transaccion en una funcion
 * DONE NODO
 ** DONE change the semaphores for real semaphores.
 ** DONE cambiar tiempo de espera del nodo
