@@ -9,14 +9,6 @@
 
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 
-/*Dichiariamo le funzioni*/
-int userUpdate(int *id, int lastUpdate);
-Transazione generateTransaction(int *id);
-void writeConf();
-void readconf(char fileName[]);
-int readAndInt(char *str, int n, FILE *stream);
-void* nodo(void* conf);
-void* utente(void* conf);
 
 /*strutruttura della configurazione.*/
 struct Configurazione{
@@ -42,6 +34,15 @@ typedef struct Transazione{
    int quantita;
    int reward;
 }Transazione;
+
+/*Dichiariamo le funzioni*/
+int userUpdate(int *id, int lastUpdate);
+Transazione generateTransaction(int *id);
+void writeConf();
+void readconf(char fileName[]);
+int readAndInt(char *str, int n, FILE *stream);
+void* nodo(void* conf);
+void* utente(void* conf);
 
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
