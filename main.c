@@ -9,6 +9,15 @@
 
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 
+/*Dichiariamo le funzioni*/
+int userUpdate(int *id, int lastUpdate);
+Transazione generateTransaction(int *id);
+void writeConf();
+void readconf(char fileName[]);
+int readAndInt(char *str, int n, FILE *stream);
+void* nodo(void* conf);
+void* utente(void* conf);
+
 /*strutruttura della configurazione.*/
 struct Configurazione{
    int SO_USERS_NUM;/*numero di processi utente*/
