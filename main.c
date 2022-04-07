@@ -1,60 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdbool.h>/*aggiunge i boolean var*/
+#include <stdbool.h>                   /*aggiunge i boolean var*/
+#include <unistd.h>                    /*Header per sleep()*/
+#include <pthread.h>                   /*per fare i thread*/
+#include <semaphore.h>                 /*aggiungi i semafori*/
 
-#include <unistd.h> /*Header per sleep()*/
-#include <pthread.h> /*per fare i thread*/
-#include <semaphore.h> /*aggiungi i semafori*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                        DEFINIAMO LE MACRO                                             */
 
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 
-
-/*strutruttura della configurazione.*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                   CREIAMO STRUTTURA CONFIGURAZIONE                                    */
 struct Configurazione{
-   int SO_USERS_NUM;/*numero di processi utente*/
-   int SO_NODES_NUM;/*numero di processi nodo*/
-   int SO_BUDGET_INIT;/*budget iniziale di ciascun processo utente*/
-   int SO_REWARD;/*la percentuale di reward pagata da ogni utente per il processamento di una transazione*/
-   int SO_MIN_TRANS_GEN_NSEC;/*minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
-   int SO_MAX_TRANS_GEN_NSEC;/*massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
-   int SO_RETRY;/*numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina*/
-   int SO_TP_SIZE;/*numero massimo di transazioni nella transaction pool dei processi nodo*/
-   int SO_MIN_TRANS_PROC_NSEC;/*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
-   int SO_MAX_TRANS_PROC_NSEC;/*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
-   int SO_SIM_SEC;/*durata della simulazione*/
-   int SO_FRIENDS_NUM;/*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
-   int SO_HOPS;/*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
+   int SO_USERS_NUM;                   /*numero di processi utente*/
+   int SO_NODES_NUM;                   /*numero di processi nodo*/
+   int SO_BUDGET_INIT;                 /*budget iniziale di ciascun processo utente*/
+   int SO_REWARD;                      /*la percentuale di reward pagata da ogni utente per il processamento di una transazione*/
+   int SO_MIN_TRANS_GEN_NSEC;          /*minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
+   int SO_MAX_TRANS_GEN_NSEC;          /*massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
+   int SO_RETRY;                       /*numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina*/
+   int SO_TP_SIZE;                     /*numero massimo di transazioni nella transaction pool dei processi nodo*/
+   int SO_MIN_TRANS_PROC_NSEC;         /*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
+   int SO_MAX_TRANS_PROC_NSEC;         /*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
+   int SO_SIM_SEC;                     /*durata della simulazione*/
+   int SO_FRIENDS_NUM;                 /*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
+   int SO_HOPS;                        /*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
 }configurazione;
 
-typedef struct Transazione{
+/*                                  CREIAMO STRUTTURA TRANSAZIONE                                           */
+typedef struct{
    double timestamp;
    int sender;
    int receiver;
    int quantita;
    int reward;
-}Transazione;
+}transazione;
 
-/*Dichiariamo le funzioni*/
-int userUpdate(int *id, int lastUpdate);
-Transazione generateTransaction(int *id);
-void writeConf();
-void readconf(char fileName[]);
-int readAndInt(char *str, int n, FILE *stream);
-void* nodo(void* conf);
-void* utente(void* conf);
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                     DICHIARIAMO LE FUNZIONI                                           */
 
-Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
-int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
-sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
+transazione generateTransaction(int *id);                      /*Funzione crea Transazione*/
+int userUpdate(int *id, int lastUpdate);                       /*Funzione aggiorna budget del processo User*/
+void writeConf();                                              /*Funzione Scrivi Configurazioni*/
+void readconf(char fileName[]);                                /*Funzione Leggi Configurazioni*/
+int readAndInt(char *str, int n, FILE *stream);                /*Funzione Leggi da File*/
+void* nodo(void* conf);                                        /*Processo Nodo*/
+void* utente(void* conf);                                      /*Processo Utente*/
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                              CREIAMO LIBRO_MASTRO E VAR DI CONTROLLO                                  */
+
+transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];     /*libro mastro dove si scrivono tutte le transazioni.*/
+int libroCounter=0;                                            /*Counter controlla la quantitta di blocchi*/
+sem_t libroluck;                                               /*luchetto per accedere solo un nodo alla volta*/
 time_t startSimulation;
 
-/*variabili condivise tra diversi thread.*/
-int *listUtenti;/*thread id di ogni utente*/
-int *budgetlist;/*un registro del budget di ogni utente fino all ultimo aggiornameto del libro mastro*/
-int *rewardlist;/*un registro publico del reward totale di ogni nodo.*/
-sem_t *semafori;/*semafori per accedere/bloccare un nodo*/
-Transazione *mailbox;/*struttura per condividere */
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                        VARIABILI CONDIVISE                                            */
+
+int *listUtenti;                                               /*thread id di ogni utente*/
+int *budgetlist;                                               /*un registro del budget di ogni utente fino all ultimo aggiornameto del libro mastro*/
+int *rewardlist;                                               /*un registro publico del reward totale di ogni nodo.*/
+sem_t *semafori;                                               /*semafori per accedere/bloccare un nodo*/
+transazione *mailbox;                                          /*struttura per condividere */
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                     PROCESSO UTENTE                                                   */
 
 void* utente(void* conf){
    int i;
@@ -74,7 +99,7 @@ void* utente(void* conf){
       if(budgetlist[*id]>=2){
       
          /*qui va la struttura della transazione*/
-	 Transazione transaccion;
+	 transazione transaccion;
 	 transaccion = generateTransaction(*id);
 	 /*ricerca del nodo*/
 	 do{
@@ -93,47 +118,8 @@ void* utente(void* conf){
    }
 }
 
-int userUpdate(int *id, int lastUpdate){
-   int i;
-   int budget = budgetlist[*id];
-   while(lastUpdate != libroCounter){
-      for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
-         if(libroMastro[i].sender == listUtenti[*id]){
-	    budget += libroMastro[i].quantita;
-	 }else if(libroMastro[i].receiver == listUtenti[*id]){
-	    budget -= libroMastro[i].quantita;
-	 }
-      }
-      lastUpdate++;
-   }
-   budgetlist[*id] = budget;
-   return lastUpdate;
-}
-
-Transazione generateTransaction(int *id){
-   Transazione transaccion;
-   int i;
-   transaccion.sender = listUtenti[*id];
-   transaccion.quantita = (rand() % ((budgetlist[*id] - 2) + 1)) + 2;/*set quantita a caso*/
-   transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
- 
-   /*se il reward non arriva a 1, allora diventa 1*/
-   if(transaccion.reward < 1){
-      transaccion.reward = 1;
-   }
-	 
-   /*ricerca del riceiver*/
-   /*debo reparar lo de los intentos*/
-   do{
-      i= rand() % configurazione.SO_USERS_NUM;
-   }while(i==*id || listUtenti[i]==-1);
-   transaccion.receiver = listUtenti[i];
-
-   /*calculate tr from simulation*/
-   transaccion.timestamp = difftime(time(0),startSimulation);
-
-   return transaccion;
-}
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                     PROCESSO NODO                                                     */
 
 void* nodo(void* conf){
    /*creazioni dei dati del nodo*/
@@ -142,9 +128,9 @@ void* nodo(void* conf){
    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
    int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
-   Transazione blocco[SO_BLOCK_SIZE];
-   Transazione pool[configurazione.SO_TP_SIZE];
-   Transazione finalReward;
+   transazione blocco[SO_BLOCK_SIZE];
+   transazione pool[configurazione.SO_TP_SIZE];
+   transazione finalReward;
    int mythr; 
    int *id = (int *)conf;
    int semvalue;/*valore del semaforo*/
@@ -200,15 +186,73 @@ void* nodo(void* conf){
    }
 }
 
-/*Un picollo metodo che fa un fgets(con gli stessi parametri e lo 
-ritorna come un valore intero*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                        FUNZIONI                                                       */
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                    FUNZIONE USER_UPDATE                                               */
+
+int userUpdate(int *id, int lastUpdate){
+   int i;
+   int budget = budgetlist[*id];
+   while(lastUpdate != libroCounter){
+      for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
+         if(libroMastro[i].sender == listUtenti[*id]){
+	    budget += libroMastro[i].quantita;
+	 }else if(libroMastro[i].receiver == listUtenti[*id]){
+	    budget -= libroMastro[i].quantita;
+	 }
+      }
+      lastUpdate++;
+   }
+   budgetlist[*id] = budget;
+   return lastUpdate;
+}
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                   FUNZIONE GENERATE_TRANSACTION                                       */
+
+transazione generateTransaction(int *id){
+   transazione transaccion;
+   int i;
+   transaccion.sender = listUtenti[*id];
+   transaccion.quantita = (rand() % ((budgetlist[*id] - 2) + 1)) + 2;/*set quantita a caso*/
+   transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
+ 
+   /*se il reward non arriva a 1, allora diventa 1*/
+   if(transaccion.reward < 1){
+      transaccion.reward = 1;
+   }
+	 
+   /*ricerca del riceiver*/
+   /*debo reparar lo de los intentos*/
+   do{
+      i= rand() % configurazione.SO_USERS_NUM;
+   }while(i==*id || listUtenti[i]==-1);
+   transaccion.receiver = listUtenti[i];
+
+   /*calculate tr from simulation*/
+   transaccion.timestamp = difftime(time(0),startSimulation);
+
+   return transaccion;
+}
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                      FUNZIONE READ_FROM_FILE                                          */
+/*Un picolo metodo che fa un fgets(con gli stessi parametri e lo ritorna come un valore intero           */
+
 int readAndInt(char *str, int n, FILE *stream){
    fgets(str,n,stream);
    return atoi(str);
 }
-/*funzione che cerca la maniera di leggere il config file.
-/*metodo basato in codice di stackoverflow per leggere file come
-una unica struttura.*/
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                      FUNZIONE READ_CONFIGURATIONS                                     */
+/*funzione che cerca la maniera di leggere il config file. Metodo basato su codice di stackoverflow per  */
+/*leggere file come una unica struttura.                                                                 */
+
 void readconf(char fileName[]){
    /*secondo lo std c89 tutte le variabile devono 
    essere dichiarate prima del primo codice */
@@ -251,7 +295,10 @@ void readconf(char fileName[]){
    fclose(file);/*chiusura del file.*/
 }
 
-/*scritura manuale dei valori del sistema.*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                    FUNZIONE WRITE_CONFIGURATIONS                                      */
+/*scritura manuale dei valori del sistema.                                                               */
+
 void writeConf(){
    printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
    printf("SO_USERS_NUM: ");
@@ -283,6 +330,11 @@ void writeConf(){
    clear();
 
 }
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
+/*                                     PROCESSO MASTER/MAIN                                              */
 
 int main(int argc,char *argv[]){
    int i;
@@ -370,3 +422,7 @@ int main(int argc,char *argv[]){
    }
    return 0;
 }
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/*-------------------------------------------------------------------------------------------------------*/
