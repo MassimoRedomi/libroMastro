@@ -15,17 +15,8 @@ Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
-/*DICHIARAZIONE FUNZIONI:*/
-Transazione generateTransaction(int *id);      /*Funzione crea Transazione*/
-int userUpdate(int *id, int lastUpdate);       /*Funzione aggiorna budget del processo User*/
-void writeConf();                              /*Funzione Scrivi Configurazioni*/
-void readconf(char fileName[]);                /*Funzione Leggi Configurazioni*/
-int readAndInt(char *str, int n, FILE *stream);/*Funzione Leggi da File*/
-void* nodo(void* conf);                        /*Processo Nodo*/
-void* utente(void* conf);                      /*Processo Utente*/
-
 /*variabili condivise tra diversi thread.*/
-int *listUtenti;     /*thread id di ogni utente*/
+int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -118,6 +109,34 @@ void writeConf(){
 
 }
 
+void showUsers(){
+         int i;
+	 int counterAttivi=0;
+	 bool test;
+	 printf("Utenti:\n");
+	 /*mostra il budget di ogni utente*/
+	 for(i=0; i<configurazione.SO_USERS_NUM; i++){
+	    test = retrylist[i]<configurazione.SO_RETRY;
+	    if(test)
+	       counterAttivi++;
+	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
+	    if(i%9==0)
+	       printf("\n");
+	 }
+	 printf("\nattivi: %d\n",counterAttivi);
+
+}
+
+void showNodes(){
+         int i;
+	 int counterAttivi;
+	 printf("\nnodi: \n");
+	 for(i=0; i<configurazione.SO_NODES_NUM; i++){
+	    sem_getvalue(&semafori[i],&counterAttivi);
+	    printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
+	 }
+}
+
 int main(int argc,char *argv[]){
    int i;
    float now;
@@ -154,10 +173,10 @@ int main(int argc,char *argv[]){
 	 usleep(100);
       }
       /*generatore dei utenti*/
-      listUtenti=malloc(configurazione.SO_USERS_NUM * sizeof(int));
+      retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
       budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
-         pthread_create(&tid,NULL,utente,(void *)&i);
+         pthread_create(&tid,NULL,utente,i);
 	 usleep(100);
       }
       
@@ -165,31 +184,15 @@ int main(int argc,char *argv[]){
       now = difftime(time(0), startSimulation);
       while(now < configurazione.SO_SIM_SEC){
          sleep(1);
-	 clear();
+	 /*clear();*/
 	 
 	 /*show last update*/
 	 printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 	 /*conta la quantita di utenti attivi*/
-	 
-	 printf("Utenti:\n");
-	 counterAttivi=0;
-	 /*mostra il budget di ogni utente*/
-	 for(i=0; i<configurazione.SO_USERS_NUM; i++){
-	    test = listUtenti[i]!=-1;
-	    if(test)
-	       counterAttivi++;
-	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
-	    if(i%9==0)
-	       printf("\n");
-	 }
-	 printf("\nattivi: %d\n",counterAttivi);
+	 showUsers();
 	 	 
 	 /*mostra i nodi con i suoi semafori */
-	 printf("\nnodi: \n");
-	 for(i=0; i<configurazione.SO_NODES_NUM; i++){
-	    sem_getvalue(&semafori[i],&counterAttivi);
-	    printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
-	 }
+	 showNodes();
 	 printf("\n");
 
          now = difftime(time(0), startSimulation);
