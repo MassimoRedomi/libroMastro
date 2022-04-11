@@ -86,54 +86,57 @@ Transazione generateTransaction(int id){
 ** processo Utente principale
   #+begin_src c :tangle yes
 /*PROCESSO UTENTE:*/
-void* utente(int conf){
+void* utente(void *conf){
+   int *id = (int*)conf;                        /*Id processo utente*/
    int i;
    /*Lasso di tempo massimo durata transazione:*/
    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
-
-   int id = (int)conf;                        /*Id processo utente*/
    int mythr = pthread_self();                /*Pid thread processo utente*/
    int tentativi = 0;                         /*tentativi massimo per creazione di una transazione*/
    int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
-   retrylist[id] = 0;
-   budgetlist[id] = configurazione.SO_BUDGET_INIT;/*publico el budget de mi usuario*/
+   retrylist[*id] = 0;
+   budgetlist[*id] = configurazione.SO_BUDGET_INIT;/*publico el budget de mi usuario*/
 
-   printf("Utente #%d creato nel thread %d\n",id,mythr);
+   printf("Utente #%d creato nel thread %d\n",*id,mythr);
 
-   while(tentativi<configurazione.SO_RETRY){
+   while(retrylist[*id]<configurazione.SO_RETRY){
       
-      lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budget del Processo Utente*/
+      lastUpdate = userUpdate(*id,lastUpdate);  /*Aggiorniamo Budget del Processo Utente*/
 
-      if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/                                
+      if(budgetlist[*id]>=2){                   /*Condizione Budget >= 2*/                                
          
          Transazione transaction;              /*Creiamo una nuova transazione*/
-	 transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
+	 transaction = generateTransaction(*id);/*Chiamiamo la func generateTransaction*/
 	 
 	      
+	 printf("%f: sender:%d, receiver:%d, quantita:%d\n",transaction.timestamp,transaction.sender,transaction.receiver,transaction.quantita);
 	 /*scelglie un nodo libero a caso*/
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
-	    retrylist[id]++;
+	    retrylist[*id]++;
+	    if(retrylist[*id] >= configurazione.SO_RETRY){
+	        break;
+	    }
 	 }while(sem_trywait(&semafori[i])!=0);
 	 /*prueba de transaccion*/
-	printf("%f: sender:%d, receiver:%d, quantita:%d, nodo:%d\n",transaction.timestamp,transaction.sender,transaction.receiver,transaction.quantita,i);
+	 printf("%f: sender:%d, receiver:%d, quantita:%d, nodo:%d\n",transaction.timestamp,transaction.sender,transaction.receiver,transaction.quantita,i);
 	 
-	if(retrylist[id] < configurazione.SO_RETRY){
-           sem_wait(&semafori[i]);           /*blocco con il semaforo*/
-           mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
-	   retrylist[id] = 0;
-	}else{
-	   printf("l'utente %d ha superato la cuantita di tentativi",id);
-	}
+	 if(retrylist[*id] < configurazione.SO_RETRY){
+            sem_wait(&semafori[i]);           /*blocco con il semaforo*/
+            mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
+	    retrylist[*id] = 0;
+	 }else{
+	    printf("l'utente %d ha superato la cuantita di tentativi",*id);
+	 }
 	 
       }else{
-         retrylist[id]++;
+         retrylist[*id]++;
       }
 
       usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);/*Tempo di Attesa Random della trasazione*/
 
-      if(tentativi >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-         printf("utente %d fermato",id);       /*ferma il procceso*/
+      if(retrylist[*id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
+         printf("utente %d fermato",*id);       /*ferma il procceso*/
       }
    }
 }

@@ -169,22 +169,22 @@ int main(int argc,char *argv[]){
       semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
       mailbox=malloc(configurazione.SO_NODES_NUM * (4 * sizeof(int)) * sizeof(time_t));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
-         pthread_create(&tid,NULL,nodo,(void *)&i);
-	 usleep(100);
+         pthread_create(&tid,NULL,nodo,&i);
+	 /*usleep(100);*/
       }
       /*generatore dei utenti*/
       retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
       budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
-         pthread_create(&tid,NULL,utente,i);
-	 usleep(100);
+         pthread_create(&tid,NULL,utente,&i);
+	 /*usleep(100);*/
       }
       
       /*now start the master process*/
       now = difftime(time(0), startSimulation);
       while(now < configurazione.SO_SIM_SEC){
          sleep(1);
-	 /*clear();*/
+	 clear();
 	 
 	 /*show last update*/
 	 printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);

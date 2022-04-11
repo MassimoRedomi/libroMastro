@@ -13,18 +13,18 @@ extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
 extern time_t startSimulation;
 
-void* nodo(void* conf){
+void* nodo(void *conf){
    /*creazioni dei dati del nodo*/
+   int *id = (int *)conf;
    int i;
    int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
    int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
    Transazione blocco[SO_BLOCK_SIZE];
-   Transazione pool[configurazione.SO_TP_SIZE];
+   Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
    Transazione finalReward;
    int mythr; 
-   int *id = (int *)conf;
    int semvalue;/*valore del semaforo*/
    sem_init(&semafori[*id],0,0);/*inizializa il semaforo in 0*/
    rewardlist[*id]=0;
