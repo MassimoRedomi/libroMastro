@@ -19,10 +19,8 @@ int userUpdate(int id, int lastUpdate){
    int budget = budgetlist[id];
    while(lastUpdate != libroCounter){
       for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
-         if(libroMastro[i].sender == id){
+         if(libroMastro[i].receiver == id){
 	    budget += libroMastro[i].quantita;
-	 }else if(libroMastro[i].receiver == id){
-	    budget -= libroMastro[i].quantita;
 	 }
       }
       lastUpdate++;
@@ -80,23 +78,25 @@ void* utente(void *conf){
 	 transaction = generateTransaction(*id);/*Chiamiamo la func generateTransaction*/
 	 
 	      
-	 printf("%f: sender:%d, receiver:%d, quantita:%d\n",transaction.timestamp,transaction.sender,transaction.receiver,transaction.quantita);
 	 /*scelglie un nodo libero a caso*/
 	 do{
 	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
 	    retrylist[*id]++;
 	    if(retrylist[*id] >= configurazione.SO_RETRY){
+	        pthread_exit(NULL);
 	        break;
 	    }
 	 }while(sem_trywait(&semafori[i])!=0);
 	 /*prueba de transaccion*/
-	 printf("%f: sender:%d, receiver:%d, quantita:%d, nodo:%d\n",transaction.timestamp,transaction.sender,transaction.receiver,transaction.quantita,i);
 	 
 	 if(retrylist[*id] < configurazione.SO_RETRY){
-            sem_wait(&semafori[i]);           /*blocco con il semaforo*/
+            /*sem_wait(&semafori[i]);           /*blocco con il semaforo*/
+	    prinTrans(transaction);
+	    budgetlist[*id] -= transaction.quantita;
             mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
 	    retrylist[*id] = 0;
 	 }else{
+	    pthread_exit(NULL);
 	    printf("l'utente %d ha superato la cuantita di tentativi",*id);
 	 }
 	 

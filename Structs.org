@@ -1,7 +1,7 @@
 * structures
   Le strutture sono gruppi di variabili che rapressentano un
  oggetto della vita reale.
-** ReadStruct
+** Configurazione
    questa struttura solo serve per avere un archivio di dati ordinati
    dei dati letti del file di configurazione. questi dati sono:
 |---------------------------------------+------------------------------------------------------------------------------------------------------------------|
@@ -75,3 +75,10 @@ typedef struct Transazione{
 
   #+end_src
 
+** printTrans
+#+begin_src c :tangle yes
+
+void prinTrans(Transazione t){
+   printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+}
+#+end_src

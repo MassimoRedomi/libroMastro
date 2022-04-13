@@ -141,7 +141,7 @@ int main(int argc,char *argv[]){
    int i;
    float now;
    bool test;
-   pthread_t tid;
+   pthread_t *tid;
    int counterAttivi;
    if(argc<2){
       printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
@@ -162,22 +162,25 @@ int main(int argc,char *argv[]){
       
       startSimulation = time(0);/* el tiempo de ahora*/
       sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
-
+      tid=malloc((configurazione.SO_NODES_NUM + configurazione.SO_USERS_NUM) * sizeof(pthread_t));
       /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
       /*generatore dei nodi*/
       rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
       semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
-      mailbox=malloc(configurazione.SO_NODES_NUM * (4 * sizeof(int)) * sizeof(time_t));
+      mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(time_t)));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
-         pthread_create(&tid,NULL,nodo,&i);
-	 /*usleep(100);*/
+         pthread_create(&tid[i],NULL,nodo,(void *)&i);
+	 usleep(200);
+	 /*pthread_join(tid[i],NULL);*/
+	 
       }
       /*generatore dei utenti*/
       retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
       budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
-         pthread_create(&tid,NULL,utente,&i);
-	 /*usleep(100);*/
+         pthread_create(&tid[configurazione.SO_NODES_NUM+i],NULL,utente,(void *)&i);
+	 usleep(200);
+	 /*pthread_join(tid[i],NULL);*/
       }
       
       /*now start the master process*/
@@ -193,15 +196,23 @@ int main(int argc,char *argv[]){
 	 	 
 	 /*mostra i nodi con i suoi semafori */
 	 showNodes();
-	 printf("\n");
+	 printf("\n\n");
 
          now = difftime(time(0), startSimulation);
       }
 
+      /*kill all the threads*/
+      for(i=0;i<configurazione.SO_NODES_NUM + configurazione.SO_USERS_NUM; i++){
+         pthread_cancel(tid[i]);
+      }
+
+      printf("numero di blocchi: %d\n\n",libroCounter);
       /*solo por confirmar al final*/
       for(i=0;i<libroCounter;i++){
-         printf("%f: %d %d %d\n",libroMastro[i].timestamp,libroMastro[i].sender,libroMastro[i].receiver, libroMastro[i].quantita);
+         prinTrans(libroMastro[i]);
       }
+      
+      
             
 
    }

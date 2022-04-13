@@ -30,3 +30,5 @@
   no de una transaccion a otra, sino que entre un bloque y otro.
 ** DONE cambiar la suma de rewards a una lista externa para permitir que lo lea el proceso maestro
 * DONE lectura de variables
+* DONE asignar tid individual para cada hilo
+  probablemente es el motivo de que los hilos no vayan bien en la transaccion.

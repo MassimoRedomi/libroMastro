@@ -26,7 +26,7 @@ void* nodo(void *conf){
    Transazione finalReward;
    int mythr; 
    int semvalue;/*valore del semaforo*/
-   sem_init(&semafori[*id],0,0);/*inizializa il semaforo in 0*/
+   sem_init(&semafori[*id],configurazione.SO_USERS_NUM,0);/*inizializa il semaforo in 0*/
    rewardlist[*id]=0;
    mythr = pthread_self();
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
@@ -36,7 +36,7 @@ void* nodo(void *conf){
    
       /*aggiorno il valore del semaforo*/
       sem_getvalue(&semafori[*id],&semvalue);
-      if(semvalue!=0){
+      if(semvalue<0){
          /*scrivo la nuova transazione nel blocco e nella pool*/
          pool[counterPool]=mailbox[*id];
 	 blocco[counterBlock]=mailbox[*id];
@@ -69,11 +69,14 @@ void* nodo(void *conf){
 	    counterBlock=0;
 	    sommaBlocco=0;
 	    usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
+	    free(&mailbox[*id]);
+	    
+	    if(counterPool < configurazione.SO_TP_SIZE){
+               sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
+	    }  
 	 }
-	 
+	  
       }
-      if(counterPool < configurazione.SO_TP_SIZE){
-         sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
-      }
+
    }
 }

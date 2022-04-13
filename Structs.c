@@ -23,3 +23,7 @@ typedef struct Transazione{
    int quantita;    /*Quantita di denaro inviata.*/
    int reward;      /*denaro dal sender al nodo che processa la transazione.*/
 }Transazione;
+
+void prinTrans(Transazione t){
+   printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+}
