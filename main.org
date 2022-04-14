@@ -255,12 +255,14 @@ int main(int argc,char *argv[]){
       startSimulation = time(0);/* el tiempo de ahora*/
       sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
       tid=malloc((configurazione.SO_NODES_NUM + configurazione.SO_USERS_NUM) * sizeof(pthread_t));
-      /*libroMastro=malloc(configurazione.SO_BLOCK_SIZE * configurazione.SO_REGISTRY_SIZE * (4 * sizeof(int)) * sizeof(time_t));*/
+      
       /*generatore dei nodi*/
       rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
       semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
       mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(time_t)));
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
+         sem_init(&semafori[i],configurazione.SO_USERS_NUM,1);
+	 rewardlist[i]=0;
          pthread_create(&tid[i],NULL,nodo,(void *)&i);
 	 usleep(200);
 	 /*pthread_join(tid[i],NULL);*/
@@ -270,6 +272,8 @@ int main(int argc,char *argv[]){
       retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
       budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
       for(i=0;i<configurazione.SO_USERS_NUM;i++){
+         retrylist[i] = 0;
+	 budgetlist[i] = configurazione.SO_BUDGET_INIT;
          pthread_create(&tid[configurazione.SO_NODES_NUM+i],NULL,utente,(void *)&i);
 	 usleep(200);
 	 /*pthread_join(tid[i],NULL);*/

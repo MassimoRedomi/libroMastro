@@ -63,12 +63,11 @@ void* utente(void *conf){
    int mythr = pthread_self();                /*Pid thread processo utente*/
    int tentativi = 0;                         /*tentativi massimo per creazione di una transazione*/
    int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
-   retrylist[*id] = 0;
-   budgetlist[*id] = configurazione.SO_BUDGET_INIT;/*publico el budget de mi usuario*/
-
+   
    printf("Utente #%d creato nel thread %d\n",*id,mythr);
 
    while(retrylist[*id]<configurazione.SO_RETRY){
+      printf("nueva transaccion de %d\n",*id);
       
       lastUpdate = userUpdate(*id,lastUpdate);  /*Aggiorniamo Budget del Processo Utente*/
 
@@ -86,7 +85,7 @@ void* utente(void *conf){
 	        pthread_exit(NULL);
 	        break;
 	    }
-	 }while(sem_trywait(&semafori[i])!=0);
+	 }while(sem_trywait(&semafori[i])<=0);
 	 /*prueba de transaccion*/
 	 
 	 if(retrylist[*id] < configurazione.SO_RETRY){
@@ -97,7 +96,7 @@ void* utente(void *conf){
 	    retrylist[*id] = 0;
 	 }else{
 	    pthread_exit(NULL);
-	    printf("l'utente %d ha superato la cuantita di tentativi",*id);
+	    printf("l'utente %d ha superato la cuantita di tentativi\n",*id);
 	 }
 	 
       }else{

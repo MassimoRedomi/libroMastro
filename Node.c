@@ -26,8 +26,6 @@ void* nodo(void *conf){
    Transazione finalReward;
    int mythr; 
    int semvalue;/*valore del semaforo*/
-   sem_init(&semafori[*id],configurazione.SO_USERS_NUM,0);/*inizializa il semaforo in 0*/
-   rewardlist[*id]=0;
    mythr = pthread_self();
    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
    
