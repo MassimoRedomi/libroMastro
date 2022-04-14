@@ -27,3 +27,16 @@ typedef struct Transazione{
 void prinTrans(Transazione t){
    printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
+
+int randomInt(int min, int max){
+     return rand() % max +min;
+}
+
+long randomlong(int min, int max){
+     return (long)(rand() % max +min);
+}
+
+/*si ferma per una quantita random di nano secondi*/
+void randomSleep(int min, int max){
+    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+}

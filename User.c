@@ -89,7 +89,7 @@ void* utente(void *conf){
 	 /*prueba de transaccion*/
 	 
 	 if(retrylist[*id] < configurazione.SO_RETRY){
-            /*sem_wait(&semafori[i]);           /*blocco con il semaforo*/
+            sem_wait(&semafori[i]);           /*blocco con il semaforo*/
 	    prinTrans(transaction);
 	    budgetlist[*id] -= transaction.quantita;
             mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
@@ -103,7 +103,8 @@ void* utente(void *conf){
          retrylist[*id]++;
       }
 
-      usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);/*Tempo di Attesa Random della trasazione*/
+      /*usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);/*Tempo di Attesa Random della trasazione*/
+      randomSleep(configurazione.SO_MIN_TRANS_GEN_NSEC,configurazione.SO_MAX_TRANS_GEN_NSEC);
 
       if(retrylist[*id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
          printf("utente %d fermato",*id);       /*ferma il procceso*/

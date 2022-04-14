@@ -82,3 +82,30 @@ void prinTrans(Transazione t){
    printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
 #+end_src
+** RandomInt & RandomLong
+   Le due funzioni servono per lanciare un numero aleatorio tra min e 
+   max. In ogni caso si usano le stesse variabili:
+   -_min_:il numero minimo del rango.
+   -_max_:il numero massimo del rango.
+
+   _randomInt_ serve per simplificare ogni volta che si fa una scelta a 
+   caso dentro di ogni thread.
+   _randomlong_ per ora solo serve per il random sleep.
+   #+begin_src c :tangle yes
+int randomInt(int min, int max){
+     return rand() % max +min;
+}
+
+long randomlong(int min, int max){
+     return (long)(rand() % max +min);
+}
+   #+end_src
+** randomSleep
+   funzione di nanosleep con un rango tra due numeri:
+   _min_
+   #+begin_src c :tangle yes
+/*si ferma per una quantita random di nano secondi*/
+void randomSleep(int min, int max){
+    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+}
+   #+end_src

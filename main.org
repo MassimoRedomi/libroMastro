@@ -263,7 +263,7 @@ int main(int argc,char *argv[]){
       for(i=0;i<configurazione.SO_NODES_NUM;i++){
          sem_init(&semafori[i],configurazione.SO_USERS_NUM,1);
 	 rewardlist[i]=0;
-         pthread_create(&tid[i],NULL,nodo,(void *)&i);
+         pthread_create(&tid[i],NULL,nodo,&i);
 	 usleep(200);
 	 /*pthread_join(tid[i],NULL);*/
 	 
