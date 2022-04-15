@@ -1,0 +1,100 @@
+{
+  "main": {
+    "id": "5a615b55d4a6ba45",
+    "type": "split",
+    "children": [
+      {
+        "id": "ee5e61a4b883d20e",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "lista.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "7384f7e47485ae2c",
+    "type": "split",
+    "children": [
+      {
+        "id": "ebe9b315537c7cb9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2f994cc9c642a9e8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "81fada4791816978",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "3715246b105a240a",
+    "type": "split",
+    "children": [
+      {
+        "id": "1d4bb4ce1adec25b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "45ab6fba7c034154",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "lista.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "ee5e61a4b883d20e",
+  "lastOpenFiles": [
+    "lista.md",
+    "User.md",
+    "Node.md",
+    "Structs.md",
+    "main.md",
+    "Progetto_SO_2021_22_definitivo.pdf",
+    "[.md"
+  ]
+}
