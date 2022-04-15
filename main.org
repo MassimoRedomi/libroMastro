@@ -1,8 +1,7 @@
 #+title: Libro Mastro
-#+author: José Santos L.
+#+author: José Santos L, Evelyn Rojas, Massimo Redomi.
 * Compilazione
-  La compilazione è compresa in un MAKEFILE per passare tutti i 
-  parametri:
+  La compilazione avviene tramite MAKEFILE:
 #+begin_src makefile :tangle Makefile
 all:
 	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
@@ -25,23 +24,22 @@ all:
 
 * Headers
 ** Basic libraries
-   sono librerie che non credo di aver bisogno di spiegare cosa fanno.
    #+begin_src c :tangle yes
-#include <stdio.h>  /*standard input-output header*/
+#include <stdio.h>  /*Standard input-output header*/
 #include <stdlib.h> /*Libreria Standard*/  
-#include <time.h>   /*Acquisizione e manipolazione tempo*/
-#include <stdbool.h>/*aggiunge i boolean var*/
+#include <time.h>   /*Acquisizione e manipolazione del tempo*/
+#include <stdbool.h>/*Aggiunge i boolean var*/
 
    #+end_src
 
 ** specific libraries
    #+begin_src c :tangle yes
 #include <unistd.h>      /*Header per sleep()*/
-#include <pthread.h>     /*Per fare i thread*/
-#include <semaphore.h>   /*Aggiungi i semafori*/
+#include <pthread.h>     /*Creazione/Modifica thread*/
+#include <semaphore.h>   /*Aggiunge i semafori*/
 
    #+end_src
-** importa le funzioni di utente 
+** Importa le funzioni utente 
 
    #+begin_src c :tangle yes
 
@@ -49,7 +47,7 @@ all:
 
    #+end_src
 ** macro
-   Un macro è un frammento di codice a cui viene assegnato un nome.
+   Una macro è un frammento di codice a cui viene assegnato un nome.
    #+begin_src c :tangle yes
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 
@@ -57,36 +55,36 @@ all:
 
 * Controllo del LIBRO_MASTRO
   Creazione del libroMastro e tutte le variabili:
-  -_libroluck_:   Semaforo per accedere alla scrittura del libroMastro.
-  -_libroCounter_:Contatore che indica la quantità di blocchi scritti nel libroMastro.
+  -_libroluck_: Semaforo per accedere alla scrittura del libroMastro.
+  -_libroCounter_: Contatore della quantità di blocchi scritti nel libroMastro.
   #+begin_src c :tangle yes
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
-sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
+sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
 
    #+end_src
-* funzioni in paralelo
-  questo spazio è riservato per le funzioni del multithread
+* Funzioni in parallelo
+  questo spazio è riservato alle funzioni del multithread
   
-** memoria condivisa (work in progress)
-   i semafori vengono usati per gestire il flusso del programma.
-   e sopratutto non accedono diversi processi allo stesso tempo
-   allo stesso dato. Uguale a un semaforo normale ci sono 3 stati:
+** Memoria condivisa (work in progress)
+   i semafori vengono usati per gestire il flusso del programma
+   e ad evitare che i processi accedano contemporaneamente ai dati. 
+   Un Semaforo ha 3 stati:
 *** 0 avanti
-    il processo puo accedere diretamente al dato.
+    Il processo puo accedere direttamente al dato.
 *** <0 aspetta
-    il processo deve ancora aspettare per accedere a questo dato
-    o direttamente cercare un'alternativa a questo.
+    Il processo aspetta per accedere al dato
+    o in alternativa sceglie unn'altra via per l'accesso.
 *** external resources 
 **** general semaphore example https://www.delftstack.com/howto/c/semaphore-example-in-c/
 **** trywait https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait
-*** lista de semafori e altre dati condivise tra i diversi thread:
+*** lista dei semafori ed altre dati condivise tra i diversi thread:
     #+begin_src c :tangle yes
 
 /*variabili condivise tra diversi thread.*/
 int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
-int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
+int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
@@ -102,13 +100,13 @@ Configurazione configurazione;
 #+end_src
 ** legge file
 #+begin_src c :tangle yes
-/*Un picollo metodo che fa un fgets(con gli stessi parametri e lo 
-ritorna come un valore intero*/
+/*Un metodo che fa un fgets(con gli stessi parametri e lo 
+ritorna come un valore intero)*/
 int readAndInt(char *str, int n, FILE *stream){
    fgets(str,n,stream);
    return atoi(str);
 }
-/*funzione che cerca la maniera di leggere il config file.
+/*Funzione che cerca la maniera di leggere il config file.
 /*metodo basato in codice di stackoverflow per leggere file come
 una unica struttura.*/
 void readconf(char fileName[]){
@@ -122,7 +120,7 @@ void readconf(char fileName[]){
    }else{
       char line[20];/*str per prendere le righe*/
 
-      /*inserisco le variabili riga a riga alla struttura.*/
+      /*Inserisco le variabili riga per riga alla struttura.*/
       configurazione.SO_USERS_NUM = readAndInt(line,20,file);
       printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
       configurazione.SO_NODES_NUM = readAndInt(line,20,file);
