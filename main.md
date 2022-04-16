@@ -1,20 +1,21 @@
 
 # [Table of Contents](#table-of-contents)
 
-- ### [1.0 Compilazione](#compilazione)
-  - #### [1.1 std=c89](#stdc89)
-  - #### [1.2 pthread](#pthread)
-  - #### [1.3 pedantic](#pedantic)
-  - #### [1.4 D_GNU_SOURCE](#d_gnu_source)
-  - #### [1.5 SO_BLOCK_SIZE](#so_block_size)
-  - #### [1.6 SO_REGISTRY_SIZE](#so_registry_size)
-  - #### [1.7 -lm](#-lm)
+- ### [1.0 Compilazione](#10-compilazione)
+  - #### [1.1 std=c89](#11-stdc89)
+  - #### [1.2 pthread](#12-pthread)
+  - #### [1.3 pedantic](#13-pedantic)
+  - #### [1.4 D_GNU_SOURCE](#14-d_gnu_source)
+  - #### [1.5 SO_BLOCK_SIZE](#15-so_block_size)
+  - #### [1.6 SO_REGISTRY_SIZE](#16-so_registry_size)
+  - #### [1.7 -lm](#17--lm)
 - ### [2.0 Headers](#headers)
   - #### [2.1 Basic libraries](#basic-libraries)
   - #### [2.2 Specific Libraries](#specific-libraries)
   - #### [2.3 Funzioni Utente](#funzioni-utente)
   - #### [2.4 Definizioni Macro](#definizioni-macro)
 - ### [3.0 Controllo LIBRO_MASTRO](#controllo-libro-mastro)
+  - #### [3.1 Creazione del Libro_Mastro e Variabili](#31-creazione-del-libro_mastro-e-variabili)
 - ### [4.0 Funzioni in parallelo](#funzioni-in-parallelo)
   - [4.1 Memoria condivisa](#memoria-condivisa-work-in-progress)
     - [4.1.1 0 avanti](#0-avanti)
@@ -25,7 +26,7 @@
   - #### [5.1 Dichiaro Variabile Configurazione](#dichiaro-variabile-configurazione)
   - #### [5.2 Legge File](#legge-file)
   - #### [5.3 Scrittura Manuale](#scrittura-manuale)
-- #### [6.0 Main](#main)
+- ### [6.0 Main](#main)
   - #### [6.1 Show Users](#show-users)
   - #### [6.2 Show Nodes](#show-nodes)
   - #### [6.3 Main Function](#main-function)
@@ -33,7 +34,7 @@
 
 
 
-# Compilazione
+# 1.0 Compilazione
 
 La compilazione avviene tramite MAKEFILE:
 ```makefile Makefile
@@ -42,31 +43,31 @@ all:
 ```
 
 
-### std=c89
+### 1.1 std=c89
 set the language standard C89.
 
-### pthread
+### 1.2 pthread
 Setting the binary for thread processing.
 
-### pedantic
+### 1.3 pedantic
 
-### D_GNU_SOURCE
+### 1.4 D_GNU_SOURCE
 enables GNU extensions to the C and OS standards supported by the 
 GNU C library.
 
-### SO_BLOCK_SIZE
+### 1.5 SO_BLOCK_SIZE
 The size of the block in the simulation.
 
 
-### SO_REGISTRY_SIZE
+### 1.6 SO_REGISTRY_SIZE
 The max size of the libro mastro.
 
-### -lm
+### 1.7 -lm
 Compiles against the shared library.
 
 
-# Headers
-## Basic libraries
+# 2.0 Headers
+## 2.1 Basic libraries
 ``` c main.c
 #include <stdio.h>  /*Standard input-output header*/
 #include <stdlib.h> /*Libreria Standard*/  
@@ -75,7 +76,7 @@ Compiles against the shared library.
 
 ```
 
-## Specific Libraries
+## 2.2 Specific Libraries
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
@@ -83,13 +84,13 @@ Compiles against the shared library.
 
 ```
 
-## Funzioni Utente
+## 2.3 Funzioni Utente
 importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
 ``` c main.c
 #include "User.c"
 ```
 
-## Definizioni Macro
+## 2.4 Definizioni Macro
 
 Una macro è un frammento di codice a cui viene assegnato un nome.
 
@@ -97,9 +98,9 @@ Una macro è un frammento di codice a cui viene assegnato un nome.
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 ```
 
-# Controllo LIBRO MASTRO
+# 3.0 Controllo LIBRO MASTRO
 
-Creazione del libroMastro e tutte le variabili:
+## 3.1 Creazione del Libro_Mastro e Variabili:
 - __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
 - __libroCounter__: Contatore della quantità di blocchi scritti nel libroMastro.
 
@@ -111,30 +112,32 @@ sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
 ```
 
 
-# Funzioni in parallelo
+# 4.0 Funzioni in parallelo
 questo spazio è riservato alle funzioni del multithread
 
-## Memoria condivisa (work in progress)
+## 4.1 Memoria condivisa (work in progress)
 
 i semafori vengono usati per gestire il flusso del programma
 e ad evitare che i processi accedano contemporaneamente ai dati. 
 Un Semaforo ha 3 stati:
 
-### 0 avanti
+### 4.1.1 0 avanti
 Il processo puo accedere direttamente al dato.
 
 
-### <0 aspetta
+### 4.1.2 <0 aspetta
 Il processo aspetta per accedere al dato
 o in alternativa sceglie unn'altra via per l'accesso.
 
-### external resources
+### 4.1.3 external resources
 
-1.  general semaphore example <https://www.delftstack.com/howto/c/semaphore-example-in-c/>
-2.  trywait <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
+1.  General Semaphore Example:
+    <https://www.delftstack.com/howto/c/semaphore-example-in-c/>
+2.  trywait:
+    <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
 
 
-### Lista Semafori e altri Dati Condivisi tra i threads:
+### 4.1.4 Lista Semafori e altri Dati Condivisi tra i threads:
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
@@ -146,14 +149,14 @@ Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
 ```
 
-# Lettura Configurazione
-## Dichiaro Variabile Configurazione
+# 5.0 Lettura Configurazione
+## 5.1 Dichiaro Variabile Configurazione
 
 ```c main.c
 Configurazione configurazione;
 ```
 
-## Legge File
+## 5.2 Legge File
 ```c main.c
 /*Un metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero)*/
@@ -208,7 +211,7 @@ void readconf(char fileName[]){
 
 ```
 
-## Scrittura Manuale
+## 5.3 Scrittura Manuale
 
 Forse per la parte di prove. possiamo cambiare la intro delle variabili.
 probabilmente cancelliamo questo alla fine del progetto.
@@ -250,9 +253,9 @@ void writeConf(){
 
 ```
 
-# Main
+# 6.0 Main
 
-## Show Users
+## 6.1 Show Users
 ```c main.c
 void showUsers(){
 	int i;
@@ -273,7 +276,7 @@ void showUsers(){
 
 ```
 
-## Show Nodes
+## 6.2 Show Nodes
 ```c main.c
 void showNodes(){
 	int i;
@@ -287,7 +290,7 @@ void showNodes(){
 
 ```
 
-## Main Function
+## 6.3 Main Function
 
 ```c main.c
 int main(int argc,char *argv[]){
