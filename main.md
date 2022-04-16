@@ -1,25 +1,35 @@
 
-# Table of Contents
+# [Table of Contents](#table-of-contents)
 
-1.  [Compilazione](#org3d1550e)
-2.  [Headers](#org490c68f)
-    1.  [Basic libraries](#org0a118af)
-    2.  [specific libraries](#org2762bdf)
-    3.  [Importa le funzioni utente](#orgc6664f9)
-    4.  [macro](#org1945bc4)
-3.  [Controllo del LIBRO_MASTRO](#orgd0244e6)
-4.  [Funzioni in parallelo](#orgdefd6a0)
-    1.  [Memoria condivisa (work in progress)](#org7d59c22)
-        1.  [external resources](#org57db06e)
-        2.  [lista dei semafori ed altre dati condivise tra i diversi thread:](#org2d10bd3)
-5.  [Lettura configurazione](#org3864e20)
-    1.  [dichiaro variabile configurazione](#org84575e2)
-    2.  [legge file](#orgf7155b2)
-    3.  [Scrittura manuale](#orge34b092)
-6.  [main](#org0f6ec9c)
-    1.  [show users](#orgc632acf)
-    2.  [Show nodes](#orgca2ba3c)
-    3.  [main function](#org8034f83)
+- [Table of Contents](#table-of-contents)
+- [Compilazione](#compilazione)
+    - [std=c89](#stdc89)
+    - [pthread](#pthread)
+    - [pedantic](#pedantic)
+    - [D_GNU_SOURCE](#d_gnu_source)
+    - [SO_BLOCK_SIZE](#so_block_size)
+    - [SO_REGISTRY_SIZE](#so_registry_size)
+    - [-lm](#-lm)
+- [Headers](#headers)
+  - [Basic libraries](#basic-libraries)
+  - [Specific Libraries](#specific-libraries)
+  - [Funzioni Utente](#funzioni-utente)
+  - [Definizioni Macro](#definizioni-macro)
+- [Controllo LIBRO MASTRO](#controllo-libro-mastro)
+- [Funzioni in parallelo](#funzioni-in-parallelo)
+  - [Memoria condivisa (work in progress)](#memoria-condivisa-work-in-progress)
+    - [0 avanti](#0-avanti)
+    - [<0 aspetta](#0-aspetta)
+    - [external resources](#external-resources)
+    - [Lista Semafori e altri Dati Condivisi tra i threads:](#lista-semafori-e-altri-dati-condivisi-tra-i-threads)
+- [Lettura Configurazione](#lettura-configurazione)
+  - [Dichiaro Variabile Configurazione](#dichiaro-variabile-configurazione)
+  - [Legge File](#legge-file)
+  - [Scrittura Manuale](#scrittura-manuale)
+- [Main](#main)
+  - [Show Users](#show-users)
+  - [Show Nodes](#show-nodes)
+  - [Main Function](#main-function)
 
 
 
@@ -66,7 +76,7 @@ Compiles against the shared library.
 
 ```
 
-## specific libraries
+## Specific Libraries
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
@@ -74,13 +84,13 @@ Compiles against the shared library.
 
 ```
 
-## Importa le funzioni utente
-importando le funzioni di [User.c](User.md), anche sono inclusi le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
+## Funzioni Utente
+importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
 ``` c main.c
 #include "User.c"
 ```
 
-## macro
+## Definizioni Macro
 
 Una macro è un frammento di codice a cui viene assegnato un nome.
 
@@ -88,7 +98,7 @@ Una macro è un frammento di codice a cui viene assegnato un nome.
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 ```
 
-# Controllo del LIBRO_MASTRO
+# Controllo LIBRO MASTRO
 
 Creazione del libroMastro e tutte le variabili:
 - __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
@@ -125,7 +135,7 @@ o in alternativa sceglie unn'altra via per l'accesso.
 2.  trywait <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
 
 
-### lista dei semafori ed altre dati condivise tra i diversi thread:
+### Lista Semafori e altri Dati Condivisi tra i threads:
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
@@ -137,14 +147,14 @@ Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
 ```
 
-# Lettura configurazione
-## dichiaro variabile configurazione
+# Lettura Configurazione
+## Dichiaro Variabile Configurazione
 
 ```c main.c
 Configurazione configurazione;
 ```
 
-## legge file
+## Legge File
 ```c main.c
 /*Un metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero)*/
@@ -199,7 +209,7 @@ void readconf(char fileName[]){
 
 ```
 
-## Scrittura manuale
+## Scrittura Manuale
 
 Forse per la parte di prove. possiamo cambiare la intro delle variabili.
 probabilmente cancelliamo questo alla fine del progetto.
@@ -241,9 +251,9 @@ void writeConf(){
 
 ```
 
-# main
+# Main
 
-## show users
+## Show Users
 ```c main.c
 void showUsers(){
 	int i;
@@ -264,7 +274,7 @@ void showUsers(){
 
 ```
 
-## Show nodes
+## Show Nodes
 ```c main.c
 void showNodes(){
 	int i;
@@ -278,7 +288,7 @@ void showNodes(){
 
 ```
 
-## main function
+## Main Function
 
 ```c main.c
 int main(int argc,char *argv[]){
