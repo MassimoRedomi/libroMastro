@@ -8,8 +8,8 @@ funzioni di [Node](Node.md) e [Structs](Structs.md).
 
 ```
 
-### Importa variabili globali
-#### controllo del libro mastro
+### Importa Variabili Globali
+#### Controllo del Libro_Mastro
 Importazione del libroMastro e tutte le variabili:
 - __libroluck__:   Semaforo per accedere alla scrittura del libroMastro.
 - __libroCounter__:Contatore che indica la quantità di blocchi scritti nel libroMastro.
@@ -21,9 +21,9 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
 ```
 
-#### Sincronizzazione tra processi
+#### Sincronizzazione tra Processi
 
-importa tutte le variabili del main 
+Importa tutte le variabili del Main 
 
 ```c User.c
 /*variabili condivise tra diversi thread.*/
@@ -37,10 +37,9 @@ extern time_t startSimulation;
 
 ```
 
-## aggiornamento con libroMastro
+## Aggiornamento Libro_Mastro
 
-l'aggiornamento con il libro mastro viene compresso in una sola 
-funzione. Quando 
+L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione. 
 
 ```c User.c
 /*aggiornamento del budget in base al libro.*/
@@ -61,7 +60,7 @@ int userUpdate(int id, int lastUpdate){
 ```
 
 
-## transaction generator
+## Generatore di Transazione
 
 ```c User.c
 Transazione generateTransaction(int id){
@@ -91,7 +90,7 @@ Transazione generateTransaction(int id){
 
 ```
 
-## processo Utente principale
+## Processo Utente Principale
 
 ```c User.c
 /*PROCESSO UTENTE:*/
