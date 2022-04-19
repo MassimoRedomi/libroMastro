@@ -1,7 +1,7 @@
 # Node
 
-## Importa variabili globali
-importa funzioni e strutture di [Structs](Structs.md)
+## Importa Variabili Globali
+Importa funzioni e strutture di [Structs](Structs.md)
 ```c Node.c
 #include "Structs.c"
 ```
@@ -22,7 +22,7 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
 <a id="org71aa49b"></a>
 
-### Sincronizzazione tra processi
+### Sincronizzazione tra Processi
 ```c Nodj.c
 /*variabili condivise tra diversi thread.*/
 extern int *listUtenti;     /*thread id di ogni utente*/
@@ -35,7 +35,7 @@ extern time_t startSimulation;
 
 ```
 
-## funzione principale
+## Funzione Principale
 ```c Node.c
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
