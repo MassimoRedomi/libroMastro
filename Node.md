@@ -23,7 +23,7 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 <a id="org71aa49b"></a>
 
 ### Sincronizzazione tra Processi
-```c Nodj.c
+```c Node.c
 /*variabili condivise tra diversi thread.*/
 extern int *listUtenti;     /*thread id di ogni utente*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
@@ -32,6 +32,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
 extern time_t startSimulation;
+extern pthread_t *nid;       /*lista dei processi nodi*/
 
 ```
 

@@ -113,8 +113,8 @@ int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
-pthread_id *uid;     /*lista id di processi utenti*/
-pthread_id *nid;     /*lista id di processi nodi  */
+pthread_t *uid;     /*lista id di processi utenti*/
+pthread_t *nid;     /*lista id di processi nodi  */
 ```
 
 # 5.0 Lettura Configurazione
@@ -286,7 +286,8 @@ int main(int argc,char *argv[]){
     
         startSimulation = time(0);/* el tiempo de ahora*/
         sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
-        tid=malloc((configurazione.SO_NODES_NUM + configurazione.SO_USERS_NUM) * sizeof(pthread_t));
+        uid = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
+        nid = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
     
         /*generatore dei nodi*/
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));

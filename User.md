@@ -34,6 +34,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
 extern time_t startSimulation;
+extern pthread_t *uid;      /*lista id dei processi utenti*/
 
 ```
 
