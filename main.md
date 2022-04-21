@@ -34,7 +34,7 @@ Compiles against the shared library.
 
 # 2.0 Headers
 ## 2.1 Basic libraries
-``` c main.c
+```c main.c
 #include <stdio.h>  /*Standard input-output header*/
 #include <stdlib.h> /*Libreria Standard*/  
 #include <time.h>   /*Acquisizione e manipolazione del tempo*/
@@ -52,7 +52,7 @@ Compiles against the shared library.
 
 ## 2.3 Funzioni Utente
 importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
-``` c main.c
+```c main.c
 #include "User.c"
 ```
 
@@ -60,7 +60,7 @@ importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [N
 
 Una macro è un frammento di codice a cui viene assegnato un nome.
 
-``` c main.c
+```c main.c
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 ```
 

@@ -1,7 +1,14 @@
+#include <stdio.h>  /*Standard input-output header*/
+#include <stdlib.h> /*Libreria Standard*/  
+#include <time.h>   /*Acquisizione e manipolazione del tempo*/
+#include <stdbool.h>/*Aggiunge i boolean var*/
+
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
 #include <semaphore.h>   /*Aggiunge i semafori*/
 
+#include "User.c"
+#define clear() printf("\033[H\033[J") /*clear the screen*/
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
