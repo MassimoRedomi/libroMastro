@@ -1,245 +1,739 @@
----
-author: Bini, Radicioni, Schifanella
-title: Descrizione del progetto
----
+# structures
 
-# 5 Descrizione del progetto: versione minima (voto max 24 su 30)
+ Le strutture sono gruppi di variabili che rapressentano un
+oggetto della vita reale.
 
-Si intende simulare un libro mastro contenente i dati di transazioni
-monetarie fra diversi utenti. A tal fine sono presenti i seguenti
-processi:
 
--   un processo master che gestisce la simulazione, la creazione degli
-    altri processi, etc.
--   SO~USERSNUM~ processi utente che possono inviare denaro ad altri
-    utenti attraverso una transazione
--   SO~NODESNUM~ processi nodo che elaborano, a pagamento, le
-    transazioni ricevute.
+## Configurazione
 
-## 5.1 Le transazioni
+questa struttura solo serve per avere un archivio di dati ordinati
+dei dati letti del file di configurazione. questi dati sono:
 
-Una transazione è caratterizzata dalle seguenti informazioni: •
-timestamp della transazione con risoluzione dei nanosecondi (si veda
-funzione clock~gettime~(...)) • sender (implicito, in quanto è l'utente
-che ha generato la transazione) • receiver, utente destinatario della
-somma • quantità di denaro inviata. • reward, denaro pagato dal sender
-al nodo che processa la transazione.
+| variables                            | descripcion                                                                                                      |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| SO_USERS_NUM                         | numero di processi untente                                                                                       |
+| SO_NODES_NUM                         | numero di processi nodo                                                                                          |
+| SO_BUDGETNUM                         | budget iniziale di ciascun processo utente                                                                       |
+| SO_REWARD                            | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
+| SO_MIN_TRANS_GEN_NSEC                | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
+| SO_MAX_TRANS_GEN_NSEC                | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| SO_RETRY                             | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
+| SO_TPSIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
+| SO_BLOCKSIZE                         | numero di transazioni contenute in un blocco                                                                     |
+| SO_MIN_TRANS_PROC                    | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
+| SO_MAX_TRANS_PROC                    | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
+| SO_REGISTRY_SIZE                     | numero massimo di blocchi nel libro mastro.                                                                      |
+| SO_SIM_SEC                           | durata della simulazione.                                                                                        |
+| SO_NUM_FRIENDS(solo versione max 30) | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
+| SO_HOPS                              | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 
-La transazione è inviata dal processo utente che la genera ad uno dei
-processi nodo, scelto a caso.
 
-## 5.2 Processi utente
+Anche è vero che si poteva leggere tutte le variabili senza metterlo
+in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto 
+cosi.
 
-I processi utente sono responsabili della creazione e invio delle
-transazioni monetarie ai processi nodo. Ad ogni processo utente è
-assegnato un buget iniziale SO~BUDGETINIT~. Durante il proprio ciclo di
-vita, un processo utente svolge iterativamente le seguenti operazioni:
+```c Structs.c
 
-### 1. Calcola il bilancio corrente a partire dal budget iniziale e facendo la somma algebrica delle entrate e delle
-
-uscite registrate nelle transazioni presenti nel libro mastro,
-sottraendo gli importi delle transazioni spedite ma non ancora
-registrate nel libro mastro.
-
-• Se il bilancio è maggiore o uguale a 2, il processo estrae a caso: --
-Un altro processo utente destinatario a cui inviare il denaro -- Un nodo
-a cui inviare la transazione da processare -- Un valore intero compreso
-tra 2 e il suo bilancio suddiviso in questo modo:
-
-∗ il reward della transazione pari ad una percentuale SO~REWARD~ del
-valore estratto, arrotondato, con un minimo di 1.
-
-∗ l'importo della transazione sarà uguale al valore estratto sottratto
-del reward
-
-Esempio: l'utente ha un bilancio di 100. Estraendo casualmente un numero
-fra 2 e 100, estrae 50. Se SO~REWARD~ è pari al 20 (ad indicare un
-reward del 20%) allora con l'esecuzione della transazione l'utente
-trasferirà 40 all'utente destinatario, e 10 al nodo che avrà processato
-con successo la transazione.
-
-• Se il bilancio è minore di 2, allora il processo non invia alcuna
-transazione
-
-### 2. Invia al nodo estratto la transazione e attende un intervallo di tempo (in nanosecondi) estratto casualmente tra SO~MINTRANSGENNSEC~ e massimo SO~MAXTRANSGENNSEC~.
-
-Inoltre, un processo utente deve generare una transazione anche in
-risposta ad un segnale ricevuto (la scelta del segnale è a discrezione
-degli sviluppatori).
-
-Se un processo non riesce ad inviare alcuna transazione per SO~RETRY~
-volte consecutive, allora termina la sua esecuzione, notificando il
-processo master.
-
-## 5.3 Processi nodo
-
-Ogni processo nodo memorizza privatamente la lista di transazioni
-ricevute da processare, chiamata transaction pool, che può contenere al
-massimo SO~TPSIZE~ transazioni, con SO~TPSIZE~ \> SO~BLOCKSIZE~. Se la
-transaction pool del nodo è piena, allora ogni ulteriore transazione
-viene scartata e quindi non eseguita. In questo caso, il sender della
-transazione scartata deve esserne informato.
-
-Le transazioni sono processate da un nodo in blocchi. Ogni blocco
-contiene esattamente SO~BLOCKSIZE~ transazioni da processare di cui
-SO~BLOCKSIZE~−1 transazioni ricevute da utenti e una transazione di
-pagamento per il processing (si veda sotto).
-
-Il ciclo di vita di un nodo può essere cosı̀ definito: • Creazione di un
-blocco candidato -- Estrazione dalla transaction pool di un insieme di
-SO~BLOCKSIZE~−1 transazioni non ancora presenti nel libro mastro. --
-Alle transazioni presenti nel blocco, il nodo aggiunge una transazione
-di reward, con le seguenti caratteristiche:
-
--   timestamp: il valore attuale di clock~gettime~(...)
-
-```{=html}
-<!-- -->
+/*struttura della configurazione.*/
+typedef struct Configurazione{
+	int SO_USERS_NUM;          /*numero di processi utente*/
+    int SO_NODES_NUM;          /*numero di processi nodo*/
+    int SO_BUDGET_INIT;        /*budget iniziale di ciascun processo utente*/
+    int SO_REWARD;             /*la percentuale di reward pagata da ogni utente per il processamento di una transazione*/
+    int SO_MIN_TRANS_GEN_NSEC; /*minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
+    int SO_MAX_TRANS_GEN_NSEC; /*massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente*/
+    int SO_RETRY;              /*numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina*/
+    int SO_TP_SIZE;            /*numero massimo di transazioni nella transaction pool dei processi nodo*/
+    int SO_MIN_TRANS_PROC_NSEC;/*minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
+    int SO_MAX_TRANS_PROC_NSEC;/*massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo*/
+    int SO_SIM_SEC;            /*durata della simulazione*/
+    int SO_FRIENDS_NUM;        /*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
+    int SO_HOPS;               /*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
+}Configurazione;
 ```
--   sender : -1 (definire una MACRO...)
--   receiver : l'dentificatore del nodo corrente
--   quantità: la somma di tutti i reward delle transazioni incluse nel
-    blocco
--   reward : 0
 
-• Simula l'elaborazione di un blocco attraverso una attesa non attiva di
-un intervallo temporale casuale espresso in nanosecondi compreso tra
-SO~MINTRANSPROCNSEC~ e SO~MAXTRANSPROCNSEC~.
+Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> 
+perche solo c'è una lettura delle variabili di configurazione.
 
-• Una volta completata l'elaborazione del blocco, scrive il nuovo blocco
-appena elaborato nel libro mastro, ed elimina le transazioni eseguite
-con successo dal transaction pool.
 
-## 5.4 Libro mastro
+## Transazione
 
-Il libro mastro è la struttura condivisa da tutti i nodi e gli utenti,
-ed è deputata alla memorizzazione delle transazioni eseguite. Una
-transazione si dice confermata solamente quando entra a far parte del
-libro mastro. Più in dettaglio, il libro mastro è formato da una
-sequenza di lunghezza massima SO~REGISTRYSIZE~ di blocchi consecutivi.
-All'interno di ogni blocco sono contenute esattamente SO~BLOCKSIZE~
-transazioni. Ogni blocco è identificato da un identificatore intero
-progressivo il cui valore iniziale è impostato a 0. Una transazione è
-univocamente identificata dalla tripletta (timestamp, sender, receiver).
-Il nodo che aggiunge un nuovo blocco al libro mastro è responsabile
-anche dell'aggiornamento dell'identificatore del blocco stesso.
+Una transazione è caratterizzata dalle seguenti informazioni:
 
-## 5.5 Stampa
+| variabile | descrizione                                           |
+| --------- | ----------------------------------------------------- |
+| timestamp | Quando viene effetuata la transazione.                |
+| sender    | Utente che ha generato la transazione.                |
+| receiver  | Utente destinatario della somma.                      |
+| quantita  | Quantita di denaro inviata.                           |
+| reward    | denaro dal sender al nodo che processa la transazione |
 
-Ogni secondo il processo master stampa:
+La transazione è inviata dal processo utente che la genera ad uno 
+dei processi nodo, scelto a caso.
 
-• numero di processi utente a nodo attivi • il budget corrente di ogni
-processo utente e di ogni processo nodo, cosı̀ come registrato nel libro
-mastro (inclusi i processi utente terminati). Se il numero di processi è
-troppo grande per essere visualizzato, allora viene stampato soltanto lo
-stato dei processi più significativi: quelli con maggior e minor budget.
+```c Structs.c
+/*struttura della configurazione.*/
+typedef struct Transazione{
+	double timestamp;/*Quando viene effettuata la transazione.*/
+	int sender;      /*Utente che ha generato la transazione.*/
+    int receiver;    /*Utente destinatario de la somma.*/
+    int quantita;    /*Quantita di denaro inviata.*/
+    int reward;      /*denaro dal sender al nodo che processa la transazione.*/
+	
+}Transazione;
 
-## 5.6 Terminazione della simulazione
+```
 
-La simulazione terminerà in uno dei seguenti casi:
 
-• sono trascorsi SO~SIMSEC~ secondi • la capacità del libro mastro si
-esaurisce (il libro mastro può contenere al massimo SO~REGISTRYSIZE~
-blocchi) • tutti i processi utente sono terminati.
+## printTrans
 
-Alla terminazione, il processo master obbliga tutti i processi nodo e
-utente a terminare, e stamperà un riepilogo della simulazione,
-contenente almeno queste informazioni:
+```c Structs.c
+void prinTrans(Transazione t){
+	printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+}
 
-• ragione della terminazione della simulazione • bilancio di ogni
-processo utente, compresi quelli che sono terminati prematuramente •
-bilancio di ogni processo nodo • numero dei processi utente terminati
-prematuramente • numero di blocchi nel libro mastro • per ogni processo
-nodo, numero di transazioni ancora presenti nella transaction pool
+```
 
-# 6 Descrizione del progetto: versione "normal" (max 30)
+## RandomInt & RandomLong
 
-All'atto della creazione da parte del processo master, ogni nodo riceve
-un elenco di SO~NUMFRIENDS~ nodi amici. Il ciclo di vita di un processo
-nodo si arricchisce quindi di un ulteriore step:
+Le due funzioni servono per lanciare un numero aleatorio tra min e 
+max. In ogni caso si usano le stesse variabili:
 
-• periodicamente ogni nodo seleziona una transazione dalla transaction
-pool che è non ancora presente nel libro mastro e la invia ad un nodo
-amico scelto a caso (la transazione viene eliminata dalla transaction
-pool del nodo sorgente)
+- min: il numero minimo del rango.
+- max: il numero massimo del rango.
 
-Quando un nodo riceve una transazione, ma ha la transaction pool piena,
-allora esso provvederà a spedire tale transazione ad uno dei suoi amici
-scelto a caso. Se la transazione non trova una collocazione entro
-SO~HOPS~ l'ultimo nodo che la riceve invierà la transazione al processo
-master che si occuperà di creare un nuovo processo nodo che contiene la
-transazione scartata come primo elemento della transaction pool.
-Inoltre, il processo master assegna al nuovo processo nodo
-SO~NUMFRIENDS~ processi nodo amici scelti a caso. Inoltre, il processo
-master sceglierà a caso altri SO~NUMFRIENDS~ processi nodo già
-esistenti, ordinandogli di aggiungere alla lista dei loro amici il
-processo nodo appena creato.
+__randomInt__ serve per simplificare ogni volta che si fa una scelta a 
+caso dentro di ogni thread.
+__randomlong__ per ora solo serve per il random sleep.
 
-# 7 Configurazione
+```c Struc.c
 
-I seguenti parametri sono letti a tempo di esecuzione, da file, da
-variabili di ambiente, o da stdin (a discrezione degli studenti):
+int randomInt(int min, int max){
+	return rand() % max +min;
+}
+    
+long randomlong(int min, int max){
+	return (long)(rand() % max +min);
+}
 
-  variable                                description
-  --------------------------------------- ------------------------------------------------------------------------------------------------------------------
-  SO~USERSNUM~                            numero di processi utente
-  SO~NODESNUM~                            numero di processi nodo
-  SO~BUDGETINIT~                          budget iniziale di ciascun processo utente
-  SO~REWARD~                              la percentuale di reward pagata da ogni utente per il processamento di una transazione
-  SO~MINTRANSGENNSEC~                     minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente
-  SO~MAXTRANSGENNSEC~                     massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente
-  SO~RETRY~                               numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina
-  SO~TPSIZE~                              numero massimo di transazioni nella transaction pool dei processi nodo
-  SO~MINTRANSPROCNSEC~,                   minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo
-  SO~MAXTRANSPROCNSEC~                    massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo
-  SO~REGISTRYSIZE~                        numero massimo di blocchi nel libro mastro.
-  SO~SIMSESC~                             durata della simulazione
-  SO~NUMFRIENDS~ (solo versione max 30)   numero di nodi amici dei processi nodo (solo per la versione full)
-  SO~HOPS~ (solo versione max 30)         numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo
+```
 
-Un cambiamento dei precedenti parametri non deve determinare una nuova
-compilazione dei sorgenti. Invece, i seguenti parametri sono letti a
-tempo di compilazione:
+## randomSleep
 
-  variable           description
-  ------------------ ----------------------------------------------
-  SO~REGISTRYSIZE~   numero massimo di blocchi nel libro mastro
-  SO~BLOCKSIZE~      numero di transazioni contenute in un blocco
+funzione di nanosleep con un rango tra due numeri:
+min
 
-La seguente tabella elenca valori per alcune configurazioni di esempio
-da testare. Si tenga presente che il progetto deve poter funzionare
-anche con altri parametri.
+```c Struct.c
+    /*si ferma per una quantita random di nano secondi*/
+    void randomSleep(int min, int max){
+        nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+    }
 
-  parametro                      letto a...     conf #1     conf #2     conf #3
-  ------------------------------ -------------- ----------- ----------- -----------
-  SO~USERSNUM~                   run time       100         1000        20
-  SO~NODESNUM~                   run time       10          10          10
-  SO~BUDGETINIT~                 run time       1000        1000        10000
-  SO~REWARD~ \[0-100\]           run time       1           20          1
-  SO~MINTRANSGENNSEC~\[nsec\]    run time       100000000   100000000   100000000
-  SO~MAXTRANSGENNSEC~\[nsec\]    run time       200000000   100000000   200000000
-  SO~RETRY~                      run time       20          2           10
-  SO~TPSIZE~                     run time       1000        20          100
-  SO~BLOCKSIZE~                  compile time   100         10          10
-  SO~MINTRANSPROCNSEC~\[nsec\]   run time       10000000    10000000    
-  SO~MAXTRANSPROCNSEC~{nsec\]    run time       20000000    10000000    
-  SO~REGISTRYSIZE~               compile time   1000        10000       1000
-  SO~SIMSEC~\[sec\]              run time       10          20          20
-  SO~FRIENDSNUM~                 run time       3           5           3
-  SO~HOPS~                       run time       10          2           10
+```
+# Node
 
-# 8 Requisiti implementativi
+## Importa Variabili Globali
+Importa funzioni e strutture di [Structs](Structs.md)
+```c Node.c
+#include "Structs.c"
+```
 
-Il progetto (sia in versione "minimal" che "normal") deve • essere
-realizzato sfruttando le tecniche di divisione in moduli del codice, •
-essere compilato mediante l'utilizzo dell'utility make • massimizzare il
-grado di concorrenza fra processi • deallocare le risorse IPC che sono
-state allocate dai processi al termine del gioco • essere compilato con
-almeno le seguenti opzioni di compilazione: [gcc -std=c89
--pedantic]{.underline}
+### Controllo del LIBRO_MASTRO
 
-• poter eseguire correttamente su una macchina (virtuale o fisica) che
-presenta parallelismo (due o più processori).
+Import del libroMastro e tutte le variabili:
+- __libroluck__:   Semaforo per accedere alla scrittura del libroMastro.
+- __libroCounter__: Contatore che indica la quantità di blocchi scritti nel libroMastro.
 
-Per i motivi introdotti a lezione, ricordarsi di definire la macro
-~GNUSOURCE~ o compilare il progetto con il flag -D~GNUSOURCE~.
+```c Node.c
+extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
+extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
+extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
+
+```
+
+
+<a id="org71aa49b"></a>
+
+### Sincronizzazione tra Processi
+```c Node.c
+/*variabili condivise tra diversi thread.*/
+extern int *listUtenti;     /*thread id di ogni utente*/
+extern int *budgetlist;     /*un registro del budget di ogni utente*/
+extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
+extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
+extern Transazione *mailbox;/*struttura per condividere */
+extern Configurazione configurazione;
+extern time_t startSimulation;
+extern pthread_t *nid;       /*lista dei processi nodi*/
+
+```
+
+## Funzione Principale
+```c Node.c
+void* nodo(void *conf){
+	/*creazioni dei dati del nodo*/
+    int *id = (int *)conf;
+    int i;
+    int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
+    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
+    int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
+    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
+    Transazione blocco[SO_BLOCK_SIZE];
+    Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
+    Transazione finalReward;
+    int mythr; 
+    int semvalue;/*valore del semaforo*/
+    mythr = pthread_self();
+    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
+    
+    /*inizio del funzionamento*/
+    while(counterPool < configurazione.SO_TP_SIZE){
+    
+		/*aggiorno il valore del semaforo*/
+        sem_getvalue(&semafori[*id],&semvalue);
+        if(semvalue<0){
+			/*scrivo la nuova transazione nel blocco e nella pool*/
+	    	 pool[counterPool]=mailbox[*id];
+	    	 blocco[counterBlock]=mailbox[*id];
+    
+	    	 /*somma il reward*/
+	    	 sommaBlocco = blocco[counterBlock].reward;
+	    	 rewardlist[*id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
+    
+	    	 /*incremento i contatori di posizione di pool e block*/
+	    	 counterBlock++;
+	    	 counterPool++;
+    
+	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
+	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
+	    	    finalReward.timestamp = difftime(time(0),startSimulation);/*momento attuale della simulazione*/
+	    	    finalReward.sender = -1;/*-1*/
+	    	    finalReward.receiver = *id;/*identificatore del nodo*/
+	    	    finalReward.quantita = sommaBlocco;/*somma di tutti i reward*/
+	    	    finalReward.reward = 0;
+    
+	    	    blocco[counterBlock]= finalReward;/*aggiunge la transazione al blocco.*/
+    
+	    	    sem_wait(&libroluck);
+	    	    for(i=0;i< SO_BLOCK_SIZE;i++){
+	    	       libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
+	    	    }
+	    	    /*si spostano i contatori*/
+	    	    libroCounter++;
+	    	    sem_post(&libroluck);
+	    	    counterBlock=0;
+	    	    sommaBlocco=0;
+	    	    usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
+	    	    free(&mailbox[*id]);
+    
+	    	    if(counterPool < configurazione.SO_TP_SIZE){
+	    	       sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
+	    	    }  
+	    	}
+    
+		}
+    
+	}
+}
+```
+# Utente
+## import
+Si importa il codice di Node.c che importa tutte le
+funzioni di [Node](Node.md) e [Structs](Structs.md).
+
+```c User.c
+#include "Node.c"
+
+```
+
+### Importa Variabili Globali
+#### Controllo del Libro_Mastro
+Importazione del libroMastro e tutte le variabili:
+- __libroluck__:   Semaforo per accedere alla scrittura del libroMastro.
+- __libroCounter__:Contatore che indica la quantità di blocchi scritti nel libroMastro.
+
+```c User.c
+extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
+extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
+extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
+
+```
+
+#### Sincronizzazione tra Processi
+
+Importa tutte le variabili del Main 
+
+```c User.c
+/*variabili condivise tra diversi thread.*/
+extern int *retrylist ;     /*thread id di ogni utente*/
+extern int *budgetlist;     /*un registro del budget di ogni utente*/
+extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
+extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
+extern Transazione *mailbox;/*struttura per condividere */
+extern Configurazione configurazione;
+extern time_t startSimulation;
+extern pthread_t *uid;      /*lista id dei processi utenti*/
+
+```
+
+## Aggiornamento Libro_Mastro
+
+L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione. 
+
+```c User.c
+/*aggiornamento del budget in base al libro.*/
+int userUpdate(int id, int lastUpdate){
+	int i;
+    int budget = budgetlist[id];
+    while(lastUpdate != libroCounter){
+		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
+			if(libroMastro[i].receiver == id){
+	    	    budget += libroMastro[i].quantita;
+	    	 }
+		}
+        lastUpdate++;
+	}
+	budgetlist[id] = budget;
+    return lastUpdate;
+}
+```
+
+
+## Generatore di Transazione
+
+```c User.c
+Transazione generateTransaction(int id){
+	Transazione transaccion;
+    int i;
+    transaccion.sender = id;
+    transaccion.quantita = (rand() % ((budgetlist[id] - 2) + 1)) + 2;/*set quantita a caso*/
+	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
+    
+	/*se il reward non arriva a 1, allora diventa 1*/
+    if(transaccion.reward < 1){
+		transaccion.reward = 1;
+    }
+    
+    /*ricerca del riceiver*/
+    /*debo reparar lo de los intentos*/
+    do{
+		i= rand() % configurazione.SO_USERS_NUM;
+	}while(i==id || retrylist[i]<configurazione.SO_RETRY);
+	transaccion.receiver = i;
+    
+	/*calculate tr from simulation*/
+	transaccion.timestamp = difftime(time(0),startSimulation);
+    
+	return transaccion;
+}
+
+```
+
+## Processo Utente Principale
+
+```c User.c
+/*PROCESSO UTENTE:*/
+void* utente(void *conf){
+	int *id = (int*)conf;                        /*Id processo utente*/
+    int i;
+    /*Lasso di tempo massimo durata transazione:*/
+    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
+    int mythr = pthread_self();                /*Pid thread processo utente*/
+    int tentativi = 0;                         /*tentativi massimo per creazione di una transazione*/
+    int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
+    
+	printf("Utente #%d creato nel thread %d\n",*id,mythr);
+    
+	while(retrylist[*id]<configurazione.SO_RETRY){
+		printf("nueva transaccion de %d\n",*id);
+    
+		lastUpdate = userUpdate(*id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
+    
+		if(budgetlist[*id]>=2){                   /*Condizione Budget >= 2*/                                
+    
+			Transazione transaction;              /*Creiamo una nuova transazione*/
+			transaction = generateTransaction(*id);/*Chiamiamo la func generateTransaction*/
+    
+    
+			/*scelglie un nodo libero a caso*/
+			do{
+	    	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
+	    	    retrylist[*id]++;
+	    	    if(retrylist[*id] >= configurazione.SO_RETRY){
+		    		pthread_exit(NULL);
+		    		break;
+	    	    }
+	    	 }while(sem_trywait(&semafori[i])<=0);
+	    	 /*prueba de transaccion*/
+    
+			if(retrylist[*id] < configurazione.SO_RETRY){
+	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
+	    	    prinTrans(transaction);
+	    	    budgetlist[*id] -= transaction.quantita;
+	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
+	    	    retrylist[*id] = 0;
+	    	}else{
+	    	    pthread_exit(NULL);
+	    	    printf("l'utente %d ha superato la cuantita di tentativi\n",*id);
+	    	}
+    
+        }else{
+			retrylist[*id]++;
+		}
+    
+          /*usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);/*Tempo di Attesa Random della trasazione*/
+		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
+    
+		if(retrylist[*id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
+			printf("utente %d fermato",*id);       /*ferma il procceso*/
+		}
+    }
+}
+```
+
+
+# 1.0 Compilazione
+
+La compilazione avviene tramite MAKEFILE:
+```makefile Makefile
+all:
+	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
+```
+
+
+### 1.1 std=c89
+set the language standard C89.
+
+### 1.2 pthread
+Setting the binary for thread processing.
+
+### 1.3 pedantic
+
+### 1.4 D_GNU_SOURCE
+enables GNU extensions to the C and OS standards supported by the 
+GNU C library.
+
+### 1.5 SO_BLOCK_SIZE
+The size of the block in the simulation.
+
+
+### 1.6 SO_REGISTRY_SIZE
+The max size of the libro mastro.
+
+### 1.7 -lm
+Compiles against the shared library.
+
+
+# 2.0 Headers
+## 2.1 Basic libraries
+```c main.c
+#include <stdio.h>  /*Standard input-output header*/
+#include <stdlib.h> /*Libreria Standard*/  
+#include <time.h>   /*Acquisizione e manipolazione del tempo*/
+#include <stdbool.h>/*Aggiunge i boolean var*/
+
+```
+
+## 2.2 Specific Libraries
+```c main.c
+#include <unistd.h>      /*Header per sleep()*/
+#include <pthread.h>     /*Creazione/Modifica thread*/
+#include <semaphore.h>   /*Aggiunge i semafori*/
+
+```
+
+## 2.3 Funzioni Utente
+importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
+```c main.c
+#include "User.c"
+```
+
+## 2.4 Definizioni Macro
+
+Una macro è un frammento di codice a cui viene assegnato un nome.
+
+```c main.c
+#define clear() printf("\033[H\033[J") /*clear the screen*/
+```
+
+# 3.0 Controllo LIBRO MASTRO
+
+## 3.1 Creazione del Libro_Mastro e Variabili:
+- __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
+- __libroCounter__: Contatore della quantità di blocchi scritti nel libroMastro.
+
+```c main.c
+Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
+int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
+sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
+
+```
+
+
+# 4.0 Funzioni in parallelo
+questo spazio è riservato alle funzioni del multithread
+
+## 4.1 Memoria condivisa (work in progress)
+
+i semafori vengono usati per gestire il flusso del programma
+e ad evitare che i processi accedano contemporaneamente ai dati. 
+Un Semaforo ha 3 stati:
+
+### 4.1.1 0 avanti
+Il processo puo accedere direttamente al dato.
+
+
+### 4.1.2 <0 aspetta
+Il processo aspetta per accedere al dato
+o in alternativa sceglie unn'altra via per l'accesso.
+
+### 4.1.3 external resources
+
+1.  General Semaphore Example:
+    <https://www.delftstack.com/howto/c/semaphore-example-in-c/>
+2.  trywait:
+    <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
+
+
+### 4.1.4 Lista Semafori e altri Dati Condivisi tra i threads:
+
+```c main.c
+/*variabili condivise tra diversi thread.*/
+int *retrylist;      /*numero di tentativi di ogni utente*/
+int *budgetlist;     /*un registro del budget di ogni utente*/
+int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
+sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
+Transazione *mailbox;/*struttura per condividere */
+time_t startSimulation;
+pthread_t *uid;     /*lista id di processi utenti*/
+pthread_t *nid;     /*lista id di processi nodi  */
+```
+
+# 5.0 Lettura Configurazione
+## 5.1 Dichiaro Variabile Configurazione
+
+```c main.c
+Configurazione configurazione;
+```
+
+## 5.2 Legge File
+```c main.c
+/*Un metodo che fa un fgets(con gli stessi parametri e lo 
+ritorna come un valore intero)*/
+int readAndInt(char *str, int n, FILE *stream){
+	fgets(str,n,stream);
+    return atoi(str);
+}
+/*Funzione che cerca la maniera di leggere il config file.
+/*metodo basato in codice di stackoverflow per leggere file come
+una unica struttura.*/
+void readconf(char fileName[]){
+	/*secondo lo std c89 tutte le variabile devono 
+    essere dichiarate prima del primo codice */
+    FILE *file= fopen(fileName, "r");
+    
+    if(!file){
+	      printf("non si trova il config file.\n");
+          exit(EXIT_FAILURE);
+    }else{
+      char line[20];/*str per prendere le righe*/
+    
+    /*Inserisco le variabili riga per riga alla struttura.*/
+    configurazione.SO_USERS_NUM = readAndInt(line,20,file);
+    printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
+    configurazione.SO_NODES_NUM = readAndInt(line,20,file);
+    printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
+    configurazione.SO_BUDGET_INIT = readAndInt(line,20,file);
+    printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
+    configurazione.SO_REWARD = readAndInt(line,20,file);
+    printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
+    configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
+    configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
+    configurazione.SO_RETRY = readAndInt(line,20,file);
+    printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
+    configurazione.SO_TP_SIZE = readAndInt(line,20,file);
+    printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
+    configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
+    configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
+    configurazione.SO_SIM_SEC = readAndInt(line,20,file);
+    printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
+    configurazione.SO_FRIENDS_NUM = readAndInt(line,20,file);
+    printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
+    configurazione.SO_HOPS = readAndInt(line,20,file);
+    printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
+    }
+    fclose(file);/*chiusura del file.*/
+}
+
+```
+
+## 5.3 Scrittura Manuale
+
+Forse per la parte di prove. possiamo cambiare la intro delle variabili.
+probabilmente cancelliamo questo alla fine del progetto.
+l'idea e' poter inserire le variabili a mano
+
+```c main.c
+/*scritura manuale dei valori del sistema.*/
+void writeConf(){
+	printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
+    printf("SO_USERS_NUM: ");
+    scanf("%d",&configurazione.SO_USERS_NUM);
+    printf("SO_NODES_NUM: ");
+    scanf("%d",&configurazione.SO_NODES_NUM);
+    printf("SO_BUDGET_INIT: ");
+    scanf("%d",&configurazione.SO_BUDGET_INIT);
+    printf("SO_REWARD: ");
+    scanf("%d",&configurazione.SO_REWARD);
+    printf("SO_MIN_TRANS_GEN_NSEC: ");
+    scanf("%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
+    printf("SO_MAX_TRANS_GEN_NSEC: ");
+    scanf("%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
+    printf("SO_RETRY: ");
+    scanf("%d",&configurazione.SO_RETRY);
+    printf("SO_TP_SIZE: ");
+    scanf("%d",&configurazione.SO_TP_SIZE);
+    printf("SO_MIN_TRANS_PROC_NSEC: ");
+    scanf("%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
+    printf("SO_MAX_TRANS_PROC_NSEC: ");
+    scanf("%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
+    printf("SO_SIM_SEC: ");
+    scanf("%d",&configurazione.SO_SIM_SEC);
+    printf("SO_FRIENDS_NUM: ");
+    scanf("%d",&configurazione.SO_FRIENDS_NUM);
+    printf("SO_HOPS: ");
+    scanf("%d",&configurazione.SO_HOPS);
+    clear();
+    
+}
+
+```
+
+# 6.0 Main
+
+## 6.1 Show Users
+```c main.c
+void showUsers(){
+	int i;
+    int counterAttivi=0;
+	bool test;
+    printf("Utenti:\n");
+	/*mostra il budget di ogni utente*/
+	for(i=0; i<configurazione.SO_USERS_NUM; i++){
+		test = retrylist[i]<configurazione.SO_RETRY;
+  	    if(test)
+ 	       counterAttivi++;
+   	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
+   	    if(i%9==0)
+   	       printf("\n");
+	}
+   	 printf("\nattivi: %d\n",counterAttivi);
+}
+
+```
+
+## 6.2 Show Nodes
+```c main.c
+void showNodes(){
+	int i;
+ 	int counterAttivi;
+  	printf("\nnodi: \n");
+    for(i=0; i<configurazione.SO_NODES_NUM; i++){
+    	sem_getvalue(&semafori[i],&counterAttivi);
+    	printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
+    }
+}
+
+```
+
+## 6.3 Main Function
+
+```c main.c
+int main(int argc,char *argv[]){
+    int i;
+	float now;
+    bool test;
+    pthread_t *tid;
+    int counterAttivi;
+    if(argc<2){
+	    printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
+        exit(EXIT_FAILURE);
+    }else if(argc>2){
+		printf("troppi argomenti.\n");
+		exit(EXIT_FAILURE);
+    }else{
+		/*in caso di voler inserire i valori a mano*/
+		if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
+			writeConf();
+		}else{
+	    	 readconf(argv[1]);/*lettura del file*/
+        }
+    
+        /*now that we have all the variables we can start the process
+        master*/
+    
+        startSimulation = time(0);/* el tiempo de ahora*/
+        sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
+        uid = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
+        nid = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
+    
+        /*generatore dei nodi*/
+        rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
+        semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
+        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(time_t)));
+        for(i=0;i<configurazione.SO_NODES_NUM;i++){
+			sem_init(&semafori[i],configurazione.SO_USERS_NUM,1);
+			rewardlist[i]=0;
+			pthread_create(&tid[i],NULL,nodo,&i);
+			usleep(200);
+	    	/*pthread_join(tid[i],NULL);*/
+        }
+        /*generatore dei utenti*/
+        retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
+        budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
+        for(i=0;i<configurazione.SO_USERS_NUM;i++){
+			retrylist[i] = 0;
+			budgetlist[i] = configurazione.SO_BUDGET_INIT;
+			pthread_create(&tid[configurazione.SO_NODES_NUM+i],NULL,utente,(void *)&i);
+			usleep(200);
+			/*pthread_join(tid[i],NULL);*/
+        }
+    
+		/*now start the master process*/
+		now = difftime(time(0), startSimulation);
+		while(now < configurazione.SO_SIM_SEC){
+			sleep(1);
+			clear();
+    
+			/*show last update*/
+	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
+
+	    	/*conta la quantita di utenti attivi*/
+	    	showUsers();
+    
+	    	/*mostra i nodi con i suoi semafori */
+	    	showNodes();
+	    	printf("\n\n");
+    
+	    	now = difftime(time(0), startSimulation);
+        }
+    
+        /*kill all the threads*/
+        for(i=0;i<configurazione.SO_NODES_NUM + configurazione.SO_USERS_NUM; i++){
+			pthread_cancel(tid[i]);
+		}
+    
+		printf("numero di blocchi: %d\n\n",libroCounter);
+		/*solo por confirmar al final*/
+		for(i=0;i<libroCounter;i++){
+			prinTrans(libroMastro[i]);
+        }
+    
+	}
+	return 0;
+}
+```
