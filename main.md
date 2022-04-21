@@ -1,38 +1,4 @@
 
-# [Table of Contents](#table-of-contents)
-
-- ### [1.0 Compilazione](#10-compilazione)
-  - #### [1.1 std=c89](#11-stdc89)
-  - #### [1.2 pthread](#12-pthread)
-  - #### [1.3 pedantic](#13-pedantic)
-  - #### [1.4 D_GNU_SOURCE](#14-d_gnu_source)
-  - #### [1.5 SO_BLOCK_SIZE](#15-so_block_size)
-  - #### [1.6 SO_REGISTRY_SIZE](#16-so_registry_size)
-  - #### [1.7 -lm](#17--lm)
-- ### [2.0 Headers](#20-headers)
-  - #### [2.1 Basic libraries](#21-basic-libraries)
-  - #### [2.2 Specific Libraries](#22-specific-libraries)
-  - #### [2.3 Funzioni Utente](#23-funzioni-utente)
-  - #### [2.4 Definizioni Macro](#24-definizioni-macro)
-- ### [3.0 Controllo LIBRO_MASTRO](#30-controllo-libro-mastro)
-  - #### [3.1 Creazione del Libro_Mastro e Variabili](#31-creazione-del-libro_mastro-e-variabili)
-- ### [4.0 Funzioni in parallelo](#40-funzioni-in-parallelo)
-  - #### [4.1 Memoria condivisa](#41-memoria-condivisa-work-in-progress)
-    - ##### [4.1.1 0 avanti](#411-0-avanti)
-    - ##### [4.1.2 <0 aspetta](#412-0-aspetta)
-    - [4.1.3 external resources](#413-external-resources)
-    - ##### [4.1.4 Lista Semafori e altri Dati Condivisi tra i threads:](#414-lista-semafori-e-altri-dati-condivisi-tra-i-threads)
-- ### [5.0 Lettura Configurazione](#50-lettura-configurazione)
-  - #### [5.1 Dichiaro Variabile Configurazione](#51-dichiaro-variabile-configurazione)
-  - #### [5.2 Legge File](#52-legge-file)
-  - #### [5.3 Scrittura Manuale](#5.3-scrittura-manuale)
-- ### [6.0 Main](#60-main)
-  - #### [6.1 Show Users](#61-show-users)
-  - #### [6.2 Show Nodes](#62-show-nodes)
-  - #### [6.3 Main Function](#63-main-function)
-
-
-
 
 # 1.0 Compilazione
 
@@ -147,6 +113,8 @@ int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
+pthread_id *uid;     /*lista id di processi utenti*/
+pthread_id *nid;     /*lista id di processi nodi  */
 ```
 
 # 5.0 Lettura Configurazione

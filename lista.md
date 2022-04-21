@@ -24,7 +24,7 @@
 
 - [x] asignar tid individual para cada hilo. Probablemente es el motivo de que los hilos no vayan bien en la transaccion.
 
-- [ ] separar la lista de threads en 2: utenti e nodi.
+- [x] separar la lista de threads en 2: utenti e nodi.
 
 - [ ] eliminar el puntero del pthread_create.
 
