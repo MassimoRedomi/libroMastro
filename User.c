@@ -29,9 +29,19 @@ int userUpdate(int id, int lastUpdate){
 	budgetlist[id] = budget;
     return lastUpdate;
 }
-Transazione generateTransaction(int id){
-	Transazione transaccion;
+
+/*Trova thread id in uid*/
+int trovaId(){
     int i;
+    for(i=0;i<configurazione.SO_USERS_NUM;i++){
+        if(uid[i] == pthread_self()){
+            return i;
+        }
+    }
+}
+Transazione generateTransaction(int id){
+    int i;
+	Transazione transaccion;
     transaccion.sender = id;
     transaccion.quantita = (rand() % ((budgetlist[id] - 2) + 1)) + 2;/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
@@ -56,58 +66,58 @@ Transazione generateTransaction(int id){
 
 /*PROCESSO UTENTE:*/
 void* utente(void *conf){
-	int *id = (int*)conf;                        /*Id processo utente*/
+	int id = trovaId();                       /*Id processo utente*/
     int i;
     /*Lasso di tempo massimo durata transazione:*/
-    int range = configurazione.SO_MAX_TRANS_GEN_NSEC - configurazione.SO_MIN_TRANS_GEN_NSEC;
     int mythr = pthread_self();                /*Pid thread processo utente*/
-    int tentativi = 0;                         /*tentativi massimo per creazione di una transazione*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
     
-	printf("Utente #%d creato nel thread %d\n",*id,mythr);
+    retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
+	printf("Utente #%d creato nel thread %d\n",id,mythr);
     
-	while(retrylist[*id]<configurazione.SO_RETRY){
-		printf("nueva transaccion de %d\n",*id);
+	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+	while(retrylist[id]<configurazione.SO_RETRY){
+		/*printf("nueva transaccion de %d\n",id);*/
     
-		lastUpdate = userUpdate(*id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
+		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
     
-		if(budgetlist[*id]>=2){                   /*Condizione Budget >= 2*/                                
+		if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/                                
     
 			Transazione transaction;              /*Creiamo una nuova transazione*/
-			transaction = generateTransaction(*id);/*Chiamiamo la func generateTransaction*/
+			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
     
 			/*scelglie un nodo libero a caso*/
 			do{
 	    	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
-	    	    retrylist[*id]++;
-	    	    if(retrylist[*id] >= configurazione.SO_RETRY){
+	    	    retrylist[id]++;
+	    	    if(retrylist[id] >= configurazione.SO_RETRY){
 		    		pthread_exit(NULL);
 		    		break;
 	    	    }
 	    	 }while(sem_trywait(&semafori[i])<=0);
 	    	 /*prueba de transaccion*/
     
-			if(retrylist[*id] < configurazione.SO_RETRY){
+			if(retrylist[id] < configurazione.SO_RETRY){
 	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
 	    	    prinTrans(transaction);
-	    	    budgetlist[*id] -= transaction.quantita;
+	    	    budgetlist[id] -= transaction.quantita;
 	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
-	    	    retrylist[*id] = 0;
+	    	    retrylist[id] = 0;
 	    	}else{
 	    	    pthread_exit(NULL);
-	    	    printf("l'utente %d ha superato la cuantita di tentativi\n",*id);
+	    	    printf("l'utente %d ha superato la cuantita di tentativi\n",id);
 	    	}
     
         }else{
-			retrylist[*id]++;
+			retrylist[id]++;
 		}
     
           /*usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);/*Tempo di Attesa Random della trasazione*/
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
-		if(retrylist[*id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-			printf("utente %d fermato",*id);       /*ferma il procceso*/
+		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
+			printf("utente %d fermato",id);       /*ferma il procceso*/
 		}
     }
 }

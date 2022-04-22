@@ -265,7 +265,6 @@ int main(int argc,char *argv[]){
     int i;
 	float now;
     bool test;
-    pthread_t *tid;
     int counterAttivi;
     if(argc<2){
 	    printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
@@ -294,21 +293,13 @@ int main(int argc,char *argv[]){
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(time_t)));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-			sem_init(&semafori[i],configurazione.SO_USERS_NUM,1);
-			rewardlist[i]=0;
-			pthread_create(&tid[i],NULL,nodo,&i);
-			usleep(200);
-	    	/*pthread_join(tid[i],NULL);*/
+			pthread_create(&nid[i],NULL,nodo,NULL);
         }
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-			retrylist[i] = 0;
-			budgetlist[i] = configurazione.SO_BUDGET_INIT;
-			pthread_create(&tid[configurazione.SO_NODES_NUM+i],NULL,utente,(void *)&i);
-			usleep(200);
-			/*pthread_join(tid[i],NULL);*/
+			pthread_create(&uid[i],NULL,utente,NULL);
         }
     
 		/*now start the master process*/
@@ -331,13 +322,16 @@ int main(int argc,char *argv[]){
         }
     
         /*kill all the threads*/
-        for(i=0;i<configurazione.SO_NODES_NUM + configurazione.SO_USERS_NUM; i++){
-			pthread_cancel(tid[i]);
+        for(i=0; i<configurazione.SO_NODES_NUM ; i++){
+			pthread_cancel(nid[i]);
 		}
+        for(i=0; i<configurazione.SO_USERS_NUM; i++){
+            pthread_cancel(uid[i]);
+        }
     
 		printf("numero di blocchi: %d\n\n",libroCounter);
 		/*solo por confirmar al final*/
-		for(i=0;i<libroCounter;i++){
+		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
 			prinTrans(libroMastro[i]);
         }
     

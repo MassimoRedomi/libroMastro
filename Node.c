@@ -4,7 +4,6 @@ extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
 /*variabili condivise tra diversi thread.*/
-extern int *listUtenti;     /*thread id di ogni utente*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -13,9 +12,18 @@ extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nid;       /*lista dei processi nodi*/
 
+/*Trova thread id in nid*/
+int trovaNid(){
+    int i;
+    for(i=0;i<configurazione.SO_NODES_NUM;i++){
+        if(nid[i] == pthread_self()){
+            return i;
+        }
+    }
+}
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
-    int *id = (int *)conf;
+    int id = trovaNid();
     int i;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
     int counterPool=0;/*contatore della quantita di transazioni nella pool*/
@@ -26,22 +34,24 @@ void* nodo(void *conf){
     Transazione finalReward;
     int mythr; 
     int semvalue;/*valore del semaforo*/
+    sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
+	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     mythr = pthread_self();
-    printf("Nodo #%d creato nel thread %d\n",*id,mythr);
+    printf("Nodo #%d creato nel thread %d\n",id,mythr);
     
     /*inizio del funzionamento*/
     while(counterPool < configurazione.SO_TP_SIZE){
     
 		/*aggiorno il valore del semaforo*/
-        sem_getvalue(&semafori[*id],&semvalue);
+        sem_getvalue(&semafori[id],&semvalue);
         if(semvalue<0){
 			/*scrivo la nuova transazione nel blocco e nella pool*/
-	    	 pool[counterPool]=mailbox[*id];
-	    	 blocco[counterBlock]=mailbox[*id];
+	    	 pool[counterPool]=mailbox[id];
+	    	 blocco[counterBlock]=mailbox[id];
     
 	    	 /*somma il reward*/
 	    	 sommaBlocco = blocco[counterBlock].reward;
-	    	 rewardlist[*id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
+	    	 rewardlist[id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
     
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
@@ -51,7 +61,7 @@ void* nodo(void *conf){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
 	    	    finalReward.timestamp = difftime(time(0),startSimulation);/*momento attuale della simulazione*/
 	    	    finalReward.sender = -1;/*-1*/
-	    	    finalReward.receiver = *id;/*identificatore del nodo*/
+	    	    finalReward.receiver = id;/*identificatore del nodo*/
 	    	    finalReward.quantita = sommaBlocco;/*somma di tutti i reward*/
 	    	    finalReward.reward = 0;
     
@@ -67,10 +77,10 @@ void* nodo(void *conf){
 	    	    counterBlock=0;
 	    	    sommaBlocco=0;
 	    	    usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
-	    	    free(&mailbox[*id]);
+	    	    free(&mailbox[id]);
     
 	    	    if(counterPool < configurazione.SO_TP_SIZE){
-	    	       sem_post(&semafori[*id]);/*stabilisco il semaforo come di nuovo disponibile*/
+	    	       sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
 	    	    }  
 	    	}
     

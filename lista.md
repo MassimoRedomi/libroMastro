@@ -26,7 +26,7 @@
 
 - [x] separar la lista de threads en 2: utenti e nodi.
 
-- [ ] eliminar el puntero del pthread_create.
+- [x] eliminar el puntero del pthread_create.
 
 # [UTENTE](User.md)
 - [x] construir transacción.
@@ -43,7 +43,7 @@
 
 - [x] hacer transaccion en una funcion.
 
-- [ ] sacar el ID en base a una busqueda en la lista de hilos del main.
+- [x] sacar el ID en base a una busqueda en la lista de hilos del main.
 
 
 # [NODO](Node.md)
@@ -54,4 +54,4 @@
 
 - [x] cambiar la suma de rewards a una lista externa para permitir que lo lea el proceso maestro.
 
-- [ ] sacar el ID en base a una busqueda en la lista de hilos del main.
+- [x] sacar el ID en base a una busqueda en la lista de hilos del main.
