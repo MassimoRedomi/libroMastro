@@ -199,7 +199,7 @@ void* nodo(void *conf){
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     mythr = pthread_self();
-    printf("Nodo #%d creato nel thread %d\n",id,mythr);
+    /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
     while(counterPool < configurazione.SO_TP_SIZE){
@@ -378,7 +378,7 @@ void* utente(void *conf){
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
 
-	printf("Utente #%d creato nel thread %d\n",id,mythr);
+	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     
 
 	while(retrylist[id]<configurazione.SO_RETRY){
@@ -747,6 +747,11 @@ int main(int argc,char *argv[]){
 	    	printf("\n\n");
     
 	    	now = difftime(time(0), startSimulation);
+            
+            if(libroCounter > SO_REGISTRY_SIZE){
+                printf("%f: libro mastro pieno\n",now);
+                break;
+            }
 
         }
     
@@ -761,7 +766,7 @@ int main(int argc,char *argv[]){
 		printf("numero di blocchi: %d\n\n",libroCounter);
 		/*solo por confirmar al final*/
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			prinTrans(libroMastro[i]);
+			/*prinTrans(libroMastro[i]); /*per ora non mostro tutte transazioni*/
         }
     
 	}

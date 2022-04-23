@@ -193,6 +193,11 @@ int main(int argc,char *argv[]){
 	    	printf("\n\n");
     
 	    	now = difftime(time(0), startSimulation);
+            
+            if(libroCounter > SO_REGISTRY_SIZE){
+                printf("%f: libro mastro pieno\n",now);
+                break;
+            }
 
         }
     
@@ -207,7 +212,7 @@ int main(int argc,char *argv[]){
 		printf("numero di blocchi: %d\n\n",libroCounter);
 		/*solo por confirmar al final*/
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			prinTrans(libroMastro[i]);
+			/*prinTrans(libroMastro[i]); /*per ora non mostro tutte transazioni*/
         }
     
 	}

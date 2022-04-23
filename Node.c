@@ -36,7 +36,7 @@ void* nodo(void *conf){
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     mythr = pthread_self();
-    printf("Nodo #%d creato nel thread %d\n",id,mythr);
+    /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
     while(counterPool < configurazione.SO_TP_SIZE){

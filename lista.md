@@ -29,8 +29,8 @@
 - [x] eliminar el puntero del pthread_create.
 
 - [ ] condicionar la continuidad de la simulacion
-   - [ ] todos los usuarios estan desactivados
-   - [ ] el libro Mastro llego a su limite de bloques
+   - [ ] Todos los usuarios estan desactivados.
+   - [x] El libro Mastro llego a su limite de bloques.
 
 # [UTENTE](User.md)
 - [x] construir transacción.

@@ -123,7 +123,7 @@ void* utente(void *conf){
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
 
-	printf("Utente #%d creato nel thread %d\n",id,mythr);
+	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     
 
 	while(retrylist[id]<configurazione.SO_RETRY){
