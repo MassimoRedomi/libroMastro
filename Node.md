@@ -75,7 +75,7 @@ void* nodo(void *conf){
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue == 0){
-            printf("hay algo en el mailbox #%d\n",id);
+            /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
 	    	 pool[counterPool]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];

@@ -49,7 +49,7 @@
 
 - [x] sacar el ID en base a una busqueda en la lista de hilos del main.
 
-- [ ] limpiar los outputs
+- [x] limpiar los outputs
 
 
 # [NODO](Node.md)
@@ -64,4 +64,7 @@
 
 - [ ] fragmentar la funcion principal.
 
-- [ ] limpiar los outputs
+- [x] limpiar los outputs
+
+# [STRUCTS](Structs.md)
+- [ ] riparare il warning di randomSleep

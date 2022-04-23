@@ -102,16 +102,16 @@ void* utente(void *conf){
 	    	    }
 	    	 }while(sem_trywait(&semafori[i])<0);
 	    	/*prueba de transaccion*/
-		    printf("nueva transaccion de %d a %d nel nodo %d\n",id,transaction.receiver,i);
+		    /*printf("nueva transaccion de %d a %d nel nodo %d\n",id,transaction.receiver,i);*/
 
 			if(retrylist[id] < configurazione.SO_RETRY){
 	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
-	    	    prinTrans(transaction);
+	    	    /*prinTrans(transaction);*/
 	    	    budgetlist[id] -= transaction.quantita;
 	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
 	    	    retrylist[id] = 0;
 	    	}else{
-	    	    printf("l'utente %d ha superato la cuantita di tentativi\n",id);
+	    	    /*printf("l'utente %d ha superato la cuantita di tentativi\n",id);*/
 	    	    pthread_exit(NULL);
 	    	}
     
@@ -123,7 +123,7 @@ void* utente(void *conf){
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
 		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-			printf("utente %d fermato",id);       /*ferma il procceso*/
+			/*printf("utente %d fermato",id);       /*ferma il procceso*/
 		}
     }
 }
