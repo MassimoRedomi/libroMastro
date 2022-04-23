@@ -320,6 +320,7 @@ int main(int argc,char *argv[]){
 	    	printf("\n\n");
     
 	    	now = difftime(time(0), startSimulation);
+
         }
     
         /*kill all the threads*/

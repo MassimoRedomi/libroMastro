@@ -46,16 +46,14 @@ L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione.
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
 	int i;
-    int budget = budgetlist[id];
     while(lastUpdate != libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id){
-	    	    budget += libroMastro[i].quantita;
+	    	    budgetlist[id] += libroMastro[i].quantita;
 	    	 }
-		}
+        }
         lastUpdate++;
 	}
-	budgetlist[id] = budget;
     return lastUpdate;
 }
 
@@ -83,7 +81,7 @@ Transazione generateTransaction(int id){
     int i;
 	Transazione transaccion;
     transaccion.sender = id;
-    transaccion.quantita = (rand() % ((budgetlist[id] - 2) + 1)) + 2;/*set quantita a caso*/
+    transaccion.quantita = randomInt(2,budgetlist[id]);/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
 	/*se il reward non arriva a 1, allora diventa 1*/
@@ -151,7 +149,7 @@ void* utente(void *conf){
 			if(retrylist[id] < configurazione.SO_RETRY){
 	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
 	    	    /*prinTrans(transaction);*/
-	    	    budgetlist[id] -= transaction.quantita;
+	    	    budgetlist[id] -= transaction.quantita - transaction.reward;
 	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
 	    	    retrylist[id] = 0;
 	    	}else{
