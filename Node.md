@@ -32,6 +32,8 @@ extern time_t startSimulation;
 extern pthread_t *nid;       /*lista dei processi nodi*/
 
 ```
+
+
 ## Trova thread id
 Questo metodo cerca la posizione del nodo in base alla posizione del 
 thread nella lista nid(Node id)
@@ -45,7 +47,9 @@ int trovaNid(){
         }
     }
 }
+
 ```
+
 
 ## Funzione Principale
 ```c Node.c
@@ -56,7 +60,6 @@ void* nodo(void *conf){
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
     int counterPool=0;/*contatore della quantita di transazioni nella pool*/
     int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
-    int range = configurazione.SO_MAX_TRANS_PROC_NSEC - configurazione.SO_MIN_TRANS_PROC_NSEC;
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
     Transazione finalReward;
@@ -104,7 +107,7 @@ void* nodo(void *conf){
 	    	    sem_post(&libroluck);
 	    	    counterBlock=0;
 	    	    sommaBlocco=0;
-	    	    usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_PROC_NSEC);
+				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
 	    	    free(&mailbox[id]);
     
 	    	    if(counterPool < configurazione.SO_TP_SIZE){

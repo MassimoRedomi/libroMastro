@@ -68,14 +68,16 @@ Transazione generateTransaction(int id){
 void* utente(void *conf){
 	int id = trovaId();                       /*Id processo utente*/
     int i;
-    /*Lasso di tempo massimo durata transazione:*/
     int mythr = pthread_self();                /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
-    
+
+	/*setting default values delle variabili condivise*/
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
+	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+
 	printf("Utente #%d creato nel thread %d\n",id,mythr);
     
-	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+
 	while(retrylist[id]<configurazione.SO_RETRY){
 		/*printf("nueva transaccion de %d\n",id);*/
     
@@ -95,7 +97,7 @@ void* utente(void *conf){
 		    		pthread_exit(NULL);
 		    		break;
 	    	    }
-	    	 }while(sem_trywait(&semafori[i])<=0);
+	    	 }while(sem_trywait(&semafori[i])<0);
 	    	 /*prueba de transaccion*/
     
 			if(retrylist[id] < configurazione.SO_RETRY){

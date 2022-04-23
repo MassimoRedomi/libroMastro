@@ -22,7 +22,7 @@
 
 - [x] sync time al publico.
 
-- [x] asignar tid individual para cada hilo. Probablemente es el motivo de que los hilos no vayan bien en la transaccion.
+- [x] asignar tid individual para cada hilo.
 
 - [x] separar la lista de threads en 2: utenti e nodi.
 
@@ -55,3 +55,5 @@
 - [x] cambiar la suma de rewards a una lista externa para permitir que lo lea el proceso maestro.
 
 - [x] sacar el ID en base a una busqueda en la lista de hilos del main.
+
+- [ ] fragmentar la funcion principal.
