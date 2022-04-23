@@ -39,6 +39,7 @@ int trovaId(){
         }
     }
 }
+
 Transazione generateTransaction(int id){
     int i;
 	Transazione transaccion;
@@ -55,9 +56,13 @@ Transazione generateTransaction(int id){
     /*debo reparar lo de los intentos*/
     do{
 		i= rand() % configurazione.SO_USERS_NUM;
-	}while(i==id || retrylist[i]<configurazione.SO_RETRY);
+        retrylist[id]++;
+        if(retrylist[id] > configurazione.SO_RETRY){
+            printf("Utente #%d non ha trovato un altro utente",id);
+            pthread_exit(NULL);
+        }
+	}while(i==id);
 	transaccion.receiver = i;
-    
 	/*calculate tr from simulation*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
     
@@ -79,7 +84,6 @@ void* utente(void *conf){
     
 
 	while(retrylist[id]<configurazione.SO_RETRY){
-		/*printf("nueva transaccion de %d\n",id);*/
     
 		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
     
@@ -87,7 +91,6 @@ void* utente(void *conf){
     
 			Transazione transaction;              /*Creiamo una nuova transazione*/
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
-    
     
 			/*scelglie un nodo libero a caso*/
 			do{
@@ -98,8 +101,9 @@ void* utente(void *conf){
 		    		break;
 	    	    }
 	    	 }while(sem_trywait(&semafori[i])<0);
-	    	 /*prueba de transaccion*/
-    
+	    	/*prueba de transaccion*/
+		    printf("nueva transaccion de %d a %d nel nodo %d\n",id,transaction.receiver,i);
+
 			if(retrylist[id] < configurazione.SO_RETRY){
 	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
 	    	    prinTrans(transaction);
@@ -107,8 +111,8 @@ void* utente(void *conf){
 	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
 	    	    retrylist[id] = 0;
 	    	}else{
-	    	    pthread_exit(NULL);
 	    	    printf("l'utente %d ha superato la cuantita di tentativi\n",id);
+	    	    pthread_exit(NULL);
 	    	}
     
         }else{

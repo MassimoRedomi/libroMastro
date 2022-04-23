@@ -106,7 +106,7 @@ __randomInt__ serve per simplificare ogni volta che si fa una scelta a
 caso dentro di ogni thread.
 __randomlong__ per ora solo serve per il random sleep.
 
-```c Struc.c
+```c Structs.c
 
 int randomInt(int min, int max){
 	return rand() % max +min;
@@ -123,7 +123,7 @@ long randomlong(int min, int max){
 funzione di nanosleep con un rango tra due numeri:
 min
 
-```c Struct.c
+```c Structs.c
     /*si ferma per una quantita random di nano secondi*/
     void randomSleep(int min, int max){
         nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
