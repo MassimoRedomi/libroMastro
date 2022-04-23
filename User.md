@@ -104,6 +104,7 @@ Transazione generateTransaction(int id){
 	transaccion.receiver = i;
 	/*calculate tr from simulation*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
+    retrylist[id] = 0;
     
 	return transaccion;
 }
@@ -141,7 +142,6 @@ void* utente(void *conf){
 	    	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
 	    	    retrylist[id]++;
 	    	    if(retrylist[id] >= configurazione.SO_RETRY){
-		    		pthread_exit(NULL);
 		    		break;
 	    	    }
 	    	 }while(sem_trywait(&semafori[i])<0);

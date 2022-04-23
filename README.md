@@ -155,7 +155,6 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 ### Sincronizzazione tra Processi
 ```c Node.c
 /*variabili condivise tra diversi thread.*/
-extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
@@ -207,7 +206,8 @@ void* nodo(void *conf){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
-        if(semvalue<0){
+        if(semvalue == 0){
+            printf("hay algo en el mailbox #%d\n",id);
 			/*scrivo la nuova transazione nel blocco e nella pool*/
 	    	 pool[counterPool]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
@@ -219,7 +219,8 @@ void* nodo(void *conf){
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
 	    	 counterPool++;
-    
+
+             sem_post(&semafori[id]);
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
 	    	    finalReward.timestamp = difftime(time(0),startSimulation);/*momento attuale della simulazione*/
@@ -240,7 +241,7 @@ void* nodo(void *conf){
 	    	    counterBlock=0;
 	    	    sommaBlocco=0;
 				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
-	    	    free(&mailbox[id]);
+	    	    /*free(&mailbox[id]);*/
     
 	    	    if(counterPool < configurazione.SO_TP_SIZE){
 	    	       sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
@@ -358,6 +359,7 @@ Transazione generateTransaction(int id){
 	transaccion.receiver = i;
 	/*calculate tr from simulation*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
+    retrylist[id] = 0;
     
 	return transaccion;
 }
@@ -395,7 +397,6 @@ void* utente(void *conf){
 	    	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
 	    	    retrylist[id]++;
 	    	    if(retrylist[id] >= configurazione.SO_RETRY){
-		    		pthread_exit(NULL);
 		    		break;
 	    	    }
 	    	 }while(sem_trywait(&semafori[i])<0);
@@ -712,20 +713,21 @@ int main(int argc,char *argv[]){
         master*/
     
         startSimulation = time(0);/* el tiempo de ahora*/
-        sem_init(&libroluck,0,0);/*inizia il semaforo del libromastro*/
-        uid = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
-        nid = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
+        sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(time_t)));
+        nid = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nid[i],NULL,nodo,NULL);
         }
+
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
+        uid = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&uid[i],NULL,utente,NULL);
         }

@@ -4,7 +4,6 @@ extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
 /*variabili condivise tra diversi thread.*/
-extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
@@ -44,7 +43,8 @@ void* nodo(void *conf){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
-        if(semvalue<0){
+        if(semvalue == 0){
+            printf("hay algo en el mailbox #%d\n",id);
 			/*scrivo la nuova transazione nel blocco e nella pool*/
 	    	 pool[counterPool]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
@@ -56,7 +56,8 @@ void* nodo(void *conf){
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
 	    	 counterPool++;
-    
+
+             sem_post(&semafori[id]);
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
 	    	    finalReward.timestamp = difftime(time(0),startSimulation);/*momento attuale della simulazione*/
@@ -77,7 +78,7 @@ void* nodo(void *conf){
 	    	    counterBlock=0;
 	    	    sommaBlocco=0;
 				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
-	    	    free(&mailbox[id]);
+	    	    /*free(&mailbox[id]);*/
     
 	    	    if(counterPool < configurazione.SO_TP_SIZE){
 	    	       sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/

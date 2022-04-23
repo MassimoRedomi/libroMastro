@@ -28,6 +28,10 @@
 
 - [x] eliminar el puntero del pthread_create.
 
+- [ ] condicionar la continuidad de la simulacion
+   - [ ] todos los usuarios estan desactivados
+   - [ ] el libro Mastro llego a su limite de bloques
+
 # [UTENTE](User.md)
 - [x] construir transacción.
 
@@ -35,7 +39,7 @@
 
 - [x] agregar delay nanoseconds aleatorio al final de utente.
 
-- [ ] cambiar el sistema de tentativi, saltar una alerta cuando llega al numero de intentos maximo.
+- [x] cambiar el sistema de tentativi, saltar una alerta cuando llega al numero de intentos maximo.
 
 - [x] hacer transacciones en el mismo loop que se actualiza.
 
@@ -44,6 +48,8 @@
 - [x] hacer transaccion en una funcion.
 
 - [x] sacar el ID en base a una busqueda en la lista de hilos del main.
+
+- [ ] limpiar los outputs
 
 
 # [NODO](Node.md)
@@ -57,3 +63,5 @@
 - [x] sacar el ID en base a una busqueda en la lista de hilos del main.
 
 - [ ] fragmentar la funcion principal.
+
+- [ ] limpiar los outputs
