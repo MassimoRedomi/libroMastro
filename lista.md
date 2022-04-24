@@ -28,8 +28,8 @@
 
 - [x] eliminar el puntero del pthread_create.
 
-- [ ] condicionar la continuidad de la simulacion
-   - [ ] Todos los usuarios estan desactivados.
+- [x] condicionar la continuidad de la simulacion
+   - [x] Todos los usuarios estan desactivados.
    - [x] El libro Mastro llego a su limite de bloques.
 
 # [UTENTE](User.md)
