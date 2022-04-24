@@ -107,7 +107,7 @@ void writeConf(){
     
 }
 
-void showUsers(){
+bool showUsers(){
 	int i;
     int counterAttivi=0;
 	bool test;
@@ -122,6 +122,7 @@ void showUsers(){
    	       printf("\n");
 	}
    	 printf("\nattivi: %d\n",counterAttivi);
+     return counterAttivi!=0;
 }
 
 void showNodes(){
@@ -186,7 +187,7 @@ int main(int argc,char *argv[]){
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
 	    	/*conta la quantita di utenti attivi*/
-	    	showUsers();
+	    	test = showUsers();
     
 	    	/*mostra i nodi con i suoi semafori */
 	    	showNodes();
@@ -196,6 +197,11 @@ int main(int argc,char *argv[]){
             
             if(libroCounter > SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
+                break;
+            }
+
+            if(!test){
+                printf("tutti gli utenti sono disattivati");
                 break;
             }
 

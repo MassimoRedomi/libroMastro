@@ -651,8 +651,11 @@ void writeConf(){
 # 6.0 Main
 
 ## 6.1 Show Users
+Questo metodo non solo mostra lo stato di tutti gli
+utenti, anche ritorna una variabile boolean per identificare
+se ancora ci sono utenti disponibili.
 ```c main.c
-void showUsers(){
+bool showUsers(){
 	int i;
     int counterAttivi=0;
 	bool test;
@@ -667,6 +670,7 @@ void showUsers(){
    	       printf("\n");
 	}
    	 printf("\nattivi: %d\n",counterAttivi);
+     return counterAttivi!=0;
 }
 
 ```
@@ -740,7 +744,7 @@ int main(int argc,char *argv[]){
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
 	    	/*conta la quantita di utenti attivi*/
-	    	showUsers();
+	    	test = showUsers();
     
 	    	/*mostra i nodi con i suoi semafori */
 	    	showNodes();
@@ -750,6 +754,11 @@ int main(int argc,char *argv[]){
             
             if(libroCounter > SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
+                break;
+            }
+
+            if(!test){
+                printf("tutti gli utenti sono disattivati");
                 break;
             }
 
