@@ -89,7 +89,7 @@ typedef struct Transazione{
 
 ```c Structs.c
 void prinTrans(Transazione t){
-	printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+	printf("%f: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
 
 ```
