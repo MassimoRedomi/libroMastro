@@ -51,6 +51,7 @@
 
 - [x] limpiar los outputs
 
+- [ ] revisar porqué los nuemeros se disparan con el tiempo(en alguna parte se esta sumando mas de una vez)
 
 # [NODO](Node.md)
 
