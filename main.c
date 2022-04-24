@@ -128,7 +128,8 @@ bool showUsers(){
 void showNodes(){
 	int i;
  	int counterAttivi;
-  	printf("\nnodi: \n");
+    printf("\nblocchi: %d\n",libroCounter);
+  	printf("nodi: \n");
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
     	sem_getvalue(&semafori[i],&counterAttivi);
     	printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
@@ -215,7 +216,7 @@ int main(int argc,char *argv[]){
             pthread_cancel(uid[i]);
         }
     
-		printf("numero di blocchi: %d\n\n",libroCounter);
+		/*printf("numero di blocchi: %d\n\n",libroCounter);
 		/*solo por confirmar al final*/
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
 			/*prinTrans(libroMastro[i]); /*per ora non mostro tutte transazioni*/

@@ -89,7 +89,7 @@ typedef struct Transazione{
 
 ```c Structs.c
 void prinTrans(Transazione t){
-	printf("%f: %d %d %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+	printf("%f: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
 
 ```
@@ -303,7 +303,7 @@ int userUpdate(int id, int lastUpdate){
 	int i;
     while(lastUpdate != libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
-			if(libroMastro[i].receiver == id){
+			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
 	    	    budgetlist[id] += libroMastro[i].quantita;
 	    	 }
         }
@@ -404,7 +404,9 @@ void* utente(void *conf){
 			if(retrylist[id] < configurazione.SO_RETRY){
 	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
 	    	    /*prinTrans(transaction);*/
-	    	    budgetlist[id] -= transaction.quantita - transaction.reward;
+
+                /*scrive l'uscita di soldi nel budgetlist*/
+	    	    budgetlist[id] -= transaction.quantita + transaction.reward;
 	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
 	    	    retrylist[id] = 0;
 	    	}else{
@@ -420,7 +422,7 @@ void* utente(void *conf){
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
 		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-			/*printf("utente %d fermato",id);       /*ferma il procceso*/
+			printf("utente %d fermato",id);       /*ferma il procceso*/
 		}
     }
 }
@@ -680,7 +682,8 @@ bool showUsers(){
 void showNodes(){
 	int i;
  	int counterAttivi;
-  	printf("\nnodi: \n");
+    printf("\nblocchi: %d\n",libroCounter);
+  	printf("nodi: \n");
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
     	sem_getvalue(&semafori[i],&counterAttivi);
     	printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
@@ -772,7 +775,7 @@ int main(int argc,char *argv[]){
             pthread_cancel(uid[i]);
         }
     
-		printf("numero di blocchi: %d\n\n",libroCounter);
+		/*printf("numero di blocchi: %d\n\n",libroCounter);
 		/*solo por confirmar al final*/
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
 			/*prinTrans(libroMastro[i]); /*per ora non mostro tutte transazioni*/
