@@ -723,7 +723,7 @@ int main(int argc,char *argv[]){
         /*generatore dei nodi*/
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
-        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(time_t)));
+        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
         nid = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nid[i],NULL,nodo,NULL);
