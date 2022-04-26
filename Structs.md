@@ -124,9 +124,9 @@ funzione di nanosleep con un rango tra due numeri:
 min
 
 ```c Structs.c
-    /*si ferma per una quantita random di nano secondi*/
-    void randomSleep(int min, int max){
-        nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
-    }
+/*si ferma per una quantita random di nano secondi*/
+void randomSleep(int min, int max){
+    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+}
 
 ```

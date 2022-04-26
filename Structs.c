@@ -38,8 +38,8 @@ long randomlong(int min, int max){
 	return (long)(rand() % max +min);
 }
 
-    /*si ferma per una quantita random di nano secondi*/
-    void randomSleep(int min, int max){
-        nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
-    }
+/*si ferma per una quantita random di nano secondi*/
+void randomSleep(int min, int max){
+    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+}
 
