@@ -92,10 +92,6 @@ Alle transazioni presenti nel blocco, il nodo aggiunge una transazione
 di reward, con le seguenti caratteristiche:
 
 -   timestamp: il valore attuale di clock~gettime~(...)
-
-```{=html}
-<!-- -->
-```
 -   sender : -1 (definire una MACRO...)
 -   receiver : l'dentificatore del nodo corrente
 -   quantità: la somma di tutti i reward delle transazioni incluse nel
@@ -179,54 +175,53 @@ processo nodo appena creato.
 
 I seguenti parametri sono letti a tempo di esecuzione, da file, da
 variabili di ambiente, o da stdin (a discrezione degli studenti):
-
-  variable                                description
-  --------------------------------------- ------------------------------------------------------------------------------------------------------------------
-  SO~USERSNUM~                            numero di processi utente
-  SO~NODESNUM~                            numero di processi nodo
-  SO~BUDGETINIT~                          budget iniziale di ciascun processo utente
-  SO~REWARD~                              la percentuale di reward pagata da ogni utente per il processamento di una transazione
-  SO~MINTRANSGENNSEC~                     minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente
-  SO~MAXTRANSGENNSEC~                     massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente
-  SO~RETRY~                               numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina
-  SO~TPSIZE~                              numero massimo di transazioni nella transaction pool dei processi nodo
-  SO~MINTRANSPROCNSEC~,                   minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo
-  SO~MAXTRANSPROCNSEC~                    massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo
-  SO~REGISTRYSIZE~                        numero massimo di blocchi nel libro mastro.
-  SO~SIMSESC~                             durata della simulazione
-  SO~NUMFRIENDS~ (solo versione max 30)   numero di nodi amici dei processi nodo (solo per la versione full)
-  SO~HOPS~ (solo versione max 30)         numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo
+| variables                            | descripcion                                                                                                      |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| SO_USERS_NUM                         | numero di processi untente                                                                                       |
+| SO_NODES_NUM                         | numero di processi nodo                                                                                          |
+| SO_BUDGETNUM                         | budget iniziale di ciascun processo utente                                                                       |
+| SO_REWARD                            | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
+| SO_MIN_TRANS_GEN_NSEC                | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
+| SO_MAX_TRANS_GEN_NSEC                | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| SO_RETRY                             | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
+| SO_TPSIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
+| SO_BLOCKSIZE                         | numero di transazioni contenute in un blocco                                                                     |
+| SO_MIN_TRANS_PROC                    | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
+| SO_MAX_TRANS_PROC                    | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
+| SO_REGISTRY_SIZE                     | numero massimo di blocchi nel libro mastro.                                                                      |
+| SO_SIM_SEC                           | durata della simulazione.                                                                                        |
+| SO_NUM_FRIENDS(solo versione max 30) | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
+| SO_HOPS                              | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 
 Un cambiamento dei precedenti parametri non deve determinare una nuova
 compilazione dei sorgenti. Invece, i seguenti parametri sono letti a
 tempo di compilazione:
 
-  variable           description
-  ------------------ ----------------------------------------------
-  SO~REGISTRYSIZE~   numero massimo di blocchi nel libro mastro
-  SO~BLOCKSIZE~      numero di transazioni contenute in un blocco
+| variabile        | descrizione                                  |
+| ---------------- | -------------------------------------------- |
+| SO_REGISTRY_SIZE | numero massimo di blocchi nel libro mastro   |
+| SO_BLOCK_SIZE    | numero di transazioni contenute in un blocco |
 
 La seguente tabella elenca valori per alcune configurazioni di esempio
 da testare. Si tenga presente che il progetto deve poter funzionare
 anche con altri parametri.
 
-  parametro                      letto a...     conf #1     conf #2     conf #3
-  ------------------------------ -------------- ----------- ----------- -----------
-  SO~USERSNUM~                   run time       100         1000        20
-  SO~NODESNUM~                   run time       10          10          10
-  SO~BUDGETINIT~                 run time       1000        1000        10000
-  SO~REWARD~ \[0-100\]           run time       1           20          1
-  SO~MINTRANSGENNSEC~\[nsec\]    run time       100000000   100000000   100000000
-  SO~MAXTRANSGENNSEC~\[nsec\]    run time       200000000   100000000   200000000
-  SO~RETRY~                      run time       20          2           10
-  SO~TPSIZE~                     run time       1000        20          100
-  SO~BLOCKSIZE~                  compile time   100         10          10
-  SO~MINTRANSPROCNSEC~\[nsec\]   run time       10000000    10000000    
-  SO~MAXTRANSPROCNSEC~{nsec\]    run time       20000000    10000000    
-  SO~REGISTRYSIZE~               compile time   1000        10000       1000
-  SO~SIMSEC~\[sec\]              run time       10          20          20
-  SO~FRIENDSNUM~                 run time       3           5           3
-  SO~HOPS~                       run time       10          2           10
+| parametro                     | letto a...   | conf #1   | conf #2   | conf #3   |
+| ----------------------------- | ------------ | --------- | --------- | --------- |
+| SO_USER_NUM                   | run time     | 100       | 1000      | 20        |
+| SO_NODES_NUM                  | run time     | 10        | 10        | 10        |
+| SO_BUDGET_INIT                | run time     | 1000      | 1000      | 1000      |
+| SO_MIN_TRANS_GEN_NSEC [nsec]  | run time     | 100000000 | 100000000 | 100000000 |
+| SO_MAX_TRANS_GEN_NSEC [nsec]  | run time     | 200000000 | 100000000 | 200000000 |
+| SO_RETRY                      | run time     | 20        | 2         | 10        |
+| SO_TP_SIZE                    | run time     | 1000      | 20        | 100       |
+| SO_BLOCK_SIZE                 | compile time | 100       | 10        | 10        |
+| SO_MIN_TRANS_PROC_NSEC [nsec] | run time     | 10000000  | 10000000  |           |
+| SO_MAX_TRANS_PROC_NSEC [nsec] | run time     | 20000000  | 10000000  |           |
+| SO_REGISTRY_SIZE              | compile time | 1000      | 10000     | 1000      |
+| SO_SIM_SEC [sec]              | run time     | 10        | 20        | 20        |
+| SO_FRINDS_NUM [progetto 30]   | run time     | 3         | 5         | 3         |
+| SO_HOPS                       | run time     | 10        | 2         | 10        |
 
 # 8 Requisiti implementativi
 
