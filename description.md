@@ -221,7 +221,7 @@ anche con altri parametri.
 | SO_REGISTRY_SIZE              | compile time | 1000      | 10000     | 1000      |
 | SO_SIM_SEC [sec]              | run time     | 10        | 20        | 20        |
 | SO_FRINDS_NUM [progetto 30]   | run time     | 3         | 5         | 3         |
-| SO_HOPS                       | run time     | 10        | 2         | 10        |
+| SO_HOPS [progetto 30]         | run time     | 10        | 2         | 10        |
 
 # 8 Requisiti implementativi
 
