@@ -353,11 +353,11 @@ Transazione generateTransaction(int id){
             printf("Utente #%d non ha trovato un altro utente",id);
             pthread_exit(NULL);
         }
-	}while(i==id);
-	transaccion.receiver = i;
-	/*calculate tr from simulation*/
-	transaccion.timestamp = difftime(time(0),startSimulation);
+	}while(i==id || retrylist[i] > configurazione.SO_RETRY);
     retrylist[id] = 0;
+	transaccion.receiver = i;
+	/*calcola il timestamp in base al tempo di simulazione.*/
+	transaccion.timestamp = difftime(time(0),startSimulation);
     
 	return transaccion;
 }
