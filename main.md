@@ -1,39 +1,6 @@
 
-
-# 1.0 Compilazione
-
-La compilazione avviene tramite MAKEFILE:
-```makefile Makefile
-all:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
-```
-
-
-### 1.1 std=c89
-set the language standard C89.
-
-### 1.2 pthread
-Setting the binary for thread processing.
-
-### 1.3 pedantic
-
-### 1.4 D_GNU_SOURCE
-enables GNU extensions to the C and OS standards supported by the 
-GNU C library.
-
-### 1.5 SO_BLOCK_SIZE
-The size of the block in the simulation.
-
-
-### 1.6 SO_REGISTRY_SIZE
-The max size of the libro mastro.
-
-### 1.7 -lm
-Compiles against the shared library.
-
-
-# 2.0 Headers
-## 2.1 Basic libraries
+# Headers
+## Basic libraries
 ```c main.c
 #include <stdio.h>  /*Standard input-output header*/
 #include <stdlib.h> /*Libreria Standard*/  
@@ -42,7 +9,7 @@ Compiles against the shared library.
 
 ```
 
-## 2.2 Specific Libraries
+## Specific Libraries
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
@@ -50,13 +17,13 @@ Compiles against the shared library.
 
 ```
 
-## 2.3 Funzioni Utente
+## Funzioni Utente
 importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
 ```c main.c
 #include "User.c"
 ```
 
-## 2.4 Definizioni Macro
+## Definizioni Macro
 
 Una macro è un frammento di codice a cui viene assegnato un nome.
 
@@ -64,9 +31,9 @@ Una macro è un frammento di codice a cui viene assegnato un nome.
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 ```
 
-# 3.0 Controllo LIBRO MASTRO
+# Controllo LIBRO MASTRO
 
-## 3.1 Creazione del Libro_Mastro e Variabili:
+## Creazione del Libro_Mastro e Variabili:
 - __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
 - __libroCounter__: Contatore della quantità di blocchi scritti nel libroMastro.
 
@@ -78,24 +45,24 @@ sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
 ```
 
 
-# 4.0 Funzioni in parallelo
+# Funzioni in parallelo
 questo spazio è riservato alle funzioni del multithread
 
-## 4.1 Memoria condivisa (work in progress)
+## Memoria condivisa (work in progress)
 
 i semafori vengono usati per gestire il flusso del programma
 e ad evitare che i processi accedano contemporaneamente ai dati. 
 Un Semaforo ha 3 stati:
 
-### 4.1.1 0 avanti
+###  0 avanti
 Il processo puo accedere direttamente al dato.
 
 
-### 4.1.2 <0 aspetta
+### <0 aspetta
 Il processo aspetta per accedere al dato
 o in alternativa sceglie unn'altra via per l'accesso.
 
-### 4.1.3 external resources
+### external resources
 
 1.  General Semaphore Example:
     <https://www.delftstack.com/howto/c/semaphore-example-in-c/>
@@ -103,7 +70,7 @@ o in alternativa sceglie unn'altra via per l'accesso.
     <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
 
 
-### 4.1.4 Lista Semafori e altri Dati Condivisi tra i threads:
+### Lista Semafori e altri Dati Condivisi tra i threads:
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
@@ -117,14 +84,14 @@ pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 ```
 
-# 5.0 Lettura Configurazione
-## 5.1 Dichiaro Variabile Configurazione
+#  Lettura Configurazione
+## Dichiaro Variabile Configurazione
 
 ```c main.c
 Configurazione configurazione;
 ```
 
-## 5.2 Legge File
+## Legge File
 ```c main.c
 /*Un metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero)*/
@@ -179,7 +146,7 @@ void readconf(char fileName[]){
 
 ```
 
-## 5.3 Scrittura Manuale
+## Scrittura Manuale
 
 Forse per la parte di prove. possiamo cambiare la intro delle variabili.
 probabilmente cancelliamo questo alla fine del progetto.
@@ -221,9 +188,9 @@ void writeConf(){
 
 ```
 
-# 6.0 Main
+# Main
 
-## 6.1 Show Users
+## Show Users
 Questo metodo non solo mostra lo stato di tutti gli
 utenti, anche ritorna una variabile boolean per identificare
 se ancora ci sono utenti disponibili.
@@ -248,7 +215,7 @@ bool showUsers(){
 
 ```
 
-## 6.2 Show Nodes
+## Show Nodes
 ```c main.c
 void showNodes(){
 	int i;
@@ -263,7 +230,7 @@ void showNodes(){
 
 ```
 
-## 6.3 Main Function
+## Main Function
 
 ```c main.c
 int main(int argc,char *argv[]){
