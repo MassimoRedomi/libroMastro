@@ -347,7 +347,7 @@ Transazione generateTransaction(int id){
     /*ricerca del riceiver*/
     /*debo reparar lo de los intentos*/
     do{
-		i= rand() % configurazione.SO_USERS_NUM;
+		i= randomInt(0,configurazione.SO_USERS_NUM);
         retrylist[id]++;
         if(retrylist[id] > configurazione.SO_RETRY){
             printf("Utente #%d non ha trovato un altro utente",id);
@@ -392,7 +392,7 @@ void* utente(void *conf){
     
 			/*scelglie un nodo libero a caso*/
 			do{
-	    	    i = rand() % configurazione.SO_NODES_NUM;/*Assegnamo ad i, id random nodo*/
+	    	    i = randomInt(0,configurazione.SO_NODES_NUM);/*Assegnamo ad i, id random nodo*/
 	    	    retrylist[id]++;
 	    	    if(retrylist[id] >= configurazione.SO_RETRY){
 		    		break;
@@ -667,6 +667,9 @@ int main(int argc,char *argv[]){
 	float now;
     bool test;
     int counterAttivi;
+
+    srand((unsigned) time(0)); /*aleatorio*/
+
     if(argc<2){
 	    printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
         exit(EXIT_FAILURE);
@@ -706,6 +709,7 @@ int main(int argc,char *argv[]){
     
 		/*now start the master process*/
 		now = difftime(time(0), startSimulation);
+
 		while(now < configurazione.SO_SIM_SEC){
 			sleep(1);
 			clear();

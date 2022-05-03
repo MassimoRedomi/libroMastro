@@ -141,6 +141,9 @@ int main(int argc,char *argv[]){
 	float now;
     bool test;
     int counterAttivi;
+
+    srand((unsigned) time(0)); /*aleatorio*/
+
     if(argc<2){
 	    printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
         exit(EXIT_FAILURE);
@@ -180,6 +183,7 @@ int main(int argc,char *argv[]){
     
 		/*now start the master process*/
 		now = difftime(time(0), startSimulation);
+
 		while(now < configurazione.SO_SIM_SEC){
 			sleep(1);
 			clear();
