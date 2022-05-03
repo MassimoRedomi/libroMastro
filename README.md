@@ -289,7 +289,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *uid;      /*lista id dei processi utenti*/
+extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
 
 ```
 
@@ -315,13 +315,13 @@ int userUpdate(int id, int lastUpdate){
 ```
 ## Trova thread id
 Questo metodo cerca la posizione dell'utente in base alla posizione del 
-thread nella lista uid(User id)
+thread nella lista utenti_id(User id)
 ```c User.c
-/*Trova thread id in uid*/
+/*Trova thread id in utenti_id*/
 int trovaId(){
     int i;
     for(i=0;i<configurazione.SO_USERS_NUM;i++){
-        if(uid[i] == pthread_self()){
+        if(utenti_id[i] == pthread_self()){
             return i;
         }
     }
@@ -542,7 +542,7 @@ int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
-pthread_t *uid;     /*lista id di processi utenti*/
+pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nid;     /*lista id di processi nodi  */
 ```
 
@@ -732,9 +732,9 @@ int main(int argc,char *argv[]){
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
-        uid = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
+        utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-			pthread_create(&uid[i],NULL,utente,NULL);
+			pthread_create(&utenti_id[i],NULL,utente,NULL);
         }
     
 		/*now start the master process*/
@@ -772,7 +772,7 @@ int main(int argc,char *argv[]){
 			pthread_cancel(nid[i]);
 		}
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(uid[i]);
+            pthread_cancel(utenti_id[i]);
         }
     
 		/*printf("numero di blocchi: %d\n\n",libroCounter);

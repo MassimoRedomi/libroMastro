@@ -34,7 +34,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *uid;      /*lista id dei processi utenti*/
+extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
 
 ```
 
@@ -60,13 +60,13 @@ int userUpdate(int id, int lastUpdate){
 ```
 ## Trova thread id
 Questo metodo cerca la posizione dell'utente in base alla posizione del 
-thread nella lista uid(User id)
+thread nella lista utenti_id(User id)
 ```c User.c
-/*Trova thread id in uid*/
+/*Trova thread id in utenti_id*/
 int trovaId(){
     int i;
     for(i=0;i<configurazione.SO_USERS_NUM;i++){
-        if(uid[i] == pthread_self()){
+        if(utenti_id[i] == pthread_self()){
             return i;
         }
     }
