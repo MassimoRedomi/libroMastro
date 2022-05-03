@@ -9,13 +9,13 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *nid;       /*lista dei processi nodi*/
+extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 
-/*Trova thread id in nid*/
+/*Trova thread id in nodi_id*/
 int trovaNid(){
     int i;
     for(i=0;i<configurazione.SO_NODES_NUM;i++){
-        if(nid[i] == pthread_self()){
+        if(nodi_id[i] == pthread_self()){
             return i;
         }
     }

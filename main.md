@@ -114,7 +114,7 @@ sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
-pthread_t *nid;     /*lista id di processi nodi  */
+pthread_t *nodi_id;     /*lista id di processi nodi  */
 ```
 
 # 5.0 Lettura Configurazione
@@ -295,9 +295,9 @@ int main(int argc,char *argv[]){
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
-        nid = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
+        nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-			pthread_create(&nid[i],NULL,nodo,NULL);
+			pthread_create(&nodi_id[i],NULL,nodo,NULL);
         }
 
         /*generatore dei utenti*/
@@ -340,7 +340,7 @@ int main(int argc,char *argv[]){
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-			pthread_cancel(nid[i]);
+			pthread_cancel(nodi_id[i]);
 		}
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
