@@ -20,6 +20,8 @@
 
 - [ ] comunicar el main con hilos(30 pts).
 
+- [ ] revivir procesos zombies que vienen llamados por otros nodos(30 pts).
+
 - [x] sync time al publico.
 
 - [x] asignar tid individual para cada hilo.
@@ -31,6 +33,11 @@
 - [x] condicionar la continuidad de la simulacion
    - [x] Todos los usuarios estan desactivados.
    - [x] El libro Mastro llego a su limite de bloques.
+
+- [ ] limpiar la cantidad de usuarios en pantalla
+    idea:(espero opiniones)
+    se sono meno di 300 utenti: mostra tutto.
+    Altrimenti: mostra solo gli utenti che hanno meno di di SO_RETRY tentativi.
 
 # [UTENTE](User.md)
 - [x] construir transacción.
@@ -66,6 +73,10 @@
 - [ ] fragmentar la funcion principal.
 
 - [x] limpiar los outputs
+
+- [ ] crear lista de nodos amigos a los que se les puede  enviar una transaccion cuando la pool de nuestra transaccion este ocupada(30 pts).
+
+- [ ] enviar transaccion al nodo amigo(30 pts).
 
 # [STRUCTS](Structs.md)
 - [ ] riparare il warning di randomSleep
