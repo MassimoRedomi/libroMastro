@@ -110,11 +110,13 @@ void writeConf(){
 bool showUsers(){
 	int i;
     int counterAttivi=0;
+    int sommaDebug = 0; /*somma debug*/
 	bool test;
     printf("Utenti:\n");
 	/*mostra il budget di ogni utente*/
 	for(i=0; i<configurazione.SO_USERS_NUM; i++){
 		test = retrylist[i]<configurazione.SO_RETRY;
+        sommaDebug+=budgetlist[i];
   	    if(test)
  	       counterAttivi++;
    	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
@@ -122,6 +124,7 @@ bool showUsers(){
    	       printf("\n");
 	}
    	 printf("\nattivi: %d\n",counterAttivi);
+     printf("somma debug: %d\n",sommaDebug); /*stampa la somma di tutti gli account*/
      return counterAttivi!=0;
 }
 

@@ -301,7 +301,8 @@ L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione.
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
 	int i;
-    while(lastUpdate != libroCounter){
+    sem_wait(&libroluck);
+    while(lastUpdate < libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
 	    	    budgetlist[id] += libroMastro[i].quantita;
@@ -309,6 +310,7 @@ int userUpdate(int id, int lastUpdate){
         }
         lastUpdate++;
 	}
+    sem_post(&libroluck);
     return lastUpdate;
 }
 
@@ -335,7 +337,7 @@ int trovaId(){
 Transazione generateTransaction(int id){
     int i;
 	Transazione transaccion;
-    transaccion.sender = id;
+    transaccion.sender   = id;
     transaccion.quantita = randomInt(2,budgetlist[id]);/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
@@ -344,6 +346,8 @@ Transazione generateTransaction(int id){
 		transaccion.reward = 1;
     }
     
+    transaccion.quantita = transaccion.quantita - transaccion.reward;
+
     /*ricerca del riceiver*/
     /*debo reparar lo de los intentos*/
     do{
@@ -627,11 +631,13 @@ se ancora ci sono utenti disponibili.
 bool showUsers(){
 	int i;
     int counterAttivi=0;
+    int sommaDebug = 0; /*somma debug*/
 	bool test;
     printf("Utenti:\n");
 	/*mostra il budget di ogni utente*/
 	for(i=0; i<configurazione.SO_USERS_NUM; i++){
 		test = retrylist[i]<configurazione.SO_RETRY;
+        sommaDebug+=budgetlist[i];
   	    if(test)
  	       counterAttivi++;
    	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
@@ -639,6 +645,7 @@ bool showUsers(){
    	       printf("\n");
 	}
    	 printf("\nattivi: %d\n",counterAttivi);
+     printf("somma debug: %d\n",sommaDebug); /*stampa la somma di tutti gli account*/
      return counterAttivi!=0;
 }
 

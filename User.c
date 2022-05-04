@@ -17,7 +17,8 @@ extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
 	int i;
-    while(lastUpdate != libroCounter){
+    sem_wait(&libroluck);
+    while(lastUpdate < libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
 	    	    budgetlist[id] += libroMastro[i].quantita;
@@ -25,6 +26,7 @@ int userUpdate(int id, int lastUpdate){
         }
         lastUpdate++;
 	}
+    sem_post(&libroluck);
     return lastUpdate;
 }
 
@@ -41,7 +43,7 @@ int trovaId(){
 Transazione generateTransaction(int id){
     int i;
 	Transazione transaccion;
-    transaccion.sender = id;
+    transaccion.sender   = id;
     transaccion.quantita = randomInt(2,budgetlist[id]);/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
@@ -50,6 +52,8 @@ Transazione generateTransaction(int id){
 		transaccion.reward = 1;
     }
     
+    transaccion.quantita = transaccion.quantita - transaccion.reward;
+
     /*ricerca del riceiver*/
     /*debo reparar lo de los intentos*/
     do{
