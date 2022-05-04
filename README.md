@@ -774,6 +774,13 @@ SO_REGISTRY_SIZE = 1000
 	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
 	
 ```
+con debug
+```makefile Makefile
+g1:
+	gcc -std=c89 -g -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
+	
+```
+
 
 ### configurazione 2:
 SO_BLOCK_SIZE = 10
