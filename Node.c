@@ -22,7 +22,7 @@ int trovaNid(){
 }
 
 /*funzione dell'ultima transazione del blocco.*/
-Transazione ripilogo(int id, int somma){
+Transazione riasunto(int id, int somma){
     Transazione transaction;
     transaction.sender    = -1;
     transaction.receiver  = id; /*id del nodo*/
@@ -69,7 +69,7 @@ void* nodo(void *conf){
              sem_post(&semafori[id]);
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
-	    	    blocco[counterBlock]=ripilogo(id, sommaBlocco);/*aggiunge la transazione al blocco.*/
+	    	    blocco[counterBlock]=riasunto(id, sommaBlocco);/*aggiunge la transazione al blocco.*/
     
 	    	    sem_wait(&libroluck);
 	    	    for(i=0;i< SO_BLOCK_SIZE;i++){
