@@ -50,10 +50,112 @@ typedef struct Configurazione{
     int SO_FRIENDS_NUM;        /*solo per la versione full. numero di nodi amici dei processi nodo (solo per la versione full)*/
     int SO_HOPS;               /*solo per la versione full. numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo*/ 
 }Configurazione;
+
+extern Configurazione configurazione;
+#define clear() printf("\033[H\033[J") /*clear the screen*/
+
 ```
 
 Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> 
 perche solo c'è una lettura delle variabili di configurazione.
+#  Lettura Configurazione
+
+## Legge File
+```c Structs.c
+/*Un metodo che fa un fgets(con gli stessi parametri e lo 
+ritorna come un valore intero)*/
+int readAndInt(char *str, int n, FILE *stream){
+	fgets(str,n,stream);
+    return atoi(str);
+}
+/*Funzione che cerca la maniera di leggere il config file.
+metodo basato in codice di stackoverflow per leggere file come
+una unica struttura.*/
+void readconf(char fileName[]){
+	/*secondo lo std c89 tutte le variabile devono 
+    essere dichiarate prima del primo codice */
+    FILE *file= fopen(fileName, "r");
+    
+    if(!file){
+	      printf("non si trova il config file.\n");
+          exit(EXIT_FAILURE);
+    }else{
+      char line[20];/*str per prendere le righe*/
+    
+    /*Inserisco le variabili riga per riga alla struttura.*/
+    configurazione.SO_USERS_NUM = readAndInt(line,20,file);
+    printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
+    configurazione.SO_NODES_NUM = readAndInt(line,20,file);
+    printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
+    configurazione.SO_BUDGET_INIT = readAndInt(line,20,file);
+    printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
+    configurazione.SO_REWARD = readAndInt(line,20,file);
+    printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
+    configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
+    configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
+    configurazione.SO_RETRY = readAndInt(line,20,file);
+    printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
+    configurazione.SO_TP_SIZE = readAndInt(line,20,file);
+    printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
+    configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
+    configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
+    configurazione.SO_SIM_SEC = readAndInt(line,20,file);
+    printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
+    configurazione.SO_FRIENDS_NUM = readAndInt(line,20,file);
+    printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
+    configurazione.SO_HOPS = readAndInt(line,20,file);
+    printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
+    }
+    fclose(file);/*chiusura del file.*/
+}
+
+```
+
+## Scrittura Manuale
+
+Forse per la parte di prove. possiamo cambiare la intro delle variabili.
+probabilmente cancelliamo questo alla fine del progetto.
+l'idea e' poter inserire le variabili a mano
+
+```c Structs.c
+/*scritura manuale dei valori del sistema.*/
+void writeConf(){
+	printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
+    printf("SO_USERS_NUM: ");
+    scanf("%d",&configurazione.SO_USERS_NUM);
+    printf("SO_NODES_NUM: ");
+    scanf("%d",&configurazione.SO_NODES_NUM);
+    printf("SO_BUDGET_INIT: ");
+    scanf("%d",&configurazione.SO_BUDGET_INIT);
+    printf("SO_REWARD: ");
+    scanf("%d",&configurazione.SO_REWARD);
+    printf("SO_MIN_TRANS_GEN_NSEC: ");
+    scanf("%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
+    printf("SO_MAX_TRANS_GEN_NSEC: ");
+    scanf("%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
+    printf("SO_RETRY: ");
+    scanf("%d",&configurazione.SO_RETRY);
+    printf("SO_TP_SIZE: ");
+    scanf("%d",&configurazione.SO_TP_SIZE);
+    printf("SO_MIN_TRANS_PROC_NSEC: ");
+    scanf("%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
+    printf("SO_MAX_TRANS_PROC_NSEC: ");
+    scanf("%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
+    printf("SO_SIM_SEC: ");
+    scanf("%d",&configurazione.SO_SIM_SEC);
+    printf("SO_FRIENDS_NUM: ");
+    scanf("%d",&configurazione.SO_FRIENDS_NUM);
+    printf("SO_HOPS: ");
+    scanf("%d",&configurazione.SO_HOPS);
+    clear();
+    
+}
+
+```
 
 
 ## Transazione
@@ -321,12 +423,37 @@ thread nella lista utenti_id(User id)
 ```c User.c
 /*Trova thread id in utenti_id*/
 int trovaId(){
-    int i;
-    for(i=0;i<configurazione.SO_USERS_NUM;i++){
-        if(utenti_id[i] == pthread_self()){
-            return i;
+    int id;
+    for(id=0;id<configurazione.SO_USERS_NUM;id++){
+        if(utenti_id[id] == pthread_self()){
+            return id;
         }
     }
+}
+
+```
+
+## trova nodo
+serve per trovare un nodo libero per fare la transazione.
+```c User.c
+/*cerca un nodo libero per fare la trasazione.*/
+int nodoLibero(id){
+    int nodo;
+    do{
+        nodo = randomInt(0,configurazione.SO_NODES_NUM);
+        if( retrylist[id] > configurazione.SO_RETRY){
+            printf("L'utenete %d non ha trovato nessun nodo libero",id);
+            pthread_exit(NULL);
+        }else{
+            retrylist++;
+        }
+    }while(sem_trywait(&semafori[nodo])<0);
+    
+    if( retrylist[id] <= configurazione.SO_RETRY ){
+        retrylist[id] = 0;
+    }
+
+    return nodo;
 }
 
 ```
@@ -395,29 +522,8 @@ void* utente(void *conf){
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
-			do{
-	    	    i = randomInt(0,configurazione.SO_NODES_NUM);/*Assegnamo ad i, id random nodo*/
-	    	    retrylist[id]++;
-	    	    if(retrylist[id] >= configurazione.SO_RETRY){
-		    		break;
-	    	    }
-	    	 }while(sem_trywait(&semafori[i])<0);
-	    	/*prueba de transaccion*/
-		    /*printf("nueva transaccion de %d a %d nel nodo %d\n",id,transaction.receiver,i);*/
-
-			if(retrylist[id] < configurazione.SO_RETRY){
-	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
-	    	    /*prinTrans(transaction);*/
-
-                /*scrive l'uscita di soldi nel budgetlist*/
-	    	    budgetlist[id] -= transaction.quantita + transaction.reward;
-	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
-	    	    retrylist[id] = 0;
-	    	}else{
-	    	    /*printf("l'utente %d ha superato la cuantita di tentativi\n",id);*/
-	    	    pthread_exit(NULL);
-	    	}
-    
+            mailbox[nodoLibero(id)] = transaction;
+            budgetlist[id] = budgetlist[id] - transaction.quantita - transaction.reward;
         }else{
 			retrylist[id]++;
 		}
@@ -454,14 +560,6 @@ void* utente(void *conf){
 importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
 ```c main.c
 #include "User.c"
-```
-
-## Definizioni Macro
-
-Una macro è un frammento di codice a cui viene assegnato un nome.
-
-```c main.c
-#define clear() printf("\033[H\033[J") /*clear the screen*/
 ```
 
 # Controllo LIBRO MASTRO
@@ -515,111 +613,9 @@ Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
-```
-
-#  Lettura Configurazione
-## Dichiaro Variabile Configurazione
-
-```c main.c
 Configurazione configurazione;
 ```
 
-## Legge File
-```c main.c
-/*Un metodo che fa un fgets(con gli stessi parametri e lo 
-ritorna come un valore intero)*/
-int readAndInt(char *str, int n, FILE *stream){
-	fgets(str,n,stream);
-    return atoi(str);
-}
-/*Funzione che cerca la maniera di leggere il config file.
-/*metodo basato in codice di stackoverflow per leggere file come
-una unica struttura.*/
-void readconf(char fileName[]){
-	/*secondo lo std c89 tutte le variabile devono 
-    essere dichiarate prima del primo codice */
-    FILE *file= fopen(fileName, "r");
-    
-    if(!file){
-	      printf("non si trova il config file.\n");
-          exit(EXIT_FAILURE);
-    }else{
-      char line[20];/*str per prendere le righe*/
-    
-    /*Inserisco le variabili riga per riga alla struttura.*/
-    configurazione.SO_USERS_NUM = readAndInt(line,20,file);
-    printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
-    configurazione.SO_NODES_NUM = readAndInt(line,20,file);
-    printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
-    configurazione.SO_BUDGET_INIT = readAndInt(line,20,file);
-    printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
-    configurazione.SO_REWARD = readAndInt(line,20,file);
-    printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
-    configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,20,file);
-    printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
-    configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,20,file);
-    printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
-    configurazione.SO_RETRY = readAndInt(line,20,file);
-    printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
-    configurazione.SO_TP_SIZE = readAndInt(line,20,file);
-    printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
-    configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,20,file);
-    printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
-    configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,20,file);
-    printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
-    configurazione.SO_SIM_SEC = readAndInt(line,20,file);
-    printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
-    configurazione.SO_FRIENDS_NUM = readAndInt(line,20,file);
-    printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
-    configurazione.SO_HOPS = readAndInt(line,20,file);
-    printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
-    }
-    fclose(file);/*chiusura del file.*/
-}
-
-```
-
-## Scrittura Manuale
-
-Forse per la parte di prove. possiamo cambiare la intro delle variabili.
-probabilmente cancelliamo questo alla fine del progetto.
-l'idea e' poter inserire le variabili a mano
-
-```c main.c
-/*scritura manuale dei valori del sistema.*/
-void writeConf(){
-	printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
-    printf("SO_USERS_NUM: ");
-    scanf("%d",&configurazione.SO_USERS_NUM);
-    printf("SO_NODES_NUM: ");
-    scanf("%d",&configurazione.SO_NODES_NUM);
-    printf("SO_BUDGET_INIT: ");
-    scanf("%d",&configurazione.SO_BUDGET_INIT);
-    printf("SO_REWARD: ");
-    scanf("%d",&configurazione.SO_REWARD);
-    printf("SO_MIN_TRANS_GEN_NSEC: ");
-    scanf("%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
-    printf("SO_MAX_TRANS_GEN_NSEC: ");
-    scanf("%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
-    printf("SO_RETRY: ");
-    scanf("%d",&configurazione.SO_RETRY);
-    printf("SO_TP_SIZE: ");
-    scanf("%d",&configurazione.SO_TP_SIZE);
-    printf("SO_MIN_TRANS_PROC_NSEC: ");
-    scanf("%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
-    printf("SO_MAX_TRANS_PROC_NSEC: ");
-    scanf("%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
-    printf("SO_SIM_SEC: ");
-    scanf("%d",&configurazione.SO_SIM_SEC);
-    printf("SO_FRIENDS_NUM: ");
-    scanf("%d",&configurazione.SO_FRIENDS_NUM);
-    printf("SO_HOPS: ");
-    scanf("%d",&configurazione.SO_HOPS);
-    clear();
-    
-}
-
-```
 
 # Main
 
