@@ -112,12 +112,12 @@ bool showUsers(){
 ```c main.c
 void showNodes(){
 	int i;
- 	int counterAttivi;
+ 	int luchetto;
     printf("\nblocchi: %d\n",libroCounter);
   	printf("nodi: \n");
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
-    	sem_getvalue(&semafori[i],&counterAttivi);
-    	printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
+    	sem_getvalue(&semafori[i],&luchetto);
+    	printf("%d) %d %d \t",i,rewardlist[i],luchetto);
     }
 }
 

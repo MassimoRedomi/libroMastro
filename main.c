@@ -50,7 +50,7 @@ void showNodes(){
   	printf("nodi: \n");
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
     	sem_getvalue(&semafori[i],&counterAttivi);
-    	printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
+    	printf("%d) %d %d \t",i,rewardlist[i],counterAttivi);
     }
 }
 
