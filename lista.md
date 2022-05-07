@@ -6,8 +6,8 @@
 
 - [ ] c'è bisogno di fare piu cose nel Makefile?
 ## Documentazione del codice
-
 - [ ] si puo usare org-mode o Markdown o unicamente si puo comentare il codice?
+
 ## Ingresso Variabili
 
 - [x] le variabili si mettono come lettura di file o scritto a mano, avvisare che i due procedimenti sono gia creati.

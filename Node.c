@@ -21,6 +21,15 @@ int trovaNid(){
     }
 }
 
+/*funzione dell'ultima transazione del blocco.*/
+Transazione ripilogo(int id, int somma){
+    Transazione transaction;
+    transaction.sender    = -1;
+    transaction.receiver  = id; /*id del nodo*/
+    transaction.quantita  = somma; /*la somma di tutto il reward generato*/
+    transaction.timestamp = difftime(time(0),startSimulation);/*quanto tempo ha passato dal inizio della simulazione.*/
+    return transaction;
+}
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
     int id = trovaNid();
@@ -60,13 +69,7 @@ void* nodo(void *conf){
              sem_post(&semafori[id]);
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
-	    	    finalReward.timestamp = difftime(time(0),startSimulation);/*momento attuale della simulazione*/
-	    	    finalReward.sender = -1;/*-1*/
-	    	    finalReward.receiver = id;/*identificatore del nodo*/
-	    	    finalReward.quantita = sommaBlocco;/*somma di tutti i reward*/
-	    	    finalReward.reward = 0;
-    
-	    	    blocco[counterBlock]= finalReward;/*aggiunge la transazione al blocco.*/
+	    	    blocco[counterBlock]=ripilogo(id, sommaBlocco);/*aggiunge la transazione al blocco.*/
     
 	    	    sem_wait(&libroluck);
 	    	    for(i=0;i< SO_BLOCK_SIZE;i++){
