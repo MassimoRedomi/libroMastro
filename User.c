@@ -32,12 +32,31 @@ int userUpdate(int id, int lastUpdate){
 
 /*Trova thread id in utenti_id*/
 int trovaId(){
-    int i;
-    for(i=0;i<configurazione.SO_USERS_NUM;i++){
-        if(utenti_id[i] == pthread_self()){
-            return i;
+    int id;
+    for(id=0;id<configurazione.SO_USERS_NUM;id++){
+        if(utenti_id[id] == pthread_self()){
+            return id;
         }
     }
+}
+
+/*cerca un nodo libero per fare la trasazione.*/
+int nodoLibero(id){
+    int nodo;
+    do{
+        nodo = randomInt(0,configurazione.SO_NODES_NUM);
+        if( retrylist[id] > configurazione.SO_RETRY){
+            printf("L'utenete %d non ha trovato nessun nodo libero",id);
+            pthread_exit(NULL);
+        }
+        retrylist[id]++;
+    }while(sem_trywait(&semafori[nodo])<0);
+    
+    if( retrylist[id] <= configurazione.SO_RETRY ){
+        retrylist[id] = 0;
+    }
+
+    return nodo;
 }
 
 Transazione generateTransaction(int id){
@@ -64,11 +83,11 @@ Transazione generateTransaction(int id){
             pthread_exit(NULL);
         }
 	}while(i==id || retrylist[i] > configurazione.SO_RETRY);
-    retrylist[id] = 0;
 	transaccion.receiver = i;
 	/*calcola il timestamp in base al tempo di simulazione.*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
-    
+    retrylist[id] = 0;
+
 	return transaccion;
 }
 
@@ -96,29 +115,8 @@ void* utente(void *conf){
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
-			do{
-	    	    i = randomInt(0,configurazione.SO_NODES_NUM);/*Assegnamo ad i, id random nodo*/
-	    	    retrylist[id]++;
-	    	    if(retrylist[id] >= configurazione.SO_RETRY){
-		    		break;
-	    	    }
-	    	 }while(sem_trywait(&semafori[i])<0);
-	    	/*prueba de transaccion*/
-		    /*printf("nueva transaccion de %d a %d nel nodo %d\n",id,transaction.receiver,i);*/
-
-			if(retrylist[id] < configurazione.SO_RETRY){
-	    	    sem_wait(&semafori[i]);           /*blocco con il semaforo*/
-	    	    /*prinTrans(transaction);*/
-
-                /*scrive l'uscita di soldi nel budgetlist*/
-	    	    budgetlist[id] -= transaction.quantita + transaction.reward;
-	    	    mailbox[i] = transaction;         /*Inseriamo nel MailBox del nostro Nodo la transazione*/
-	    	    retrylist[id] = 0;
-	    	}else{
-	    	    /*printf("l'utente %d ha superato la cuantita di tentativi\n",id);*/
-	    	    pthread_exit(NULL);
-	    	}
-    
+            mailbox[nodoLibero(id)] = transaction;
+            budgetlist[id] = budgetlist[id] - transaction.quantita - transaction.reward;
         }else{
 			retrylist[id]++;
 		}

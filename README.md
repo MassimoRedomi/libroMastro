@@ -444,9 +444,8 @@ int nodoLibero(id){
         if( retrylist[id] > configurazione.SO_RETRY){
             printf("L'utenete %d non ha trovato nessun nodo libero",id);
             pthread_exit(NULL);
-        }else{
-            retrylist++;
         }
+        retrylist[id]++;
     }while(sem_trywait(&semafori[nodo])<0);
     
     if( retrylist[id] <= configurazione.SO_RETRY ){
@@ -485,11 +484,11 @@ Transazione generateTransaction(int id){
             pthread_exit(NULL);
         }
 	}while(i==id || retrylist[i] > configurazione.SO_RETRY);
-    retrylist[id] = 0;
 	transaccion.receiver = i;
 	/*calcola il timestamp in base al tempo di simulazione.*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
-    
+    retrylist[id] = 0;
+
 	return transaccion;
 }
 
@@ -656,7 +655,7 @@ void showNodes(){
   	printf("nodi: \n");
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
     	sem_getvalue(&semafori[i],&counterAttivi);
-    	printf("%d) %d %d\t",i,rewardlist[i],counterAttivi);
+    	printf("%d) %d %d \t",i,rewardlist[i],counterAttivi);
     }
 }
 
