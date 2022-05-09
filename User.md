@@ -46,7 +46,6 @@ L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione.
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
 	int i;
-    sem_wait(&libroluck);
     while(lastUpdate < libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
@@ -55,7 +54,6 @@ int userUpdate(int id, int lastUpdate){
         }
         lastUpdate++;
 	}
-    sem_post(&libroluck);
     return lastUpdate;
 }
 
