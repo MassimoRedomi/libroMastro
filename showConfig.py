@@ -2,8 +2,9 @@
 import sys
 """
 El objetivo de este script es para poder confirmar los valores de cada
-configuracion. Esto nos sirve tanto para ver los valores del archivo como
-para controlar que los valores estan en el orden correcto, que seria:
+configuracion que se pasa como unico parametro. Esto nos sirve tanto 
+para ver los valores del archivo como para controlar que los valores 
+estan en el orden correcto, que seria:
     1)  SO_USER_NUM
     2)  SO_NODES_NUM
     3)  SO_BUDGET_INIT
@@ -34,4 +35,5 @@ print("SO_MAX_TRANS_GEN_NSEC:",contenido[9][0:-1])
 print("SO_SIM_SEC:",contenido[10][0:-1])
 print("SO_FRINDS_NUM:",contenido[11][0:-1])
 print("SO_HOPS:",contenido[12][0:-1])
+
 archivo.close()
