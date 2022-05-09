@@ -307,8 +307,8 @@ void* nodo(void *conf){
     int id = trovaNid();
     int i;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
-    int counterPool=0;/*contatore della quantita di transazioni nella pool*/
-    int sommaBlocco=0;/*somma delle transazioni del blocco atuale*/
+    int counterPool=0; /*contatore della quantita di transazioni nella pool*/
+    int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
     Transazione finalReward;
@@ -324,21 +324,20 @@ void* nodo(void *conf){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
-        if(semvalue == 0){
+        if(semvalue <= 0){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
 	    	 pool[counterPool]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
     
 	    	 /*somma il reward*/
-	    	 sommaBlocco = blocco[counterBlock].reward;
+	    	 sommaBlocco    += blocco[counterBlock].reward;
 	    	 rewardlist[id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
     
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
 	    	 counterPool++;
 
-             sem_post(&semafori[id]);
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
 	    	    blocco[counterBlock]=riasunto(id, sommaBlocco);/*aggiunge la transazione al blocco.*/
@@ -355,10 +354,11 @@ void* nodo(void *conf){
 				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
 	    	    /*free(&mailbox[id]);*/
     
-	    	    if(counterPool < configurazione.SO_TP_SIZE){
-	    	       sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
-	    	    }  
+	    	      
 	    	}
+            if(counterPool < configurazione.SO_TP_SIZE){
+                sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
+	        }
     
 		}
     
