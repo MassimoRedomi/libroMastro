@@ -20,7 +20,7 @@ int userUpdate(int id, int lastUpdate){
     while(lastUpdate < libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
-	    	    budgetlist[id] += libroMastro[i].quantita;
+	    	    budgetlist[id] += libroMastro[i].quantita - libroMastro[i].reward;
 	    	 }
         }
         lastUpdate++;
@@ -58,7 +58,7 @@ int nodoLibero(id){
 }
 
 Transazione generateTransaction(int id){
-    int i;
+    int altroUtente;
 	Transazione transaccion;
     transaccion.sender   = id;
     transaccion.quantita = randomInt(2,budgetlist[id]);/*set quantita a caso*/
@@ -69,19 +69,17 @@ Transazione generateTransaction(int id){
 		transaccion.reward = 1;
     }
     
-    transaccion.quantita = transaccion.quantita - transaccion.reward;
-
     /*ricerca del riceiver*/
     /*debo reparar lo de los intentos*/
     do{
-		i= randomInt(0,configurazione.SO_USERS_NUM);
+		altroUtente= randomInt(0,configurazione.SO_USERS_NUM);
         retrylist[id]++;
         if(retrylist[id] > configurazione.SO_RETRY){
             printf("Utente #%d non ha trovato un altro utente",id);
             pthread_exit(NULL);
         }
-	}while(i==id || retrylist[i] > configurazione.SO_RETRY);
-	transaccion.receiver = i;
+	}while(altroUtente==id || retrylist[altroUtente] > configurazione.SO_RETRY);
+	transaccion.receiver = altroUtente;
 	/*calcola il timestamp in base al tempo di simulazione.*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
     retrylist[id] = 0;
@@ -114,12 +112,11 @@ void* utente(void *conf){
     
 			/*scelglie un nodo libero a caso*/
             mailbox[nodoLibero(id)] = transaction;
-            budgetlist[id] = budgetlist[id] - transaction.quantita - transaction.reward;
+            budgetlist[id] -= transaction.quantita;
         }else{
 			retrylist[id]++;
 		}
     
-          /*usleep((rand() % (range + 1)) + configurazione.SO_MIN_TRANS_GEN_NSEC);/*Tempo di Attesa Random della trasazione*/
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
 		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
