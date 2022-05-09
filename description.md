@@ -61,7 +61,7 @@ con successo la transazione.
 • Se il bilancio è minore di 2, allora il processo non invia alcuna
 transazione
 
-### 2. Invia al nodo estratto la transazione e attende un intervallo di tempo (in nanosecondi) estratto casualmente tra SO~MINTRANSGENNSEC~ e massimo SO~MAXTRANSGENNSEC~.
+### 2. Invia al nodo estratto la transazione e attende un intervallo di tempo (in nanosecondi) estratto casualmente tra SO_MIN_TRANSGEN_NSEC e massimo SO_MAX_TRANS_GEN_NSEC.
 
 Inoltre, un processo utente deve generare una transazione anche in
 risposta ad un segnale ricevuto (la scelta del segnale è a discrezione
@@ -75,19 +75,19 @@ processo master.
 
 Ogni processo nodo memorizza privatamente la lista di transazioni
 ricevute da processare, chiamata transaction pool, che può contenere al
-massimo SO~TPSIZE~ transazioni, con SO~TPSIZE~ \> SO~BLOCKSIZE~. Se la
+massimo SO_TP_SIZE transazioni, con SO_TP_SIZE > SO_BLOCK_SIZE. Se la
 transaction pool del nodo è piena, allora ogni ulteriore transazione
 viene scartata e quindi non eseguita. In questo caso, il sender della
 transazione scartata deve esserne informato.
 
 Le transazioni sono processate da un nodo in blocchi. Ogni blocco
-contiene esattamente SO~BLOCKSIZE~ transazioni da processare di cui
-SO~BLOCKSIZE~−1 transazioni ricevute da utenti e una transazione di
+contiene esattamente SO_BLOCK_SIZE transazioni da processare di cui
+SO_BLOCK_SIZE-1 transazioni ricevute da utenti e una transazione di
 pagamento per il processing (si veda sotto).
 
 Il ciclo di vita di un nodo può essere cosı̀ definito: • Creazione di un
 blocco candidato -- Estrazione dalla transaction pool di un insieme di
-SO~BLOCKSIZE~−1 transazioni non ancora presenti nel libro mastro. --
+SO_BLOCK_SIZE-1 transazioni non ancora presenti nel libro mastro. --
 Alle transazioni presenti nel blocco, il nodo aggiunge una transazione
 di reward, con le seguenti caratteristiche:
 
@@ -100,7 +100,7 @@ di reward, con le seguenti caratteristiche:
 
 • Simula l'elaborazione di un blocco attraverso una attesa non attiva di
 un intervallo temporale casuale espresso in nanosecondi compreso tra
-SO~MINTRANSPROCNSEC~ e SO~MAXTRANSPROCNSEC~.
+SO_MIN_TRANS_PROC_NSEC e SO_MAX_TRANS_GEN_NSEC.
 
 • Una volta completata l'elaborazione del blocco, scrive il nuovo blocco
 appena elaborato nel libro mastro, ed elimina le transazioni eseguite
@@ -112,8 +112,8 @@ Il libro mastro è la struttura condivisa da tutti i nodi e gli utenti,
 ed è deputata alla memorizzazione delle transazioni eseguite. Una
 transazione si dice confermata solamente quando entra a far parte del
 libro mastro. Più in dettaglio, il libro mastro è formato da una
-sequenza di lunghezza massima SO~REGISTRYSIZE~ di blocchi consecutivi.
-All'interno di ogni blocco sono contenute esattamente SO~BLOCKSIZE~
+sequenza di lunghezza massima SO_REGISTRY_SIZE di blocchi consecutivi.
+All'interno di ogni blocco sono contenute esattamente SO_BLOCK_SIZE
 transazioni. Ogni blocco è identificato da un identificatore intero
 progressivo il cui valore iniziale è impostato a 0. Una transazione è
 univocamente identificata dalla tripletta (timestamp, sender, receiver).
@@ -134,8 +134,8 @@ stato dei processi più significativi: quelli con maggior e minor budget.
 
 La simulazione terminerà in uno dei seguenti casi:
 
-• sono trascorsi SO~SIMSEC~ secondi • la capacità del libro mastro si
-esaurisce (il libro mastro può contenere al massimo SO~REGISTRYSIZE~
+• sono trascorsi SO_SIM_SEC secondi • la capacità del libro mastro si
+esaurisce (il libro mastro può contenere al massimo SO_REGISTRY_SIZE
 blocchi) • tutti i processi utente sono terminati.
 
 Alla terminazione, il processo master obbliga tutti i processi nodo e
@@ -151,7 +151,7 @@ nodo, numero di transazioni ancora presenti nella transaction pool
 # 6 Descrizione del progetto: versione "normal" (max 30)
 
 All'atto della creazione da parte del processo master, ogni nodo riceve
-un elenco di SO~NUMFRIENDS~ nodi amici. Il ciclo di vita di un processo
+un elenco di SO_NUM_FRIENDS nodi amici. Il ciclo di vita di un processo
 nodo si arricchisce quindi di un ulteriore step:
 
 • periodicamente ogni nodo seleziona una transazione dalla transaction
@@ -162,12 +162,12 @@ pool del nodo sorgente)
 Quando un nodo riceve una transazione, ma ha la transaction pool piena,
 allora esso provvederà a spedire tale transazione ad uno dei suoi amici
 scelto a caso. Se la transazione non trova una collocazione entro
-SO~HOPS~ l'ultimo nodo che la riceve invierà la transazione al processo
+SO_HOPS l'ultimo nodo che la riceve invierà la transazione al processo
 master che si occuperà di creare un nuovo processo nodo che contiene la
 transazione scartata come primo elemento della transaction pool.
 Inoltre, il processo master assegna al nuovo processo nodo
-SO~NUMFRIENDS~ processi nodo amici scelti a caso. Inoltre, il processo
-master sceglierà a caso altri SO~NUMFRIENDS~ processi nodo già
+SO_NUM_FRIENDS processi nodo amici scelti a caso. Inoltre, il processo
+master sceglierà a caso altri SO_NUM_FRIENDS processi nodo già
 esistenti, ordinandogli di aggiungere alla lista dei loro amici il
 processo nodo appena creato.
 
@@ -230,11 +230,11 @@ realizzato sfruttando le tecniche di divisione in moduli del codice, •
 essere compilato mediante l'utilizzo dell'utility make • massimizzare il
 grado di concorrenza fra processi • deallocare le risorse IPC che sono
 state allocate dai processi al termine del gioco • essere compilato con
-almeno le seguenti opzioni di compilazione: [gcc -std=c89
--pedantic]{.underline}
+almeno le seguenti opzioni di compilazione: 
+    gcc -std=c89 -pedantic
 
 • poter eseguire correttamente su una macchina (virtuale o fisica) che
 presenta parallelismo (due o più processori).
 
 Per i motivi introdotti a lezione, ricordarsi di definire la macro
-~GNUSOURCE~ o compilare il progetto con il flag -D~GNUSOURCE~.
+GNU_SOURCE o compilare il progetto con il flag -D_GNU_SOURCE.
