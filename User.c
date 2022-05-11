@@ -42,7 +42,7 @@ int trovaId(){
 }
 
 /*cerca un nodo libero per fare la transazione.*/
-int nodoLibero(id){
+int nodoLibero(int id){
     int nodo;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
@@ -94,7 +94,7 @@ Transazione generateTransaction(int id){
 void* utente(void *conf){
 	int id = trovaId();                       /*Id processo utente*/
     int i;
-    int mythr = pthread_self();                /*Pid thread processo utente*/
+    pthread_t mythr = pthread_self();                /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
 
 	/*setting default values delle variabili condivise*/

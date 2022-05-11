@@ -246,10 +246,10 @@ int main(int argc,char *argv[]){
             pthread_cancel(utenti_id[i]);
         }
     
-		/*printf("numero di blocchi: %d\n\n",libroCounter);
+		/*printf("numero di blocchi: %d\n\n",libroCounter);*/
 		/*solo por confirmar al final*/
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			/*prinTrans(libroMastro[i]); /*per ora non mostro tutte transazioni*/
+			/*prinTrans(libroMastro[i]); per ora non mostro tutte transazioni*/
         }
     
 	}

@@ -80,7 +80,7 @@ int trovaId(){
 serve per trovare un nodo libero per fare la transazione.
 ```c User.c
 /*cerca un nodo libero per fare la trasazione.*/
-int nodoLibero(id){
+int nodoLibero(int id){
     int nodo;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
