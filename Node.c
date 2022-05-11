@@ -40,7 +40,7 @@ void* nodo(void *conf){
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
     Transazione finalReward;
-    int mythr; 
+    pthread_t mythr; 
     int semvalue;/*valore del semaforo*/
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/

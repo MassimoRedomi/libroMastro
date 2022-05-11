@@ -38,6 +38,7 @@ int trovaId(){
             return id;
         }
     }
+    return 0;
 }
 
 /*cerca un nodo libero per fare la transazione.*/

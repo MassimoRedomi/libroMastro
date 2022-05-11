@@ -69,6 +69,7 @@ o in alternativa sceglie unn'altra via per l'accesso.
 int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
+int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
@@ -85,40 +86,74 @@ Questo metodo non solo mostra lo stato di tutti gli
 utenti, anche ritorna una variabile boolean per identificare
 se ancora ci sono utenti disponibili.
 ```c main.c
-bool showUsers(){
-	int i;
-    int counterAttivi=0;
-    int sommaDebug = 0; /*somma debug*/
-	bool test;
-    printf("Utenti:\n");
-	/*mostra il budget di ogni utente*/
-	for(i=0; i<configurazione.SO_USERS_NUM; i++){
-		test = retrylist[i]<configurazione.SO_RETRY;
-        sommaDebug+=budgetlist[i];
-  	    if(test)
- 	       counterAttivi++;
-   	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
-   	    if(i%9==0)
-   	       printf("\n");
-	}
-   	 printf("\nattivi: %d\n",counterAttivi);
-     printf("somma debug: %d\n",sommaDebug); /*stampa la somma di tutti gli account*/
-     return counterAttivi!=0;
+bool userStatus(){
+
+    int i=0;
+    int activeUsers=0;
+    int inactiveUsers=0;
+    int sommaBudget=0;
+    bool Active;
+
+    printf("\n");
+    printf("_____________________________");
+    printf("| User_ID | Budget | Status |");
+
+    for(i=0; i<configurazione.SO_USERS_NUM; i++){
+
+        sommaBudget+=budgetlist[i];
+
+        Active = retrylist[i]<configurazione.SO_RETRY;
+  	    if(Active)
+         activeUsers++;
+        else
+            inactiveUsers++;
+
+        printf("| %d | %d |%s |",i ,budgetlist[i] ,Active?"True":"False");
+    }
+
+    printf("_____________________________");
+    printf("|Active | Inactive | Total Budget |");
+    printf("| %d | %d | %d |", activeUsers, inactiveUsers, sommaBudget);
+    printf("_____________________________");
+
+    return activeUsers!=0;
 }
 
 ```
 
 ## Show Nodes
 ```c main.c
-void showNodes(){
-	int i;
- 	int luchetto;
-    printf("\nblocchi: %d\n",libroCounter);
-  	printf("nodi: \n");
+bool nodeStatus(){
+
+    int i=0;
+    int activeNodes=0;
+    int inactiveNodes=0;
+    int sommaRewards=0;
+    bool Active;
+    
+    printf("\n");
+    printf("_____________________________");
+    printf("| Node_ID | Reward | Status |");
+
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
-    	sem_getvalue(&semafori[i],&luchetto);
-    	printf("%d) %d %d \t",i,rewardlist[i],luchetto);
+        
+        sommaRewards+=rewardlist[i];
+
+        Active = poolsizelist[i] < configurazione.SO_TP_SIZE;
+  	    if(Active)
+            activeNodes++;
+        else
+            inactiveNodes++;
+
+        printf("| %d | %d |%s |",i ,rewardlist[i] ,Active?"True":"False");
     }
+
+    printf("_____________________________");
+    printf("|Active | Inactive | Total Rewards | ");
+    printf("| %d | %d | %d |",activeNodes,inactiveNodes,sommaRewards);
+    printf("_____________________________");
+
+    return activeNodes!=0;
 }
 
 ```
@@ -155,6 +190,7 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
+        poolsizelist=malloc(configurazione.SO_TP_SIZE * sizeof(int));
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
@@ -182,10 +218,10 @@ int main(int argc,char *argv[]){
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
 	    	/*conta la quantita di utenti attivi*/
-	    	test = showUsers();
+	    	test = userStatus();
     
 	    	/*mostra i nodi con i suoi semafori */
-	    	showNodes();
+	    	nodeStatus();
 	    	printf("\n\n");
     
 	    	now = difftime(time(0), startSimulation);

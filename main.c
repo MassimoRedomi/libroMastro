@@ -6,6 +6,7 @@
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
 #include <semaphore.h>   /*Aggiunge i semafori*/
+#include <string.h>
 
 #include "User.c"
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
@@ -106,7 +107,7 @@ int main(int argc,char *argv[]){
 		exit(EXIT_FAILURE);
     }else{
 		/*in caso di voler inserire i valori a mano*/
-		if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
+		if(strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
 			writeConf();
 		}else{
 	    	 readconf(argv[1]);/*lettura del file*/
