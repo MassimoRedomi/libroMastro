@@ -88,15 +88,15 @@ se ancora ci sono utenti disponibili.
 ```c main.c
 bool userStatus(){
 
-    int i=0;
+    int i=0;/*modifica*/
     int activeUsers=0;
     int inactiveUsers=0;
     int sommaBudget=0;
     bool Active;
 
     printf("\n");
-    printf("_____________________________");
-    printf("| User_ID | Budget | Status |");
+    printf("_____________________________\n");
+    printf("| User_ID | Budget | Status |\n");
 
     for(i=0; i<configurazione.SO_USERS_NUM; i++){
 
@@ -108,13 +108,13 @@ bool userStatus(){
         else
             inactiveUsers++;
 
-        printf("| %d | %d |%s |",i ,budgetlist[i] ,Active?"True":"False");
+        printf("| %d | %d |%s |\n",i ,budgetlist[i] ,Active?"True":"False");
     }
 
-    printf("_____________________________");
-    printf("|Active | Inactive | Total Budget |");
-    printf("| %d | %d | %d |", activeUsers, inactiveUsers, sommaBudget);
-    printf("_____________________________");
+    printf("_____________________________\n");
+    printf("|Active | Inactive | Total Budget |\n");
+    printf("| %d | %d | %d |\n", activeUsers, inactiveUsers, sommaBudget);
+    printf("_____________________________\n");
 
     return activeUsers!=0;
 }
@@ -132,8 +132,8 @@ bool nodeStatus(){
     bool Active;
     
     printf("\n");
-    printf("_____________________________");
-    printf("| Node_ID | Reward | Status |");
+    printf("_____________________________\n");
+    printf("| Node_ID | Reward | Status |\n");
 
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
         
@@ -145,13 +145,13 @@ bool nodeStatus(){
         else
             inactiveNodes++;
 
-        printf("| %d | %d |%s |",i ,rewardlist[i] ,Active?"True":"False");
+        printf("| %d | %d |%s |\n",i ,rewardlist[i] ,Active?"True":"False");
     }
 
-    printf("_____________________________");
-    printf("|Active | Inactive | Total Rewards | ");
+    printf("_____________________________\n");
+    printf("|Active | Inactive | Total Rewards |\n");
     printf("| %d | %d | %d |",activeNodes,inactiveNodes,sommaRewards);
-    printf("_____________________________");
+    printf("_____________________________\n");
 
     return activeNodes!=0;
 }
