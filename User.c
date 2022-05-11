@@ -1,5 +1,6 @@
 #include "Node.c"
 
+
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
@@ -8,6 +9,7 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 extern int *retrylist ;     /*thread id di ogni utente*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
+extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
@@ -38,13 +40,13 @@ int trovaId(){
     }
 }
 
-/*cerca un nodo libero per fare la trasazione.*/
+/*cerca un nodo libero per fare la transazione.*/
 int nodoLibero(id){
     int nodo;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
         if( retrylist[id] > configurazione.SO_RETRY){
-            printf("L'utenete %d non ha trovato nessun nodo libero",id);
+            printf("L'utente %d non ha trovato nessun nodo libero",id);
             pthread_exit(NULL);
         }
         retrylist[id]++;
