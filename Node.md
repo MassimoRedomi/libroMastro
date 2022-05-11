@@ -26,6 +26,7 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
+extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -73,7 +74,6 @@ void* nodo(void *conf){
     int id = trovaNid();
     int i;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
-    int counterPool=0; /*contatore della quantita di transazioni nella pool*/
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
@@ -82,18 +82,19 @@ void* nodo(void *conf){
     int semvalue;/*valore del semaforo*/
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
+    poolsizelist[id]=0;/*set full space available*/
     mythr = pthread_self();
     /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
-    while(counterPool < configurazione.SO_TP_SIZE){
+    while(poolsizelist[id] < configurazione.SO_TP_SIZE){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
-	    	 pool[counterPool]=mailbox[id];
+	    	 pool[poolsizelist[id]]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
     
 	    	 /*somma il reward*/
@@ -102,7 +103,7 @@ void* nodo(void *conf){
     
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
-	    	 counterPool++;
+	    	 poolsizelist[id]++;
 
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
@@ -122,7 +123,7 @@ void* nodo(void *conf){
     
 	    	      
 	    	}
-            if(counterPool < configurazione.SO_TP_SIZE){
+            if(poolsizelist[id] < configurazione.SO_TP_SIZE){
                 sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
 	        }
     
