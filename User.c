@@ -63,7 +63,7 @@ Transazione generateTransaction(int id){
     int altroUtente;
 	Transazione transaccion;
     transaccion.sender   = id;
-    transaccion.quantita = randomInt(2,budgetlist[id]);/*set quantita a caso*/
+    transaccion.quantita = randomInt(2,budgetlist[id])/2;/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
 	/*se il reward non arriva a 1, allora diventa 1*/
