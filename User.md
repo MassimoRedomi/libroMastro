@@ -142,7 +142,7 @@ Transazione generateTransaction(int id){
 void* utente(void *conf){
 	int id = trovaId();                       /*Id processo utente*/
     int i;
-    int mythr = pthread_self();                /*Pid thread processo utente*/
+    pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
 
 	/*setting default values delle variabili condivise*/

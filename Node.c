@@ -6,8 +6,8 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 /*variabili condivise tra diversi thread.*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern Transazione *mailbox;/*struttura per condividere */
+extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -40,7 +40,7 @@ void* nodo(void *conf){
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
     Transazione finalReward;
-    pthread_t mythr; 
+    int mythr; 
     int semvalue;/*valore del semaforo*/
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
@@ -62,7 +62,7 @@ void* nodo(void *conf){
 	    	 /*somma il reward*/
 	    	 sommaBlocco    += blocco[counterBlock].reward;
 	    	 rewardlist[id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
-
+    
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
 	    	 poolsizelist[id]++;

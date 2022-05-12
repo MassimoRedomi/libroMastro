@@ -2,11 +2,11 @@
 #include <stdlib.h> /*Libreria Standard*/  
 #include <time.h>   /*Acquisizione e manipolazione del tempo*/
 #include <stdbool.h>/*Aggiunge i boolean var*/
+#include <string.h>/*Standar library for string type*/
 
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
 #include <semaphore.h>   /*Aggiunge i semafori*/
-#include <string.h>
 
 #include "User.c"
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
@@ -24,10 +24,9 @@ time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
-
 bool userStatus(){
 
-    int i=0;
+    int i=0;/*modifica*/
     int activeUsers=0;
     int inactiveUsers=0;
     int sommaBudget=0;
@@ -47,12 +46,12 @@ bool userStatus(){
         else
             inactiveUsers++;
 
-        printf("|  %d  | %d |%s |\n",i ,budgetlist[i] ,Active?"True":"False");
+        printf("| %d | %d |%s |\n",i ,budgetlist[i] ,Active?"True":"False");
     }
 
     printf("_____________________________\n");
     printf("|Active | Inactive | Total Budget |\n");
-    printf("| %d | %d | %d |", activeUsers, inactiveUsers, sommaBudget);
+    printf("| %d | %d | %d |\n", activeUsers, inactiveUsers, sommaBudget);
     printf("_____________________________\n");
 
     return activeUsers!=0;
@@ -80,7 +79,7 @@ bool nodeStatus(){
         else
             inactiveNodes++;
 
-        printf("|  %d  | %d |%s |\n",i ,rewardlist[i] ,Active?"True":"False");
+        printf("| %d | %d |%s |\n",i ,rewardlist[i] ,Active?"True":"False");
     }
 
     printf("_____________________________\n");
@@ -107,7 +106,7 @@ int main(int argc,char *argv[]){
 		exit(EXIT_FAILURE);
     }else{
 		/*in caso di voler inserire i valori a mano*/
-		if(strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
+		if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
 			writeConf();
 		}else{
 	    	 readconf(argv[1]);/*lettura del file*/

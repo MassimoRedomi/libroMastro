@@ -6,6 +6,7 @@
 #include <stdlib.h> /*Libreria Standard*/  
 #include <time.h>   /*Acquisizione e manipolazione del tempo*/
 #include <stdbool.h>/*Aggiunge i boolean var*/
+#include <string.h>/*Standar library for string type*/
 
 ```
 

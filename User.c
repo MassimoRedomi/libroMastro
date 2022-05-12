@@ -1,9 +1,9 @@
 #include "Node.c"
 
-
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
+
 
 /*variabili condivise tra diversi thread.*/
 extern int *retrylist ;     /*thread id di ogni utente*/
@@ -38,16 +38,15 @@ int trovaId(){
             return id;
         }
     }
-    return 0;
 }
 
-/*cerca un nodo libero per fare la transazione.*/
+/*cerca un nodo libero per fare la trasazione.*/
 int nodoLibero(int id){
     int nodo;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
         if( retrylist[id] > configurazione.SO_RETRY){
-            printf("L'utente %d non ha trovato nessun nodo libero",id);
+            printf("L'utenete %d non ha trovato nessun nodo libero",id);
             pthread_exit(NULL);
         }
         retrylist[id]++;
@@ -94,7 +93,7 @@ Transazione generateTransaction(int id){
 void* utente(void *conf){
 	int id = trovaId();                       /*Id processo utente*/
     int i;
-    pthread_t mythr = pthread_self();                /*Pid thread processo utente*/
+    pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
 
 	/*setting default values delle variabili condivise*/
@@ -123,7 +122,7 @@ void* utente(void *conf){
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
 		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-			printf("utente %d fermato",id);       /*ferma il procceso*/
+			printf("utente %d fermato\n",id);       /*ferma il procceso*/
 		}
     }
 }

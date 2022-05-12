@@ -260,6 +260,7 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
+extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -307,7 +308,6 @@ void* nodo(void *conf){
     int id = trovaNid();
     int i;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
-    int counterPool=0; /*contatore della quantita di transazioni nella pool*/
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
@@ -316,18 +316,19 @@ void* nodo(void *conf){
     int semvalue;/*valore del semaforo*/
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
+    poolsizelist[id]=0;/*set full space available*/
     mythr = pthread_self();
     /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
-    while(counterPool < configurazione.SO_TP_SIZE){
+    while(poolsizelist[id] < configurazione.SO_TP_SIZE){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
-	    	 pool[counterPool]=mailbox[id];
+	    	 pool[poolsizelist[id]]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
     
 	    	 /*somma il reward*/
@@ -336,7 +337,7 @@ void* nodo(void *conf){
     
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
-	    	 counterPool++;
+	    	 poolsizelist[id]++;
 
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
@@ -356,7 +357,7 @@ void* nodo(void *conf){
     
 	    	      
 	    	}
-            if(counterPool < configurazione.SO_TP_SIZE){
+            if(poolsizelist[id] < configurazione.SO_TP_SIZE){
                 sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
 	        }
     
@@ -386,6 +387,7 @@ extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro 
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
+
 ```
 
 #### Sincronizzazione tra Processi
@@ -397,6 +399,7 @@ Importa tutte le variabili del Main
 extern int *retrylist ;     /*thread id di ogni utente*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
+extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern Configurazione configurazione;
@@ -445,7 +448,7 @@ int trovaId(){
 serve per trovare un nodo libero per fare la transazione.
 ```c User.c
 /*cerca un nodo libero per fare la trasazione.*/
-int nodoLibero(id){
+int nodoLibero(int id){
     int nodo;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
@@ -466,7 +469,7 @@ int nodoLibero(id){
 ```
 
 ## Generatore di Transazione
-
+comprime tutto il processo di generare la transazione.
 ```c User.c
 Transazione generateTransaction(int id){
     int altroUtente;
@@ -507,7 +510,7 @@ Transazione generateTransaction(int id){
 void* utente(void *conf){
 	int id = trovaId();                       /*Id processo utente*/
     int i;
-    int mythr = pthread_self();                /*Pid thread processo utente*/
+    pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
 
 	/*setting default values delle variabili condivise*/
@@ -536,7 +539,7 @@ void* utente(void *conf){
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
 		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-			printf("utente %d fermato",id);       /*ferma il procceso*/
+			printf("utente %d fermato\n",id);       /*ferma il procceso*/
 		}
     }
 }
@@ -549,6 +552,7 @@ void* utente(void *conf){
 #include <stdlib.h> /*Libreria Standard*/  
 #include <time.h>   /*Acquisizione e manipolazione del tempo*/
 #include <stdbool.h>/*Aggiunge i boolean var*/
+#include <string.h>/*Standar library for string type*/
 
 ```
 
@@ -612,6 +616,7 @@ o in alternativa sceglie unn'altra via per l'accesso.
 int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
+int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
 time_t startSimulation;
@@ -628,40 +633,74 @@ Questo metodo non solo mostra lo stato di tutti gli
 utenti, anche ritorna una variabile boolean per identificare
 se ancora ci sono utenti disponibili.
 ```c main.c
-bool showUsers(){
-	int i;
-    int counterAttivi=0;
-    int sommaDebug = 0; /*somma debug*/
-	bool test;
-    printf("Utenti:\n");
-	/*mostra il budget di ogni utente*/
-	for(i=0; i<configurazione.SO_USERS_NUM; i++){
-		test = retrylist[i]<configurazione.SO_RETRY;
-        sommaDebug+=budgetlist[i];
-  	    if(test)
- 	       counterAttivi++;
-   	    printf("%d) %d %s\t",i,budgetlist[i],test ? "true":"false");
-   	    if(i%9==0)
-   	       printf("\n");
-	}
-   	 printf("\nattivi: %d\n",counterAttivi);
-     printf("somma debug: %d\n",sommaDebug); /*stampa la somma di tutti gli account*/
-     return counterAttivi!=0;
+bool userStatus(){
+
+    int i=0;/*modifica*/
+    int activeUsers=0;
+    int inactiveUsers=0;
+    int sommaBudget=0;
+    bool Active;
+
+    printf("\n");
+    printf("_____________________________\n");
+    printf("| User_ID | Budget | Status |\n");
+
+    for(i=0; i<configurazione.SO_USERS_NUM; i++){
+
+        sommaBudget+=budgetlist[i];
+
+        Active = retrylist[i]<configurazione.SO_RETRY;
+  	    if(Active)
+         activeUsers++;
+        else
+            inactiveUsers++;
+
+        printf("| %d | %d |%s |\n",i ,budgetlist[i] ,Active?"True":"False");
+    }
+
+    printf("_____________________________\n");
+    printf("|Active | Inactive | Total Budget |\n");
+    printf("| %d | %d | %d |\n", activeUsers, inactiveUsers, sommaBudget);
+    printf("_____________________________\n");
+
+    return activeUsers!=0;
 }
 
 ```
 
 ## Show Nodes
 ```c main.c
-void showNodes(){
-	int i;
- 	int luchetto;
-    printf("\nblocchi: %d\n",libroCounter);
-  	printf("nodi: \n");
+bool nodeStatus(){
+
+    int i=0;
+    int activeNodes=0;
+    int inactiveNodes=0;
+    int sommaRewards=0;
+    bool Active;
+    
+    printf("\n");
+    printf("_____________________________\n");
+    printf("| Node_ID | Reward | Status |\n");
+
     for(i=0; i<configurazione.SO_NODES_NUM; i++){
-    	sem_getvalue(&semafori[i],&luchetto);
-    	printf("%d) %d %d \t",i,rewardlist[i],luchetto);
+        
+        sommaRewards+=rewardlist[i];
+
+        Active = poolsizelist[i] < configurazione.SO_TP_SIZE;
+  	    if(Active)
+            activeNodes++;
+        else
+            inactiveNodes++;
+
+        printf("| %d | %d |%s |\n",i ,rewardlist[i] ,Active?"True":"False");
     }
+
+    printf("_____________________________\n");
+    printf("|Active | Inactive | Total Rewards |\n");
+    printf("| %d | %d | %d |",activeNodes,inactiveNodes,sommaRewards);
+    printf("_____________________________\n");
+
+    return activeNodes!=0;
 }
 
 ```
@@ -698,6 +737,7 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
+        poolsizelist=malloc(configurazione.SO_TP_SIZE * sizeof(int));
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
@@ -725,10 +765,10 @@ int main(int argc,char *argv[]){
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
 	    	/*conta la quantita di utenti attivi*/
-	    	test = showUsers();
+	    	test = userStatus();
     
 	    	/*mostra i nodi con i suoi semafori */
-	    	showNodes();
+	    	nodeStatus();
 	    	printf("\n\n");
     
 	    	now = difftime(time(0), startSimulation);
@@ -753,10 +793,10 @@ int main(int argc,char *argv[]){
             pthread_cancel(utenti_id[i]);
         }
     
-		/*printf("numero di blocchi: %d\n\n",libroCounter);
+		/*printf("numero di blocchi: %d\n\n",libroCounter);*/
 		/*solo por confirmar al final*/
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			/*prinTrans(libroMastro[i]); /*per ora non mostro tutte transazioni*/
+			/*prinTrans(libroMastro[i]); per ora non mostro tutte transazioni*/
         }
     
 	}
