@@ -18,6 +18,7 @@ typedef struct Configurazione{
 
 extern Configurazione configurazione;
 #define clear() printf("\033[H\033[J") /*clear the screen*/
+#define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
 
 /*Un metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero)*/

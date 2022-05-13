@@ -24,70 +24,72 @@ time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
-bool userStatus(){
+bool printStatus(){
 
-    int i=0;/*modifica*/
+    /*User var*/
     int activeUsers=0;
     int inactiveUsers=0;
     int sommaBudget=0;
-    bool Active;
+    bool ActiveU;
 
-    printf("\n");
-    printf("_____________________________\n");
-    printf("| User_ID | Budget | Status |\n");
-
-    for(i=0; i<configurazione.SO_USERS_NUM; i++){
-
-        sommaBudget+=budgetlist[i];
-
-        Active = retrylist[i]<configurazione.SO_RETRY;
-  	    if(Active)
-         activeUsers++;
-        else
-            inactiveUsers++;
-
-        printf("| %d | %d |%s |\n",i ,budgetlist[i] ,Active?"True":"False");
-    }
-
-    printf("_____________________________\n");
-    printf("|Active | Inactive | Total Budget |\n");
-    printf("| %d | %d | %d |\n", activeUsers, inactiveUsers, sommaBudget);
-    printf("_____________________________\n");
-
-    return activeUsers!=0;
-}
-
-bool nodeStatus(){
-
-    int i=0;
+    /*Node var*/
     int activeNodes=0;
     int inactiveNodes=0;
     int sommaRewards=0;
-    bool Active;
-    
-    printf("\n");
-    printf("_____________________________\n");
-    printf("| Node_ID | Reward | Status |\n");
+    bool ActiveN;
 
-    for(i=0; i<configurazione.SO_NODES_NUM; i++){
-        
-        sommaRewards+=rewardlist[i];
+    /*Share var*/
+    int i=0;
 
-        Active = poolsizelist[i] < configurazione.SO_TP_SIZE;
-  	    if(Active)
-            activeNodes++;
-        else
-            inactiveNodes++;
+    /*Attributi*/
+    printf("\n\n");
+    printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
 
-        printf("| %d | %d |%s |\n",i ,rewardlist[i] ,Active?"True":"False");
+    /*Stampa risultati*/
+    for(i=0; i<MAX(configurazione.SO_NODES_NUM,configurazione.SO_USERS_NUM); i++){
+        if(i<configurazione.SO_USERS_NUM && i<configurazione.SO_NODES_NUM){
+            sommaRewards+=rewardlist[i];
+            sommaBudget+=budgetlist[i];
+
+            ActiveU = retrylist[i]<configurazione.SO_RETRY;
+            if(ActiveU)
+              activeUsers++;
+            else
+              inactiveUsers++;
+
+            ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
+            if(ActiveN)
+              activeNodes++;
+            else
+              inactiveNodes++;
+
+            printf("||    %d    | %d | %s |##|    %d    | %d | %s ||\n", i , budgetlist[i] , ActiveU?"True  ":"False " , i ,rewardlist[i] , ActiveN?"True  ":"False ");
+        }else if(i<configurazione.SO_USERS_NUM && i>=configurazione.SO_NODES_NUM){
+
+            sommaBudget+=budgetlist[i];
+
+            ActiveU = retrylist[i]<configurazione.SO_RETRY;
+            if(ActiveU)
+              activeUsers++;
+            else
+              inactiveUsers++;
+
+            printf("||    %d    | %d | %s |##|          |    |    ||\n", i , budgetlist[i] , ActiveU?"True  ":"False ");
+        }else if(i>=configurazione.SO_USERS_NUM && i<configurazione.SO_NODES_NUM){
+
+            sommaRewards+=rewardlist[i];
+
+            ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
+            if(ActiveN)
+              activeNodes++;
+            else
+              inactiveNodes++;
+
+            printf("||          |    |    |##|    %d    | %d | %s ||\n", i ,rewardlist[i] , ActiveN?"True  ":"False ");
+        }
     }
-
-    printf("_____________________________\n");
-    printf("|Active | Inactive | Total Rewards |\n");
-    printf("| %d | %d | %d |",activeNodes,inactiveNodes,sommaRewards);
-    printf("_____________________________\n");
-
-    return activeNodes!=0;
+    printf("\n\n");
+    return activeUsers!=0;
 }
 
 int main(int argc,char *argv[]){
@@ -146,13 +148,6 @@ int main(int argc,char *argv[]){
 			/*show last update*/
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
-	    	/*conta la quantita di utenti attivi*/
-	    	test = userStatus();
-    
-	    	/*mostra i nodi con i suoi semafori */
-	    	nodeStatus();
-	    	printf("\n\n");
-    
 	    	now = difftime(time(0), startSimulation);
             
             if(libroCounter > SO_REGISTRY_SIZE){
@@ -160,7 +155,7 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!test){
+            if(!printStatus()){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
