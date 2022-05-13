@@ -24,6 +24,7 @@ time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
+
 bool printStatus(){
 
     /*User var*/
@@ -63,7 +64,7 @@ bool printStatus(){
             else
               inactiveNodes++;
 
-            printf("||    %d    | %d | %s |##|    %d    | %d | %s ||\n", i , budgetlist[i] , ActiveU?"True  ":"False " , i ,rewardlist[i] , ActiveN?"True  ":"False ");
+            printf("||%9d|%8d|%8s|##|%9d|%9d|%8s||\n", i , budgetlist[i] , ActiveU?"True  ":"False " , i ,rewardlist[i] , ActiveN?"True  ":"False ");
         }else if(i<configurazione.SO_USERS_NUM && i>=configurazione.SO_NODES_NUM){
 
             sommaBudget+=budgetlist[i];
@@ -74,7 +75,7 @@ bool printStatus(){
             else
               inactiveUsers++;
 
-            printf("||    %d    | %d | %s |##|          |    |    ||\n", i , budgetlist[i] , ActiveU?"True  ":"False ");
+            printf("||%9d|%8d|%8s|##|         |         |        ||\n", i , budgetlist[i] , ActiveU?"True  ":"False ");
         }else if(i>=configurazione.SO_USERS_NUM && i<configurazione.SO_NODES_NUM){
 
             sommaRewards+=rewardlist[i];
@@ -85,7 +86,7 @@ bool printStatus(){
             else
               inactiveNodes++;
 
-            printf("||          |    |    |##|    %d    | %d | %s ||\n", i ,rewardlist[i] , ActiveN?"True  ":"False ");
+            printf("||         |        |        |##|%9d|%9d|%8s||\n", i ,rewardlist[i] , ActiveN?"True  ":"False ");
         }
     }
     printf("\n\n");
