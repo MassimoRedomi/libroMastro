@@ -63,7 +63,7 @@ Transazione generateTransaction(int id){
     int altroUtente;
 	Transazione transaccion;
     transaccion.sender   = id;
-    transaccion.quantita = randomInt(2,budgetlist[id])/2;/*set quantita a caso*/
+    transaccion.quantita = randomInt(2,budgetlist[id]/2);/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
 	/*se il reward non arriva a 1, allora diventa 1*/
@@ -75,11 +75,6 @@ Transazione generateTransaction(int id){
     /*debo reparar lo de los intentos*/
     do{
 		altroUtente= randomInt(0,configurazione.SO_USERS_NUM);
-        retrylist[id]++;
-        if(retrylist[id] > configurazione.SO_RETRY){
-            printf("Utente #%d non ha trovato un altro utente",id);
-            pthread_exit(NULL);
-        }
 	}while(altroUtente==id || retrylist[altroUtente] > configurazione.SO_RETRY);
 	transaccion.receiver = altroUtente;
 	/*calcola il timestamp in base al tempo di simulazione.*/
