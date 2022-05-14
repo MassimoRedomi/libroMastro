@@ -212,7 +212,7 @@ __randomlong__ per ora solo serve per il random sleep.
 ```c Structs.c
 
 int randomInt(int min, int max){
-	return (rand() % max) +min;
+	return rand() % max +min;
 }
     
 long randomlong(int min, int max){
@@ -654,46 +654,25 @@ bool printStatus(){
     printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
 
     /*Stampa risultati*/
-    for(i=0; i<MAX(configurazione.SO_NODES_NUM,configurazione.SO_USERS_NUM); i++){
-        if(i<configurazione.SO_USERS_NUM && i<configurazione.SO_NODES_NUM){
+    for(i=0; i<configurazione.SO_USERS_NUM; i++){
+        ActiveU = retrylist[i]<configurazione.SO_RETRY;
+        sommaBudget += budgetlist[i];
+        if(retrylist[i] < configurazione.SO_RETRY){
+            activeUsers++;
+        }else{
+            inactiveUsers++;
+        }
+
+        printf("||%9d|%8d|%8s|#",i,budgetlist[i], ActiveU?"True  ":"False ");
+
+        /*Se c'e un nodo da stampare*/
+        if(i < configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
-            sommaBudget+=budgetlist[i];
-
-            ActiveU = retrylist[i]<configurazione.SO_RETRY;
-            if(ActiveU)
-              activeUsers++;
-            else
-              inactiveUsers++;
-
             ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
-            if(ActiveN)
-              activeNodes++;
-            else
-              inactiveNodes++;
-
-            printf("||%9d|%8d|%8s|##|%9d|%9d|%8s||\n", i , budgetlist[i] , ActiveU?"True  ":"False " , i ,rewardlist[i] , ActiveN?"True  ":"False ");
-        }else if(i<configurazione.SO_USERS_NUM && i>=configurazione.SO_NODES_NUM){
-
-            sommaBudget+=budgetlist[i];
-
-            ActiveU = retrylist[i]<configurazione.SO_RETRY;
-            if(ActiveU)
-              activeUsers++;
-            else
-              inactiveUsers++;
-
-            printf("||%9d|%8d|%8s|##|         |         |        ||\n", i , budgetlist[i] , ActiveU?"True  ":"False ");
-        }else if(i>=configurazione.SO_USERS_NUM && i<configurazione.SO_NODES_NUM){
-
-            sommaRewards+=rewardlist[i];
-
-            ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
-            if(ActiveN)
-              activeNodes++;
-            else
-              inactiveNodes++;
-
-            printf("||         |        |        |##|%9d|%9d|%8s||\n", i ,rewardlist[i] , ActiveN?"True  ":"False ");
+            printf("#|%9d|%9d|%8s||\n", i , rewardlist[i],ActiveN?"True  ":"False ");
+        }else{
+            /*se non deve mostrare piu' nodi, allora solo fa un salto di linea*/
+            printf("\n");
         }
     }
     printf("\n\n");
