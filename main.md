@@ -110,6 +110,7 @@ bool printStatus(){
     /*Attributi*/
     printf("\n\n");
     printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
+    printf("||===========================|##|============================||\n");
 
     /*Stampa risultati*/
     for(i=0; i<configurazione.SO_USERS_NUM; i++){
