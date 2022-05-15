@@ -32,7 +32,7 @@ processi nodo, scelto a caso.
 
 I processi utente sono responsabili della creazione e invio delle
 transazioni monetarie ai processi nodo. Ad ogni processo utente è
-assegnato un buget iniziale SO~BUDGETINIT~. Durante il proprio ciclo di
+assegnato un buget iniziale SO_BUDGET_INIT. Durante il proprio ciclo di
 vita, un processo utente svolge iterativamente le seguenti operazioni:
 
 ### 1. Calcola il bilancio corrente a partire dal budget iniziale e facendo la somma algebrica delle entrate e delle
@@ -61,13 +61,15 @@ con successo la transazione.
 • Se il bilancio è minore di 2, allora il processo non invia alcuna
 transazione
 
-### 2. Invia al nodo estratto la transazione e attende un intervallo di tempo (in nanosecondi) estratto casualmente tra SO_MIN_TRANSGEN_NSEC e massimo SO_MAX_TRANS_GEN_NSEC.
+### 2. Aspettare
+Invia al nodo estratto la transazione e attende un intervallo di tempo (in nanosecondi) 
+estratto casualmente tra SO_MIN_TRANSGEN_NSEC e massimo SO_MAX_TRANS_GEN_NSEC.
 
 Inoltre, un processo utente deve generare una transazione anche in
 risposta ad un segnale ricevuto (la scelta del segnale è a discrezione
 degli sviluppatori).
 
-Se un processo non riesce ad inviare alcuna transazione per SO~RETRY~
+Se un processo non riesce ad inviare alcuna transazione per SO_RETRY
 volte consecutive, allora termina la sua esecuzione, notificando il
 processo master.
 
