@@ -189,8 +189,9 @@ int main(int argc,char *argv[]){
 
             /*cera transazioni programmate mancanti*/
             for(i=0; i< programmateCounter; i++){
-                if(programmate[i].timestamp <= now && programmateChecklist){
+                if(programmate[i].timestamp <= now && programmateChecklist[i]){
                     segnale(programmate[i]);
+                    programmateChecklist[i] = false;
                 }
             }
 
