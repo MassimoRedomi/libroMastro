@@ -98,7 +98,6 @@ dopo nel libro mastro.*/
 int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
     int i = 0;
     FILE *file = fopen(fileName,"r");
-    char line[20];
     if(!file){
         printf("non si trova il libro di transazioni programmate.\n");
     }else{
@@ -114,8 +113,20 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 
 ```
 
+## Segnale
+La segnale è una maniera di forzare a un'utente a fare una transazione gia
+creata dal master con valori predefiniti.
+```c main.c
 
+/*segnale che forza una transazione di un'utente.*/
+void segnale(Transazione programmato){
+    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
 
+    budgetlist[programmato.sender] -= programmato.quantita;
+    printf("Segnale ->");
+    prinTrans(programmato);
+}
+```
 
 # Main
 
@@ -171,7 +182,7 @@ bool printStatus(){
             printf("#|         |         |        ||\n");
         }
     }
-    printf("\n\n");
+    printf("\n");
     return activeUsers!=0;
 }
 
@@ -268,7 +279,7 @@ int main(int argc,char *argv[]){
             /*cera transazioni programmate mancanti*/
             for(i=0; i< programmateCounter; i++){
                 if(programmate[i].timestamp <= now && programmateChecklist){
-
+                    segnale(programmate[i]);
                 }
             }
 

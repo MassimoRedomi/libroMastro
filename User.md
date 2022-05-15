@@ -86,7 +86,7 @@ int nodoLibero(int id){
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
         if( retrylist[id] > configurazione.SO_RETRY){
             printf("L'utenete %d non ha trovato nessun nodo libero",id);
-            pthread_exit(NULL);
+            pthread_cancel(utenti_id[id]);
         }
         retrylist[id]++;
     }while(sem_trywait(&semafori[nodo])<0);

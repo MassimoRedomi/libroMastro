@@ -31,7 +31,6 @@ dopo nel libro mastro.*/
 int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
     int i = 0;
     FILE *file = fopen(fileName,"r");
-    char line[20];
     if(!file){
         printf("non si trova il libro di transazioni programmate.\n");
     }else{
@@ -45,6 +44,15 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
     return i;
 }
 
+
+/*segnale che forza una transazione di un'utente.*/
+void segnale(Transazione programmato){
+    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
+
+    budgetlist[programmato.sender] -= programmato.quantita;
+    printf("Segnale ->");
+    prinTrans(programmato);
+}
 
 bool printStatus(){
 
@@ -90,7 +98,7 @@ bool printStatus(){
             printf("#|         |         |        ||\n");
         }
     }
-    printf("\n\n");
+    printf("\n");
     return activeUsers!=0;
 }
 
@@ -182,7 +190,7 @@ int main(int argc,char *argv[]){
             /*cera transazioni programmate mancanti*/
             for(i=0; i< programmateCounter; i++){
                 if(programmate[i].timestamp <= now && programmateChecklist){
-
+                    segnale(programmate[i]);
                 }
             }
 
