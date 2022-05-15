@@ -1,4 +1,5 @@
 # DOMANDE PER IL PROFESSORE
+- [ ] è valido limitare la grandezza delle transazioni da 2 a budget/2, per prolongare la vita dell'utente attivo?
 ## Condizione di compilazione
 - [ ]  si puo aggiungere piu orgomenti alla compilazione?
 
@@ -34,7 +35,7 @@
    - [x] Todos los usuarios estan desactivados.
    - [x] El libro Mastro llego a su limite de bloques.
 
-- [ ] limpiar la cantidad de usuarios en pantalla
+- [x] limpiar la cantidad de usuarios en pantalla
     idea:(espero opiniones)
     se sono meno di 300 utenti: mostra tutto.
     Altrimenti: mostra solo gli utenti che hanno meno di di SO_RETRY tentativi.
@@ -58,9 +59,9 @@
 
 - [x] limpiar los outputs
 
-- [ ] quitar la somma debug
+- [x] quitar la somma debug
 
-- [ ] revisar porqué los nuemeros se disparan con el tiempo(en alguna parte se esta sumando mas de una vez)
+- [x] revisar porqué los nuemeros se disparan con el tiempo(en alguna parte se esta sumando mas de una vez) motivo: hacia transacciones muy grandes.
 
 # [NODO](Node.md)
 
