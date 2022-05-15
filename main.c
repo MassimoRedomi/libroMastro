@@ -48,7 +48,7 @@ bool printStatus(){
     printf("||===========================|##|============================||\n");
 
     /*Stampa risultati*/
-    for(i=0; i<configurazione.SO_USERS_NUM; i++){
+    for(i=0; i<MIN(51,configurazione.SO_USERS_NUM); i++){
         ActiveU = retrylist[i]<configurazione.SO_RETRY;
         sommaBudget += budgetlist[i];
         if(retrylist[i] < configurazione.SO_RETRY){
@@ -66,7 +66,7 @@ bool printStatus(){
             printf("#|%9d|%9d|%8s||\n", i , rewardlist[i],ActiveN?"True  ":"False ");
         }else{
             /*se non deve mostrare piu' nodi, allora solo fa un salto di linea*/
-            printf("\n");
+            printf("#|         |         |        ||\n");
         }
     }
     printf("\n\n");
