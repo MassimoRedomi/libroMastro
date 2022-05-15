@@ -25,6 +25,27 @@ pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
+
+/*legge le transazioni e gli scrive in un array di transazioni per scriverle 
+dopo nel libro mastro.*/
+int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
+    int i = 0;
+    FILE *file = fopen(fileName,"r");
+    char line[20];
+    if(!file){
+        printf("non si trova il libro di transazioni programmate.\n");
+    }else{
+        /*legge riga a riga fino alla fine(EOF), mettendo tutti le variabili nell'array 
+        delle transazioni programmate.*/
+        while(fscanf(file,"%lf %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
+            programmate[i].reward = programmate[i].quantita * configurazione.SO_REWARD / 100;
+            i++;
+        }
+    }
+    return i;
+}
+
+
 bool printStatus(){
 
     /*User var*/
@@ -79,12 +100,18 @@ int main(int argc,char *argv[]){
     bool test;
     int counterAttivi;
 
+    /*variabili delle transazioni programmate*/
+    int programmateCounter;
+    bool *programmateChecklist;
+    Transazione programmate[100];
+
+
     srand((unsigned) time(0)); /*aleatorio*/
 
     if(argc<2){
 	    printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
         exit(EXIT_FAILURE);
-    }else if(argc>2){
+    }else if(argc>3){
 		printf("troppi argomenti.\n");
 		exit(EXIT_FAILURE);
     }else{
@@ -95,6 +122,17 @@ int main(int argc,char *argv[]){
 	    	 readconf(argv[1]);/*lettura del file*/
         }
     
+        /*lettura di transazioni programmate*/
+        if(argc >= 3){
+            programmateCounter = leggeLibroDiTransazioni(argv[2], programmate);
+            programmateChecklist = malloc(programmateCounter * sizeof(bool));
+            for(i=0; i < programmateCounter; i++){
+                programmateChecklist[i] = true;
+            }
+        }else{
+            programmateCounter = 0;
+        }
+ 
         /*now that we have all the variables we can start the process
         master*/
     
@@ -140,6 +178,14 @@ int main(int argc,char *argv[]){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
+
+            /*cera transazioni programmate mancanti*/
+            for(i=0; i< programmateCounter; i++){
+                if(programmate[i].timestamp <= now && programmateChecklist){
+
+                }
+            }
+
 
         }
     
