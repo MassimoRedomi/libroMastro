@@ -77,10 +77,10 @@ bool printStatus(){
     printf("||===========================|##|============================||\n");
 
     /*Stampa risultati*/
-    for(i=0; i<MIN(51,configurazione.SO_USERS_NUM); i++){
+    for(i=0; i<MIN(41,configurazione.SO_USERS_NUM); i++){
         ActiveU = retrylist[i]<configurazione.SO_RETRY;
         sommaBudget += budgetlist[i];
-        if(retrylist[i] < configurazione.SO_RETRY){
+        if(ActiveU){
             activeUsers++;
         }else{
             inactiveUsers++;
@@ -92,13 +92,22 @@ bool printStatus(){
         if(i < configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
             ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
+            if(ActiveN){
+                activeNodes++;
+            }else{
+                inactiveNodes++;
+            }
             printf("#|%9d|%9d|%8s||\n", i , rewardlist[i],ActiveN?"True  ":"False ");
         }else{
-            /*se non deve mostrare piu' nodi, allora solo fa un salto di linea*/
+            /*se non deve mostrare piu' nodi, allora stampa a vuoto*/
             printf("#|         |         |        ||\n");
         }
     }
+    printf("---------------------------------------------------------------\n");
+    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
+    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
     printf("\n");
+
     return activeUsers!=0;
 }
 
