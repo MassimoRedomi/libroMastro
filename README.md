@@ -681,7 +681,7 @@ se ci sono ancora utenti disponibili.
 
 ```c main.c
 
-bool printStatus(){
+bool printStatus(int all){
 
     /*User var*/
     int activeUsers=0;
@@ -697,14 +697,23 @@ bool printStatus(){
 
     /*Share var*/
     int i=0;
+    int dim=0;
 
+    /*Scegliamo dim della tabella*/
+    if(all){
+        dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    }else if(!all){
+        dim=MIN(41, MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM));
+    }
+  
     /*Attributi*/
     printf("\n\n");
     printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
     printf("||===========================|##|============================||\n");
 
+    
     /*Stampa risultati*/
-    for(i=0; i<MIN(41,configurazione.SO_USERS_NUM); i++){
+    for(i=0; i<dim; i++){
         ActiveU = retrylist[i]<configurazione.SO_RETRY;
         sommaBudget += budgetlist[i];
         if(ActiveU){
@@ -730,10 +739,19 @@ bool printStatus(){
             printf("#|         |         |        ||\n");
         }
     }
-    printf("---------------------------------------------------------------\n");
-    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
-    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
-    printf("\n");
+    if(!all){
+        printf("---------------------------------------------------------------\n");
+        printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
+        printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
+        printf("\n");
+    }else if(all){
+        printf("---------------------------------------------------------------\n");
+        printf("||   Active Users   |   Terminate Users   |    Tot Budget    ||\n");
+        printf("||%18d|%21d|%18d||\n",activeUsers, inactiveUsers, sommaBudget);
+        printf("||   Active Nodes   |   Terminate Nodes   |    Tot Rewards   ||\n");
+        printf("||%18d|%21d|%18d||\n",activeNodes, inactiveNodes, sommaRewards);
+        printf("\n");
+    }
 
     return activeUsers!=0;
 }
@@ -823,12 +841,12 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus()){
+            if(!printStatus(0)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
 
-            /*cera transazioni programmate mancanti*/
+            /* transazioni programmate mancanti*/
             for(i=0; i< programmateCounter; i++){
                 if(programmate[i].timestamp <= now && programmateChecklist[i]){
                     segnale(programmate[i]);
@@ -852,6 +870,10 @@ int main(int argc,char *argv[]){
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
 			/*prinTrans(libroMastro[i]); per ora non mostro tutte transazioni*/
         }
+        /*Stampiamo i risultati finali*/
+        clear();
+        printStatus(1);
+
     
 	}
 	return 0;
