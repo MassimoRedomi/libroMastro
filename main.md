@@ -130,6 +130,29 @@ void segnale(Transazione programmato){
 
 # Main
 
+## Compare Function
+```c main.c
+int cmpfunc(const void *a, const void *b) {
+    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
+}
+```
+
+
+## Sort risults
+```c main.c
+int * sort(){
+    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    int *r=malloc(sizeof(int)*dim);
+    int i;
+
+    for(i=0; i<dim; i++)
+        r[i]=i;
+    
+    qsort(r, dim, sizeof(int), cmpfunc);
+    return r;
+}
+```
+
 
 ## PrintStatus Nodes and Users
 Questo metodo non solo mostra lo stato di tutti gli
@@ -138,7 +161,7 @@ se ci sono ancora utenti disponibili.
 
 ```c main.c
 
-bool printStatus(int all){
+bool printStatus(){
 
     /*User var*/
     int activeUsers=0;
@@ -154,15 +177,10 @@ bool printStatus(int all){
 
     /*Share var*/
     int i=0;
-    int dim=0;
+    int *pa;
 
-    /*Scegliamo dim della tabella*/
-    if(all){
-        dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
-    }else if(!all){
-        dim=MIN(41, MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM));
-    }
-  
+    pa=sort();
+
     /*Attributi*/
     printf("\n\n");
     printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
@@ -170,50 +188,44 @@ bool printStatus(int all){
 
     
     /*Stampa risultati*/
-    for(i=0; i<dim; i++){
-        ActiveU = retrylist[i]<configurazione.SO_RETRY;
-        sommaBudget += budgetlist[i];
-        if(ActiveU){
-            activeUsers++;
+    for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
+
+        if(i<configurazione.SO_USERS_NUM){
+            ActiveU = retrylist[*(pa+i)]<configurazione.SO_RETRY;
+            sommaBudget += budgetlist[*(pa+i)];
+            if(ActiveU)
+                activeUsers++;
+            else
+                inactiveUsers++;
+            printf("||%9d|%8d|%8s|#",*(pa+i),budgetlist[*(pa+i)], ActiveU?"True  ":"False ");
         }else{
-            inactiveUsers++;
+            printf("#|         |         |        ||\n");
         }
 
-        printf("||%9d|%8d|%8s|#",i,budgetlist[i], ActiveU?"True  ":"False ");
-
-        /*Se c'e un nodo da stampare*/
-        if(i < configurazione.SO_NODES_NUM){
+        if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
             ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
-            if(ActiveN){
+            if(ActiveN)
                 activeNodes++;
-            }else{
+            else
                 inactiveNodes++;
-            }
-            printf("#|%9d|%9d|%8s||\n", i , rewardlist[i],ActiveN?"True  ":"False ");
+            printf("#|%9d|%9d|%8s||\n", i, rewardlist[i],ActiveN?"True  ":"False ");
         }else{
-            /*se non deve mostrare piu' nodi, allora stampa a vuoto*/
             printf("#|         |         |        ||\n");
         }
     }
-    if(!all){
-        printf("---------------------------------------------------------------\n");
-        printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
-        printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
-        printf("\n");
-    }else if(all){
-        printf("---------------------------------------------------------------\n");
-        printf("||   Active Users   |   Terminate Users   |    Tot Budget    ||\n");
-        printf("||%18d|%21d|%18d||\n",activeUsers, inactiveUsers, sommaBudget);
-        printf("||   Active Nodes   |   Terminate Nodes   |    Tot Rewards   ||\n");
-        printf("||%18d|%21d|%18d||\n",activeNodes, inactiveNodes, sommaRewards);
-        printf("\n");
-    }
 
+    printf("---------------------------------------------------------------\n");
+    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
+    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
+    printf("\n");
+
+    free(pa);
     return activeUsers!=0;
 }
 
 ```
+
 
 ## Main Function
 
@@ -285,8 +297,9 @@ int main(int argc,char *argv[]){
 		now = difftime(time(0), startSimulation);
 
 		while(now < configurazione.SO_SIM_SEC){
+
 			sleep(1);
-			clear();
+            clear();
     
 			/*show last update*/
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
@@ -298,7 +311,7 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus(0)){
+            if(!printStatus()){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
@@ -322,16 +335,14 @@ int main(int argc,char *argv[]){
             pthread_cancel(utenti_id[i]);
         }
     
-		/*printf("numero di blocchi: %d\n\n",libroCounter);*/
-		/*solo por confirmar al final*/
+		/*
+        printf("numero di blocchi: %d\n\n",libroCounter);
+		solo por confirmar al final
 		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			/*prinTrans(libroMastro[i]); per ora non mostro tutte transazioni*/
+			prinTrans(libroMastro[i]); per ora non mostro tutte transazioni
         }
-        /*Stampiamo i risultati finali*/
-        clear();
-        printStatus(1);
-
-    
+        */
+        
 	}
 	return 0;
 }
