@@ -840,7 +840,9 @@ int main(int argc,char *argv[]){
 		now = difftime(time(0), startSimulation);
 
 		while(now < configurazione.SO_SIM_SEC){
+
 			sleep(1);
+            clear();
     
 			/*show last update*/
 	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
