@@ -198,6 +198,45 @@ void prinTrans(Transazione t){
 
 ```
 
+## User Struct
+È una struttura che porta tutte le variabili pubbliche collegate a un'utente.
+
+| variabile | type | definizione                                      |
+| --------- | ---- | ------------------------------------------------ |
+| thread    | int  | id del thread dov'è iniziato il processo utente. |
+| budget    | int  | Quantità di denaro che l'utente ha.              |
+| retry     | int  | Numero di tentativi falliti consecutivi.         |
+| stato     | bool | lo stato di attivo o inattivo dell'utente        |
+
+```c Structs.c
+typedef struct userStruct{
+    int thread;
+    int retry;
+    int budget;
+    bool stato;
+}userStruct;
+```
+
+## Node Struct
+È una struttura con tutte le variabili pubbliche.
+
+| variabile | type        | descrizione                                                                |
+| --------- | ----------- | -------------------------------------------------------------------------- |
+| poolsize  | int         | Numero di elemnti nella pool del nodo.                                     |
+| reward    | int         | Comissioni accumulate delle transazioni elaborate.                         |
+| semaforo  | sem_t       | Semaforo per controllare la disponibilià del nodo.                         |
+| mailbox   | transazione | Variabile dove l'utente mette la transazione quando il nodo è disponibile. |
+
+```c Structs.c
+typedef struct nodeStruct{
+    int poolsize;
+    int reward;
+    sem_t semaforo;
+    Transazione mailbox;
+}nodeStruct;
+```
+
+
 ## RandomInt & RandomLong
 
 Le due funzioni servono per lanciare un numero aleatorio tra min e 
@@ -610,14 +649,18 @@ o in alternativa sceglie unn'altra via per l'accesso.
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
+userStruct *userList;
+nodeStruct *nodeList;
+
 int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
-time_t startSimulation;
-pthread_t *utenti_id;     /*lista id di processi utenti*/
+
+time_t startSimulation; /*inizio della simulazione   */
+pthread_t *utenti_id;   /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
@@ -828,6 +871,8 @@ int main(int argc,char *argv[]){
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
+        /*somma di tutte le variabili dei nodi*/
+        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,NULL);
@@ -836,6 +881,7 @@ int main(int argc,char *argv[]){
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
+        userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&utenti_id[i],NULL,utente,NULL);

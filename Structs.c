@@ -119,6 +119,18 @@ void prinTrans(Transazione t){
 	printf("%f: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
 
+typedef struct userStruct{
+    int thread;
+    int retry;
+    int budget;
+    bool stato;
+}userStruct;
+typedef struct nodeStruct{
+    int poolsize;
+    int reward;
+    sem_t semaforo;
+    Transazione mailbox;
+}nodeStruct;
 
 int randomInt(int min, int max){
 	return rand() % max +min;

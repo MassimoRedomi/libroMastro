@@ -198,6 +198,45 @@ void prinTrans(Transazione t){
 
 ```
 
+## User Struct
+È una struttura che porta tutte le variabili pubbliche collegate a un'utente.
+
+| variabile | type | definizione                                      |
+| --------- | ---- | ------------------------------------------------ |
+| thread    | int  | id del thread dov'è iniziato il processo utente. |
+| budget    | int  | Quantità di denaro che l'utente ha.              |
+| retry     | int  | Numero di tentativi falliti consecutivi.         |
+| stato     | bool | lo stato di attivo o inattivo dell'utente        |
+
+```c Structs.c
+typedef struct userStruct{
+    int thread;
+    int retry;
+    int budget;
+    bool stato;
+}userStruct;
+```
+
+## Node Struct
+È una struttura con tutte le variabili pubbliche.
+
+| variabile | type        | descrizione                                                                |
+| --------- | ----------- | -------------------------------------------------------------------------- |
+| poolsize  | int         | Numero di elemnti nella pool del nodo.                                     |
+| reward    | int         | Comissioni accumulate delle transazioni elaborate.                         |
+| semaforo  | sem_t       | Semaforo per controllare la disponibilià del nodo.                         |
+| mailbox   | transazione | Variabile dove l'utente mette la transazione quando il nodo è disponibile. |
+
+```c Structs.c
+typedef struct nodeStruct{
+    int poolsize;
+    int reward;
+    sem_t semaforo;
+    Transazione mailbox;
+}nodeStruct;
+```
+
+
 ## RandomInt & RandomLong
 
 Le due funzioni servono per lanciare un numero aleatorio tra min e 

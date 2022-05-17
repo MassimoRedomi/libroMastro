@@ -67,14 +67,18 @@ o in alternativa sceglie unn'altra via per l'accesso.
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
+userStruct *userList;
+nodeStruct *nodeList;
+
 int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
-time_t startSimulation;
-pthread_t *utenti_id;     /*lista id di processi utenti*/
+
+time_t startSimulation; /*inizio della simulazione   */
+pthread_t *utenti_id;   /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
@@ -285,6 +289,8 @@ int main(int argc,char *argv[]){
         rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
+        /*somma di tutte le variabili dei nodi*/
+        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,NULL);
@@ -293,6 +299,7 @@ int main(int argc,char *argv[]){
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
+        userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&utenti_id[i],NULL,utente,NULL);
