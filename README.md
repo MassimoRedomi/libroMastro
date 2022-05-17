@@ -302,6 +302,7 @@ extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
+extern nodeStruct *nodeList;
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -360,6 +361,12 @@ void* nodo(void *conf){
     poolsizelist[id]=0;/*set full space available*/
     mythr = pthread_self();
     /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
+
+    /*rellena la estructura del nodo*/
+    nodeList[id].poolsize = 0;
+    nodeList[id].reward   = 0;
+    sem_init(&nodeList[id].semaforo,configurazione.SO_USERS_NUM,1);
+
     
     /*inizio del funzionamento*/
     while(poolsizelist[id] < configurazione.SO_TP_SIZE){
@@ -443,6 +450,11 @@ extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
+
+/*variabili simplificati a due array*/
+extern userStruct *userList;
+extern nodeStruct *nodeList;
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
@@ -552,6 +564,10 @@ void* utente(void *conf){
 	/*setting default values delle variabili condivise*/
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+    userList[id].thread = pthread_self();
+    userList[id].budget = configurazione.SO_BUDGET_INIT;
+    userList[id].retry  = 0;
+    userList[id].stato  = true;
 
 	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     

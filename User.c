@@ -12,6 +12,11 @@ extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
+
+/*variabili simplificati a due array*/
+extern userStruct *userList;
+extern nodeStruct *nodeList;
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
@@ -94,6 +99,10 @@ void* utente(void *conf){
 	/*setting default values delle variabili condivise*/
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+    userList[id].thread = pthread_self();
+    userList[id].budget = configurazione.SO_BUDGET_INIT;
+    userList[id].retry  = 0;
+    userList[id].stato  = true;
 
 	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     
