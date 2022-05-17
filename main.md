@@ -131,6 +131,8 @@ void segnale(Transazione programmato){
 # Main
 
 ## Compare Function
+Metodo che compara due valori e restituisce un numero positivo se b è piu
+grande di a e negativo se b è piu piccolo di a:
 ```c main.c
 int cmpfunc(const void *a, const void *b) {
     return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
@@ -139,6 +141,9 @@ int cmpfunc(const void *a, const void *b) {
 
 
 ## Sort risults
+Metodo di ordinamento del dei processi in modo decrescente
+(dal piu grande al piu piccolo).
+
 ```c main.c
 int * sort(){
     int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
