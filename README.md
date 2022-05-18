@@ -472,7 +472,7 @@ int userUpdate(int id, int lastUpdate){
     while(lastUpdate < libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
-	    	    budgetlist[id] += libroMastro[i].quantita - libroMastro[i].reward;
+	    	    userList[id].budget += libroMastro[i].quantita - libroMastro[i].reward;
 	    	 }
         }
         lastUpdate++;
@@ -528,7 +528,7 @@ Transazione generateTransaction(int id){
     int altroUtente;
 	Transazione transaccion;
     transaccion.sender   = id;
-    transaccion.quantita = randomInt(2,budgetlist[id]/2);/*set quantita a caso*/
+    transaccion.quantita = randomInt(2,userList[id].budget/2);/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
 	/*se il reward non arriva a 1, allora diventa 1*/
@@ -576,14 +576,14 @@ void* utente(void *conf){
     
 		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
     
-		if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/                                
+		if(userList[id].budget>=2){                   /*Condizione Budget >= 2*/                                
     
 			Transazione transaction;              /*Creiamo una nuova transazione*/
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
             mailbox[nodoLibero(id)] = transaction;
-            budgetlist[id] -= transaction.quantita;
+            userList[id].budget -= transaction.quantita;
         }else{
 			retrylist[id]++;
 		}
@@ -724,7 +724,7 @@ creata dal master con valori predefiniti.
 void segnale(Transazione programmato){
     mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
 
-    budgetlist[programmato.sender] -= programmato.quantita;
+    userList[programmato.sender].budget -= programmato.quantita;
     printf("Segnale ->");
     prinTrans(programmato);
 }
@@ -737,7 +737,7 @@ Metodo che compara due valori e restituisce un numero positivo se b è piu
 grande di a e negativo se b è piu piccolo di a:
 ```c main.c
 int cmpfunc(const void *a, const void *b) {
-    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
+    return(userList[*((int*)b)].budget-userList[*((int*)a)].budget);
 }
 ```
 
@@ -799,12 +799,12 @@ bool printStatus(){
 
         if(i<configurazione.SO_USERS_NUM){
             ActiveU = retrylist[*(pa+i)]<configurazione.SO_RETRY;
-            sommaBudget += budgetlist[*(pa+i)];
+            sommaBudget += userList[*(pa+i)].budget;
             if(ActiveU)
                 activeUsers++;
             else
                 inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),budgetlist[*(pa+i)], ActiveU?"True  ":"False ");
+            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, ActiveU?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
         }

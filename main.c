@@ -53,12 +53,12 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 void segnale(Transazione programmato){
     mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
 
-    budgetlist[programmato.sender] -= programmato.quantita;
+    userList[programmato.sender].budget -= programmato.quantita;
     printf("Segnale ->");
     prinTrans(programmato);
 }
 int cmpfunc(const void *a, const void *b) {
-    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
+    return(userList[*((int*)b)].budget-userList[*((int*)a)].budget);
 }
 int * sort(){
     int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
@@ -103,12 +103,12 @@ bool printStatus(){
 
         if(i<configurazione.SO_USERS_NUM){
             ActiveU = retrylist[*(pa+i)]<configurazione.SO_RETRY;
-            sommaBudget += budgetlist[*(pa+i)];
+            sommaBudget += userList[*(pa+i)].budget;
             if(ActiveU)
                 activeUsers++;
             else
                 inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),budgetlist[*(pa+i)], ActiveU?"True  ":"False ");
+            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, ActiveU?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
         }

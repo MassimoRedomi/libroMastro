@@ -27,7 +27,7 @@ int userUpdate(int id, int lastUpdate){
     while(lastUpdate < libroCounter){
 		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
 			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
-	    	    budgetlist[id] += libroMastro[i].quantita - libroMastro[i].reward;
+	    	    userList[id].budget += libroMastro[i].quantita - libroMastro[i].reward;
 	    	 }
         }
         lastUpdate++;
@@ -68,7 +68,7 @@ Transazione generateTransaction(int id){
     int altroUtente;
 	Transazione transaccion;
     transaccion.sender   = id;
-    transaccion.quantita = randomInt(2,budgetlist[id]/2);/*set quantita a caso*/
+    transaccion.quantita = randomInt(2,userList[id].budget/2);/*set quantita a caso*/
 	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
 	/*se il reward non arriva a 1, allora diventa 1*/
@@ -111,14 +111,14 @@ void* utente(void *conf){
     
 		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
     
-		if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/                                
+		if(userList[id].budget>=2){                   /*Condizione Budget >= 2*/                                
     
 			Transazione transaction;              /*Creiamo una nuova transazione*/
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
             mailbox[nodoLibero(id)] = transaction;
-            budgetlist[id] -= transaction.quantita;
+            userList[id].budget -= transaction.quantita;
         }else{
 			retrylist[id]++;
 		}
