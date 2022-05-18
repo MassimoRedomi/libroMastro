@@ -17,7 +17,6 @@ sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
 userStruct *userList;
 nodeStruct *nodeList;
 
-int *retrylist;      /*numero di tentativi di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -50,7 +49,7 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 
 /*segnale che forza una transazione di un'utente.*/
 void segnale(Transazione programmato){
-    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
+    nodeList[nodoLibero(programmato.sender)].mailbox = programmato;/*assegno la transazione in un mailbox*/
 
     userList[programmato.sender].budget -= programmato.quantita;
     printf("Segnale ->");
@@ -101,20 +100,19 @@ bool printStatus(){
     for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
 
         if(i<configurazione.SO_USERS_NUM){
-            ActiveU = retrylist[*(pa+i)]<configurazione.SO_RETRY;
             sommaBudget += userList[*(pa+i)].budget;
-            if(ActiveU)
+            if(userList[*(pa+i)].stato)
                 activeUsers++;
             else
                 inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, ActiveU?"True  ":"False ");
+            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, userList[*(pa+i)].stato?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
         }
 
         if(i< configurazione.SO_NODES_NUM){
-            sommaRewards+=rewardlist[i];
-            ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
+            sommaRewards+=nodeList[i].reward;
+            ActiveN = nodeList[i].poolsize < configurazione.SO_TP_SIZE;
             if(ActiveN)
                 activeNodes++;
             else
@@ -180,10 +178,6 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
-        poolsizelist=malloc(configurazione.SO_TP_SIZE * sizeof(int));
-        rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
-        semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
-        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
         /*somma di tutte le variabili dei nodi*/
         nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
@@ -192,7 +186,6 @@ int main(int argc,char *argv[]){
         }
 
         /*generatore dei utenti*/
-        retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
@@ -212,7 +205,7 @@ int main(int argc,char *argv[]){
 
 	    	now = difftime(time(0), startSimulation);
             
-            if(libroCounter > SO_REGISTRY_SIZE){
+            if(libroCounter >= SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
                 break;
             }
@@ -237,9 +230,13 @@ int main(int argc,char *argv[]){
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
 			pthread_cancel(nodi_id[i]);
 		}
+        free(nodeList);
+        free(nodi_id );
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
         }
+        free(userList );
+        free(utenti_id);
     
 		/*
         printf("numero di blocchi: %d\n\n",libroCounter);
