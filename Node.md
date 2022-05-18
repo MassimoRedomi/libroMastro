@@ -121,12 +121,10 @@ void* nodo(void *conf){
 	    	}
             if(nodeList[id].poolsize < configurazione.SO_TP_SIZE){
                 sem_post(&nodeList[id].semaforo);/*stabilisco il semaforo come di nuovo disponibile*/
-	        }
-            
-            if(nodeList[id].poolsize >= configurazione.SO_TP_SIZE){
-            /*Se raggiunge il n° max di tentativi*/
-			printf("nodo %d fermato\n",id);       /*ferma il procceso*/
-            nodeList[id].stato = false;
+	        }else{
+                /*Se raggiunge il n° max di tentativi*/
+                printf("nodo %d fermato\n",id);       /*ferma il procceso*/
+                nodeList[id].stato = false;
 		    }
         }
 	}
