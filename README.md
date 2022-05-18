@@ -444,11 +444,6 @@ Importa tutte le variabili del Main
 
 ```c User.c
 /*variabili condivise tra diversi thread.*/
-extern int *retrylist ;     /*thread id di ogni utente*/
-extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
-extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
-extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-extern Transazione *mailbox;/*struttura per condividere */
 
 /*variabili simplificati a due array*/
 extern userStruct *userList;
@@ -504,15 +499,16 @@ int nodoLibero(int id){
     int nodo;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
-        if( retrylist[id] > configurazione.SO_RETRY){
+        if( userList[id].retry > configurazione.SO_RETRY){
+            userList[id].stato = false;
             printf("L'utenete %d non ha trovato nessun nodo libero\n",id);
             pthread_cancel(utenti_id[id]);
         }
-        retrylist[id]++;
-    }while(sem_trywait(&semafori[nodo])<0);
+        userList[id].retry++;
+    }while(sem_trywait(&nodeList[nodo].semaforo)<0);
     
-    if( retrylist[id] <= configurazione.SO_RETRY ){
-        retrylist[id] = 0;
+    if( userList[id].retry <= configurazione.SO_RETRY ){
+        userList[id].retry = 0;
     }
 
     return nodo;
@@ -539,11 +535,10 @@ Transazione generateTransaction(int id){
     /*debo reparar lo de los intentos*/
     do{
 		altroUtente= randomInt(0,configurazione.SO_USERS_NUM);
-	}while(altroUtente==id || retrylist[altroUtente] > configurazione.SO_RETRY);
+	}while( altroUtente==id || !userList[altroUtente].stato );
 	transaccion.receiver = altroUtente;
 	/*calcola il timestamp in base al tempo di simulazione.*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
-    retrylist[id] = 0;
 
 	return transaccion;
 }
@@ -561,7 +556,6 @@ void* utente(void *conf){
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
 
 	/*setting default values delle variabili condivise*/
-    retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
     userList[id].thread = pthread_self();
     userList[id].budget = configurazione.SO_BUDGET_INIT;
     userList[id].retry  = 0;
@@ -570,7 +564,7 @@ void* utente(void *conf){
 	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     
 
-	while(retrylist[id]<configurazione.SO_RETRY){
+	while( userList[id].stato ){
     
 		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
     
@@ -580,16 +574,17 @@ void* utente(void *conf){
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
-            mailbox[nodoLibero(id)] = transaction;
+            nodeList[nodoLibero(id)].mailbox = transaction;
             userList[id].budget -= transaction.quantita;
         }else{
-			retrylist[id]++;
+			userList[id].retry++;
 		}
     
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
-		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
+		if(userList[id].retry >= configurazione.SO_RETRY || !userList[id].stato ){/*Se raggiunge il n° max di tentativi*/
 			printf("utente %d fermato\n",id);       /*ferma il procceso*/
+            userList[id].stato = false;
 		}
     }
 }
@@ -666,7 +661,6 @@ o in alternativa sceglie unn'altra via per l'accesso.
 userStruct *userList;
 nodeStruct *nodeList;
 
-int *retrylist;      /*numero di tentativi di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -719,7 +713,7 @@ creata dal master con valori predefiniti.
 
 /*segnale che forza una transazione di un'utente.*/
 void segnale(Transazione programmato){
-    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
+    nodeList[nodoLibero(programmato.sender)].mailbox = programmato;/*assegno la transazione in un mailbox*/
 
     userList[programmato.sender].budget -= programmato.quantita;
     printf("Segnale ->");
@@ -795,20 +789,19 @@ bool printStatus(){
     for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
 
         if(i<configurazione.SO_USERS_NUM){
-            ActiveU = retrylist[*(pa+i)]<configurazione.SO_RETRY;
             sommaBudget += userList[*(pa+i)].budget;
-            if(ActiveU)
+            if(userList[*(pa+i)].stato)
                 activeUsers++;
             else
                 inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, ActiveU?"True  ":"False ");
+            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, userList[*(pa+i)].stato?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
         }
 
         if(i< configurazione.SO_NODES_NUM){
-            sommaRewards+=rewardlist[i];
-            ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
+            sommaRewards+=nodeList[i].reward;
+            ActiveN = nodeList[i].poolsize < configurazione.SO_TP_SIZE;
             if(ActiveN)
                 activeNodes++;
             else
@@ -880,10 +873,6 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
-        poolsizelist=malloc(configurazione.SO_TP_SIZE * sizeof(int));
-        rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
-        semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
-        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
         /*somma di tutte le variabili dei nodi*/
         nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
@@ -892,7 +881,6 @@ int main(int argc,char *argv[]){
         }
 
         /*generatore dei utenti*/
-        retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
@@ -912,7 +900,7 @@ int main(int argc,char *argv[]){
 
 	    	now = difftime(time(0), startSimulation);
             
-            if(libroCounter > SO_REGISTRY_SIZE){
+            if(libroCounter >= SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
                 break;
             }
@@ -937,9 +925,13 @@ int main(int argc,char *argv[]){
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
 			pthread_cancel(nodi_id[i]);
 		}
+        free(nodeList);
+        free(nodi_id );
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
         }
+        free(userList );
+        free(utenti_id);
     
 		/*
         printf("numero di blocchi: %d\n\n",libroCounter);

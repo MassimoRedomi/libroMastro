@@ -28,8 +28,6 @@ Importa tutte le variabili del Main
 
 ```c User.c
 /*variabili condivise tra diversi thread.*/
-extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-extern Transazione *mailbox;/*struttura per condividere */
 
 /*variabili simplificati a due array*/
 extern userStruct *userList;
@@ -91,7 +89,7 @@ int nodoLibero(int id){
             pthread_cancel(utenti_id[id]);
         }
         userList[id].retry++;
-    }while(sem_trywait(&semafori[nodo])<0);
+    }while(sem_trywait(&nodeList[nodo].semaforo)<0);
     
     if( userList[id].retry <= configurazione.SO_RETRY ){
         userList[id].retry = 0;
@@ -160,7 +158,7 @@ void* utente(void *conf){
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
-            mailbox[nodoLibero(id)] = transaction;
+            nodeList[nodoLibero(id)].mailbox = transaction;
             userList[id].budget -= transaction.quantita;
         }else{
 			userList[id].retry++;
