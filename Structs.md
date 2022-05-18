@@ -203,14 +203,12 @@ void prinTrans(Transazione t){
 
 | variabile | type | definizione                                      |
 | --------- | ---- | ------------------------------------------------ |
-| thread    | int  | id del thread dov'è iniziato il processo utente. |
 | budget    | int  | Quantità di denaro che l'utente ha.              |
 | retry     | int  | Numero di tentativi falliti consecutivi.         |
 | stato     | bool | lo stato di attivo o inattivo dell'utente        |
 
 ```c Structs.c
 typedef struct userStruct{
-    int thread;
     int retry;
     int budget;
     bool stato;

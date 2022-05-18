@@ -120,7 +120,6 @@ void prinTrans(Transazione t){
 }
 
 typedef struct userStruct{
-    int thread;
     int retry;
     int budget;
     bool stato;

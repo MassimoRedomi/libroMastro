@@ -91,7 +91,6 @@ void* utente(void *conf){
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
 
 	/*setting default values delle variabili condivise*/
-    userList[id].thread = pthread_self();
     userList[id].budget = configurazione.SO_BUDGET_INIT;
     userList[id].retry  = 0;
     userList[id].stato  = true;
