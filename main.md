@@ -186,8 +186,9 @@ bool printStatus(int nstamp){
 
     /*Attributi*/
     printf("\n\n");
-    printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
-    printf("||===========================|##|============================||\n");
+    printf("---------------------------------------------------------------------\n");
+    printf("||  User_ID |  Budget |  Status |##|  Node_ID |  Rewards |  Status ||\n");
+    printf("||==============================|##|===============================||\n");
 
     
     /*Stampa risultati*/
@@ -197,29 +198,41 @@ bool printStatus(int nstamp){
             sommaBudget += userList[*(pa+i)].budget;
             userList[*(pa+i)].stato?activeUsers++:inactiveUsers++;
             if(i<nstamp/2){
-                printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, B(userList[*(pa+i)].stato));
+                printf("||%10d|%9d|%9s|#",*(pa+i),userList[*(pa+i)].budget, B(userList[*(pa+i)].stato));
             }else if(i>(nstamp/2)-1 && i<nstamp){
-                printf("||%9d|%8d|%8s|#",*((pa+dim)-(i-nstamp/2)),userList[*(pa+dim)-(i-nstamp/2)].budget, B(userList[*(pa+dim)-(i-nstamp/2)].stato));
+                printf("||%10d|%9d|%9s|#",*((pa+dim)-(i-nstamp/2)),userList[*(pa+dim)-(i-nstamp/2)].budget, B(userList[*(pa+dim)-(i-nstamp/2)].stato));
             }
         }else if(i<nstamp){
-            printf("#|         |         |        ||\n");
+            printf("||          |          |         |#\n");
         }
 
         if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=nodeList[i].reward;
             nodeList[i].stato?activeNodes++:inactiveNodes++;
-            if(i<nstamp/2){
-                 printf("#|%9d|%9d|%8s||\n", i, nodeList[i].reward,B(nodeList[i].stato));
+            if(i<nstamp){
+                 printf("#|%10d|%10d|%9s||\n", i, nodeList[i].reward,B(nodeList[i].stato));
             }
         }else if(i<nstamp){
-            printf("#|         |         |        ||\n");
+            printf("#|          |          |         ||\n");
         }
     }
+    if(nstamp==dim){
+        printf("---------------------------------------------------------------------\n");
+        printf("|| Active Users | Inactive Users |##| Active Nodes | Inactive Nodes||\n");
+        printf("||%14d|%16d|##|%14d|%15d||\n",activeUsers,inactiveUsers, activeNodes, inactiveNodes);
+        printf("||-----------------------------------------------------------------||\n");
+        printf("||  Tot Rewards |%50d||\n",sommaRewards);
+        printf("||  Tot Budgets |%50d||\n",sommaBudget);
+        printf("||  Tot Block   |%50d||\n", 10);
 
-    printf("---------------------------------------------------------------\n");
-    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
-    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
-    printf("\n");
+
+    }else{
+        printf("---------------------------------------------------------------------\n");
+        printf("||  Active Users |   Tot Budget |##|  Active Nodes |   Tot Rewards ||\n");
+        printf("||%15d|%14d|##|%15d|%15d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
+        printf("\n");
+    }
+    
 
     return activeUsers!=0;
 }
@@ -323,6 +336,9 @@ int main(int argc,char *argv[]){
 
 
         }
+
+        clear();
+        printStatus(MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM));
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
@@ -339,6 +355,7 @@ int main(int argc,char *argv[]){
 			prinTrans(libroMastro[i]); per ora non mostro tutte transazioni
         }
         */
+
         
 	}
 	return 0;
