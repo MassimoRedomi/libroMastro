@@ -23,10 +23,6 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 ### Sincronizzazione tra Processi
 ```c Node.c
 /*variabili condivise tra diversi thread.*/
-extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
-extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-extern Transazione *mailbox;/*struttura per condividere */
-extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern nodeStruct *nodeList;
 extern Configurazione configurazione;
 extern time_t startSimulation;
@@ -78,14 +74,7 @@ void* nodo(void *conf){
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
-    Transazione finalReward;
-    int mythr; 
     int semvalue;/*valore del semaforo*/
-    sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
-	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
-    poolsizelist[id]=0;/*set full space available*/
-    mythr = pthread_self();
-    /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
 
     /*rellena la estructura del nodo*/
     nodeList[id].poolsize = 0;
@@ -94,23 +83,23 @@ void* nodo(void *conf){
 
     
     /*inizio del funzionamento*/
-    while(poolsizelist[id] < configurazione.SO_TP_SIZE){
+    while(nodeList[id].poolsize < configurazione.SO_TP_SIZE){
     
 		/*aggiorno il valore del semaforo*/
-        sem_getvalue(&semafori[id],&semvalue);
+        sem_getvalue(&nodeList[id].semaforo,&semvalue);
         if(semvalue <= 0){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
-	    	 pool[poolsizelist[id]]=mailbox[id];
-	    	 blocco[counterBlock]=mailbox[id];
+	    	 pool[nodeList[id].poolsize]=nodeList[id].mailbox;
+	    	 blocco[counterBlock]=nodeList[id].mailbox;
     
 	    	 /*somma il reward*/
 	    	 sommaBlocco    += blocco[counterBlock].reward;
-	    	 rewardlist[id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
+	    	 nodeList[id].reward += blocco[counterBlock].reward;/*si mette al registro publico totale*/
     
 	    	 /*incremento i contatori di posizione di pool e block*/
 	    	 counterBlock++;
-	    	 poolsizelist[id]++;
+	    	 nodeList[id].poolsize++;
 
 	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
@@ -126,12 +115,11 @@ void* nodo(void *conf){
 	    	    counterBlock=0;
 	    	    sommaBlocco=0;
 				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
-	    	    /*free(&mailbox[id]);*/
     
 	    	      
 	    	}
-            if(poolsizelist[id] < configurazione.SO_TP_SIZE){
-                sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
+            if(nodeList[id].poolsize < configurazione.SO_TP_SIZE){
+                sem_post(&nodeList[id].semaforo);/*stabilisco il semaforo come di nuovo disponibile*/
 	        }
     
 		}
