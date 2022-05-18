@@ -226,6 +226,7 @@ typedef struct userStruct{
 | reward    | int         | Comissioni accumulate delle transazioni elaborate.                         |
 | semaforo  | sem_t       | Semaforo per controllare la disponibilià del nodo.                         |
 | mailbox   | transazione | Variabile dove l'utente mette la transazione quando il nodo è disponibile. |
+| stato     | bool        | Stato di attivo o inattivo del nodo                                        |
 
 ```c Structs.c
 typedef struct nodeStruct{
@@ -233,6 +234,7 @@ typedef struct nodeStruct{
     int reward;
     sem_t semaforo;
     Transazione mailbox;
+    bool stato;
 }nodeStruct;
 ```
 
@@ -851,7 +853,7 @@ int main(int argc,char *argv[]){
     
         /*generatore dei nodi*/
         /*somma di tutte le variabili dei nodi*/
-        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)));
+        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)+ sizeof(bool)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,NULL);

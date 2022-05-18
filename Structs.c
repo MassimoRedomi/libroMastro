@@ -130,6 +130,7 @@ typedef struct nodeStruct{
     int reward;
     sem_t semaforo;
     Transazione mailbox;
+    bool stato;
 }nodeStruct;
 
 int randomInt(int min, int max){

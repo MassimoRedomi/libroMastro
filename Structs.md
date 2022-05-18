@@ -226,6 +226,7 @@ typedef struct userStruct{
 | reward    | int         | Comissioni accumulate delle transazioni elaborate.                         |
 | semaforo  | sem_t       | Semaforo per controllare la disponibilià del nodo.                         |
 | mailbox   | transazione | Variabile dove l'utente mette la transazione quando il nodo è disponibile. |
+| stato     | bool        | Stato di attivo o inattivo del nodo                                        |
 
 ```c Structs.c
 typedef struct nodeStruct{
@@ -233,6 +234,7 @@ typedef struct nodeStruct{
     int reward;
     sem_t semaforo;
     Transazione mailbox;
+    bool stato;
 }nodeStruct;
 ```
 

@@ -272,7 +272,7 @@ int main(int argc,char *argv[]){
     
         /*generatore dei nodi*/
         /*somma di tutte le variabili dei nodi*/
-        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)));
+        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)+ sizeof(bool)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,NULL);
