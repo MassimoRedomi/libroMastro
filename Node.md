@@ -79,11 +79,12 @@ void* nodo(void *conf){
     /*rellena la estructura del nodo*/
     nodeList[id].poolsize = 0;
     nodeList[id].reward   = 0;
+    nodeList[id].stato= true;
     sem_init(&nodeList[id].semaforo,configurazione.SO_USERS_NUM,1);
 
     
     /*inizio del funzionamento*/
-    while(nodeList[id].poolsize < configurazione.SO_TP_SIZE){
+    while(nodeList[id].stato){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&nodeList[id].semaforo,&semvalue);
@@ -121,9 +122,13 @@ void* nodo(void *conf){
             if(nodeList[id].poolsize < configurazione.SO_TP_SIZE){
                 sem_post(&nodeList[id].semaforo);/*stabilisco il semaforo come di nuovo disponibile*/
 	        }
-    
-		}
-    
+            
+            if(nodeList[id].poolsize >= configurazione.SO_TP_SIZE){
+            /*Se raggiunge il n° max di tentativi*/
+			printf("nodo %d fermato\n",id);       /*ferma il procceso*/
+            nodeList[id].stato = false;
+		    }
+        }
 	}
 }
 ```
