@@ -7,7 +7,6 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
 /*variabili condivise tra diversi thread.*/
 extern int *retrylist ;     /*thread id di ogni utente*/
-extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -98,7 +97,6 @@ void* utente(void *conf){
 
 	/*setting default values delle variabili condivise*/
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
-	budgetlist[id] = configurazione.SO_BUDGET_INIT;
     userList[id].thread = pthread_self();
     userList[id].budget = configurazione.SO_BUDGET_INIT;
     userList[id].retry  = 0;

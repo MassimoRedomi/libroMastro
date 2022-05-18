@@ -71,7 +71,6 @@ userStruct *userList;
 nodeStruct *nodeList;
 
 int *retrylist;      /*numero di tentativi di ogni utente*/
-int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -298,7 +297,6 @@ int main(int argc,char *argv[]){
 
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
-        budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
         userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){

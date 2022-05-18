@@ -445,7 +445,6 @@ Importa tutte le variabili del Main
 ```c User.c
 /*variabili condivise tra diversi thread.*/
 extern int *retrylist ;     /*thread id di ogni utente*/
-extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -563,7 +562,6 @@ void* utente(void *conf){
 
 	/*setting default values delle variabili condivise*/
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
-	budgetlist[id] = configurazione.SO_BUDGET_INIT;
     userList[id].thread = pthread_self();
     userList[id].budget = configurazione.SO_BUDGET_INIT;
     userList[id].retry  = 0;
@@ -669,7 +667,6 @@ userStruct *userList;
 nodeStruct *nodeList;
 
 int *retrylist;      /*numero di tentativi di ogni utente*/
-int *budgetlist;     /*un registro del budget di ogni utente*/
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -896,7 +893,6 @@ int main(int argc,char *argv[]){
 
         /*generatore dei utenti*/
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
-        budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
         userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
