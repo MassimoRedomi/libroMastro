@@ -55,6 +55,7 @@ extern Configurazione configurazione;
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 #define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
 #define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
+#define B(b) ((b) ? "true" : "false")
 
 ```
 
@@ -744,7 +745,7 @@ se ci sono ancora utenti disponibili.
 
 ```c main.c
 
-bool printStatus(){
+bool printStatus(int nstamp){
 
     /*User var*/
     int activeUsers=0;
@@ -761,6 +762,7 @@ bool printStatus(){
     /*Share var*/
     int i=0;
     int *pa;
+    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
 
     pa=sort();
 
@@ -776,18 +778,22 @@ bool printStatus(){
         if(i<configurazione.SO_USERS_NUM){
             sommaBudget += userList[*(pa+i)].budget;
             userList[*(pa+i)].stato?activeUsers++:inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, userList[*(pa+i)].stato?"True  ":"False ");
-        }else{
+            if(i<nstamp/2){
+                printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, B(userList[*(pa+i)].stato));
+            }else if(i>(nstamp/2)-1 && i<nstamp){
+                printf("||%9d|%8d|%8s|#",*((pa+dim)-(i-nstamp/2)),userList[*(pa+dim)-(i-nstamp/2)].budget, B(userList[*(pa+dim)-(i-nstamp/2)].stato));
+            }
+        }else if(i<nstamp){
             printf("#|         |         |        ||\n");
         }
 
         if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=nodeList[i].reward;
-            ActiveN = nodeList[i].poolsize < configurazione.SO_TP_SIZE;
-            ActiveN?activeNodes++:inactiveNodes++;
-            
-            printf("#|%9d|%9d|%8s||\n", i, nodeList[i].reward,ActiveN?"True  ":"False ");
-        }else{
+            nodeList[i].stato?activeNodes++:inactiveNodes++;
+            if(i<nstamp/2){
+                 printf("#|%9d|%9d|%8s||\n", i, nodeList[i].reward,B(nodeList[i].stato));
+            }
+        }else if(i<nstamp){
             printf("#|         |         |        ||\n");
         }
     }
@@ -884,7 +890,7 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus()){
+            if(!printStatus(40)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
