@@ -649,16 +649,10 @@ o in alternativa sceglie unn'altra via per l'accesso.
 userStruct *userList;
 nodeStruct *nodeList;
 
-int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
-int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
-sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-Transazione *mailbox;/*struttura per condividere */
-
-time_t startSimulation; /*inizio della simulazione   */
 pthread_t *utenti_id;   /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
-
+time_t startSimulation;
 ```
 # Transazioni programmate(para quien me lea. traduzcanme por favor)
 Las transacciones progrmadas son una lista de transacciones que vienen son leidos
@@ -794,7 +788,7 @@ bool printStatus(){
                 activeNodes++;
             else
                 inactiveNodes++;
-            printf("#|%9d|%9d|%8s||\n", i, rewardlist[i],ActiveN?"True  ":"False ");
+            printf("#|%9d|%9d|%8s||\n", i, nodeList[i].reward,ActiveN?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
         }
@@ -805,7 +799,6 @@ bool printStatus(){
     printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
     printf("\n");
 
-    free(pa);
     return activeUsers!=0;
 }
 
@@ -913,13 +906,9 @@ int main(int argc,char *argv[]){
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
 			pthread_cancel(nodi_id[i]);
 		}
-        free(nodeList);
-        free(nodi_id );
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
         }
-        free(userList );
-        free(utenti_id);
     
 		/*
         printf("numero di blocchi: %d\n\n",libroCounter);
