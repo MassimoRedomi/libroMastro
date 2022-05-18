@@ -150,6 +150,7 @@ int * sort(){
         r[i]=i;
     
     qsort(r, dim, sizeof(int), cmpfunc);
+
     return r;
 }
 ```
@@ -193,10 +194,7 @@ bool printStatus(){
 
         if(i<configurazione.SO_USERS_NUM){
             sommaBudget += userList[*(pa+i)].budget;
-            if(userList[*(pa+i)].stato)
-                activeUsers++;
-            else
-                inactiveUsers++;
+            userList[*(pa+i)].stato?activeUsers++:inactiveUsers++;
             printf("||%9d|%8d|%8s|#",*(pa+i),userList[*(pa+i)].budget, userList[*(pa+i)].stato?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
@@ -205,10 +203,8 @@ bool printStatus(){
         if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=nodeList[i].reward;
             ActiveN = nodeList[i].poolsize < configurazione.SO_TP_SIZE;
-            if(ActiveN)
-                activeNodes++;
-            else
-                inactiveNodes++;
+            ActiveN?activeNodes++:inactiveNodes++;
+            
             printf("#|%9d|%9d|%8s||\n", i, nodeList[i].reward,ActiveN?"True  ":"False ");
         }else{
             printf("#|         |         |        ||\n");
