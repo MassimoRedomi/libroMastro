@@ -129,21 +129,23 @@ bool printStatus(int nstamp){
             }
         }else if(i<nstamp){
             if(nstamp==dim){
-                printf("#|           |           |         |         ||\n");
+                printf("#|           |           |         |        ||\n");
             }else{
                 printf("#|           |           |         ||\n");
             }
         }
     }
     if(nstamp==dim){
-        printf("------------------------------------------------------------------------\n");
-        printf("|| Active Users  | Inactive Users  |##| Active Nodes | Inactive Nodes ||\n");
-        printf("||%15d|%17d|##|%14d|%16d||\n",activeUsers,inactiveUsers, activeNodes, inactiveNodes);
-        printf("------------------------------------------------------------------------\n");
-        printf("||  Tot Rewards |%53d||\n",sommaRewards);
-        printf("||  Tot Budgets |%53d||\n",sommaBudget);
-        printf("||  Tot Block   |%53d||\n", 10);
-        printf("------------------------------------------------------------------------\n");
+        printf("---------------------------------------------------------------------------------\n");
+        printf("||   Active Users  |   Inactive Users  |##|   Active Nodes  |  Inactive Nodes  ||\n");
+        printf("||%17d|%19d|##|%17d|%18d||\n",activeUsers,inactiveUsers, activeNodes, inactiveNodes);
+        printf("---------------------------------------------------------------------------------\n");
+        printf("||    Tot Rewards  |%59d||\n",sommaRewards);
+        printf("---------------------------------------------------------------------------------\n");
+        printf("||    Tot Budgets  |%59d||\n",sommaBudget);
+        printf("---------------------------------------------------------------------------------\n");
+        printf("||    Tot Block    |%59d||\n", 10);
+        printf("---------------------------------------------------------------------------------\n");
 
 
     }else{
