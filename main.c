@@ -193,7 +193,7 @@ int main(int argc,char *argv[]){
         }
 
         /*generatore dei utenti*/
-        userList  = malloc(configurazione.SO_USERS_NUM * (3 * sizeof(int) + sizeof(bool)));
+        userList  = malloc(configurazione.SO_USERS_NUM * (2 * sizeof(int) + sizeof(bool)));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&utenti_id[i],NULL,utente,NULL);
