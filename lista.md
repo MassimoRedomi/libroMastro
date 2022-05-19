@@ -40,13 +40,13 @@
     se sono meno di 300 utenti: mostra tutto.
     Altrimenti: mostra solo gli utenti che hanno meno di di SO_RETRY tentativi.
 
-- [ ] print final
+- [x] print final
     - [x] motivo del final de la ejecucion.
     - [x] bilancio di ogni processo utente , compresi quelli che sono terminati.
     - [x] bilancio di ogni processo nodo.
     - [x] numero di processi utente terminati prematuramente
-    - [ ] numero di blocchi nel libro mastro
-    - [ ] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
+    - [x] numero di blocchi nel libro mastro
+    - [x] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
 
 # [UTENTE](User.md)
 - [x] construir transacción.
