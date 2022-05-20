@@ -942,23 +942,6 @@ int main(int argc,char *argv[]){
         clear();
         printStatus(MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM));
     
-        /*kill all the threads*/
-        for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-			pthread_cancel(nodi_id[i]);
-		}
-        for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(utenti_id[i]);
-        }
-    
-		/*
-        printf("numero di blocchi: %d\n\n",libroCounter);
-		solo por confirmar al final
-		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			prinTrans(libroMastro[i]); per ora non mostro tutte transazioni
-        }
-        */
-
-        
 	}
 	return 0;
 }
