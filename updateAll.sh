@@ -7,7 +7,8 @@ python3 babel/babel.py translate User.md
 python3 babel/babel.py translate Node.md
 python3 babel/babel.py translate main.md
 python3 babel/babel.py translate compilazione.md
-python3 babel/babel.py readme compilazione.md Structs.md Node.md User.md main.md 
+python3 babel/babel.py translate print.md
+python3 babel/babel.py readme compilazione.md Structs.md Node.md User.md print.md main.md 
 if [ $# != 0 ]; then
 make $1
 else
