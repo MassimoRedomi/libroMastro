@@ -49,7 +49,11 @@
     - [x] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
  - [ ] trheads
     - [ ] establecer esquema de roundRobin
-    - [ ] 
+    - [ ] crear atributo de piticas de scheduling
+    - [ ] crear rutine. 
+        un rutine es un bloque de codigo que se ejecuta al inicio del hilo. 
+        la idea es establecer todos los valores de la estructura al inicio del hilo y dejar a 
+        la funciion principal del hilo solo con su loop principal.
 
 # [UTENTE](User.md)
 - [x] construir transacción.
