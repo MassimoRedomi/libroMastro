@@ -6,14 +6,7 @@ SO_BLOCK_SIZE = 100
 SO_REGISTRY_SIZE = 1000
 ```makefile Makefile
 1:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
-	
-```
-con debug
-```makefile Makefile
-g1:
 	gcc -std=c89 -g -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
-	
 ```
 
 
@@ -22,8 +15,7 @@ SO_BLOCK_SIZE = 10
 SO_REGISTRY_SIZE = 10000
 ```makefile Makefile
 2:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
-	
+	gcc -std=c89 -g -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
 ```
 
 ### configurazione 3:
@@ -31,8 +23,7 @@ SO_BLOCK_SIZE = 10
 SO_REGISTRY_SIZE = 1000
 ```makefile Makefile
 3:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
-	
+	gcc -std=c89 -g -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
 ```
 
 ### configurazione custom:
@@ -88,7 +79,8 @@ argomento la parola "mano" o "manuale".
 
 
 ## aggiunge segnali
-nel caso delle segnali per forzare certe transazioni, non è obbligatorio per inizializare il programma, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. # structures
+nel caso delle segnali per forzare certe transazioni, non è obbligatorio per inizializare il programma, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
+# structures
 
  Le strutture sono gruppi di variabili che rapressentano un
 oggetto della vita reale.
@@ -685,6 +677,7 @@ void* utente(void *conf){
 ## Specific Libraries
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
+#include <sched.h>
 #include <pthread.h>     /*Creazione/Modifica thread*/
 #include <semaphore.h>   /*Aggiunge i semafori*/
 
