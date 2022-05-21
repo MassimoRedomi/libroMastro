@@ -98,3 +98,4 @@
 
 # [STRUCTS](Structs.md)
 - [ ] riparare il warning di randomSleep
+- [ ] replace the time double to struct timespec

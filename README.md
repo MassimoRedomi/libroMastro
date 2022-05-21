@@ -677,7 +677,6 @@ void* utente(void *conf){
 ## Specific Libraries
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
-#include <sched.h>
 #include <pthread.h>     /*Creazione/Modifica thread*/
 #include <semaphore.h>   /*Aggiunge i semafori*/
 
