@@ -47,6 +47,9 @@
     - [x] numero di processi utente terminati prematuramente
     - [x] numero di blocchi nel libro mastro
     - [x] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
+ - [ ] trheads
+    - [ ] establecer esquema de roundRobin
+    - [ ] 
 
 # [UTENTE](User.md)
 - [x] construir transacción.
