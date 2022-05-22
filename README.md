@@ -136,7 +136,7 @@ extern Configurazione configurazione;
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 #define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
 #define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
-
+#define boolString(b) ((b) ? "True":"False")/*make the %b*/
 ```
 
 Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> 
@@ -166,31 +166,31 @@ void readconf(char fileName[]){
       char line[20];/*str per prendere le righe*/
     
     /*Inserisco le variabili riga per riga alla struttura.*/
-    configurazione.SO_USERS_NUM = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_USERS_NUM);
     printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
-    configurazione.SO_NODES_NUM = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_NODES_NUM);
     printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
-    configurazione.SO_BUDGET_INIT = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_BUDGET_INIT);
     printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
-    configurazione.SO_REWARD = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_REWARD);
     printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
-    configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
     printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
-    configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
     printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
-    configurazione.SO_RETRY = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_RETRY);
     printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
-    configurazione.SO_TP_SIZE = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_TP_SIZE);
     printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
-    configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
     printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
-    configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
     printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
-    configurazione.SO_SIM_SEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_SIM_SEC);
     printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
-    configurazione.SO_FRIENDS_NUM = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_FRIENDS_NUM);
     printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
-    configurazione.SO_HOPS = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_HOPS);
     printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
     }
     fclose(file);/*chiusura del file.*/
@@ -624,6 +624,142 @@ void* utente(void *conf){
 }
 ```
 
+# Prints
+
+## memoria condivise
+```c print.c
+/*variabili degli utenti*/
+extern int *budgetlist;
+extern bool *checkUser;
+
+/*variabili degli utenti*/
+extern int *rewardlist;
+extern int *rewardlist;
+extern int *poolsizelist;
+extern bool *checkNode;
+
+```
+## Compare Function
+Metodo che compara due valori e restituisce un numero positivo se b è piu
+grande di a e negativo se b è piu piccolo di a:
+```c print.c
+int cmpfunc(const void  *a, const void *b) {
+    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
+}
+```
+
+
+## Sort risults
+Metodo di ordinamento del dei processi in modo decrescente
+(dal piu grande al piu piccolo).
+
+```c print.c
+int * sort(){
+    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    int *r=malloc(sizeof(int)*dim);
+    int i;
+    for(i=0; i<dim; i++)
+        r[i]=i;
+    
+    /*qsort(r, dim, sizeof(int), cmpfunc);*/
+    return r;
+}
+```
+
+
+## PrintStatus Nodes and Users
+Questo metodo non solo mostra lo stato di tutti gli
+utenti e nodi, ritorna anche una variabile boolean per identificare
+se ci sono ancora utenti disponibili.
+
+```c print.c
+bool printStatus(int nstamp){
+    /*User var*/
+    int activeUsers=0;
+    int inactiveUsers=0;
+    int sommaBudget=0;
+    bool ActiveU;
+    /*Node var*/
+    int activeNodes=0;
+    int inactiveNodes=0;
+    int sommaRewards=0;
+    bool ActiveN;
+    /*Share var*/
+    int i=0;
+    int *pa;
+    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    pa=sort();
+    if(nstamp==dim){
+        /*Attributi*/
+        printf("\n\n");
+        printf("---------------------------------------------------------------------------------\n");
+        printf("||  User_ID |  Budget  |  Status |##|  Node_ID  |  Rewards  |  Status | P_Size ||\n");
+        printf("||===============================|##|==========================================||\n");
+    }else{
+        /*Attributi*/
+        printf("\n\n");
+        printf("------------------------------------------------------------------------\n");
+        printf("||  User_ID |  Budget  |  Status |##|  Node_ID  |  Rewards  |  Status ||\n");
+        printf("||===============================|##|=================================||\n");
+    }
+    
+    /*Stampa risultati*/
+    for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
+        if(i<configurazione.SO_USERS_NUM){
+            sommaBudget += budgetlist[*(pa+i)];
+
+            checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
+
+            if(i<nstamp/2){
+                printf("||%10d|%10d|%9s|#",*(pa+i),budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+            }else if(i>(nstamp/2)-1 && i<nstamp){
+                printf("||%10d|%10d|%9s|#",*((pa+dim)-(i-nstamp/2)),budgetlist[*(pa+dim)-(i-nstamp/2)], boolString(checkUser[*(pa+dim)-(i-nstamp/2)]));
+            }
+        }else if(i<nstamp){
+            printf("||          |          |         |#\n");
+        }
+        if(i< configurazione.SO_NODES_NUM){
+            sommaRewards+=rewardlist[i];
+
+            checkNode[i] ? activeNodes++ : inactiveNodes++;
+            if(i<nstamp){
+                 printf("#|%11d|%11d|%9s|", i, rewardlist[i],boolString(checkNode[i]));
+                 if(nstamp==dim){
+                     printf("%8d||\n",poolsizelist[i]);
+                 }else{
+                     printf("|\n");
+                 }
+            }
+        }else if(i<nstamp){
+            if(nstamp==dim){
+                printf("#|           |           |         |        ||\n");
+            }else{
+                printf("#|           |           |         ||\n");
+            }
+        }
+    }
+    if(nstamp==dim){
+        printf("---------------------------------------------------------------------------------\n");
+        printf("||   Active Users  |   Inactive Users  |##|   Active Nodes  |  Inactive Nodes  ||\n");
+        printf("||%17d|%19d|##|%17d|%18d||\n",activeUsers,inactiveUsers, activeNodes, inactiveNodes);
+        printf("||-----------------------------------------------------------------------------||\n");
+        printf("||    Tot Rewards  |%59d||\n",sommaRewards);
+        printf("||-----------------------------------------------------------------------------||\n");
+        printf("||    Tot Budgets  |%59d||\n",sommaBudget);
+        printf("||-----------------------------------------------------------------------------||\n");
+        printf("||    Tot Block    |%59d||\n", libroCounter);
+        printf("---------------------------------------------------------------------------------\n");
+    }else{
+        printf("------------------------------------------------------------------------\n");
+        printf("||  Active Users  |  Tot Budget  |##|  Active Nodes  |   Tot Rewards  ||\n");
+        printf("||%16d|%14d|##|%16d|%16d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
+        printf("\n");
+    }
+    
+    return activeUsers!=0;
+}
+```
+
 # Headers
 ## Basic libraries
 ```c main.c
@@ -647,6 +783,7 @@ void* utente(void *conf){
 importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
 ```c main.c
 #include "User.c"
+#include "print.c"
 ```
 
 # Controllo LIBRO MASTRO
@@ -755,110 +892,6 @@ void segnale(Transazione programmato){
 }
 ```
 
-# Main
-
-## Compare Function
-Metodo che compara due valori e restituisce un numero positivo se b è piu
-grande di a e negativo se b è piu piccolo di a:
-```c main.c
-int cmpfunc(const void *a, const void *b) {
-    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
-}
-```
-
-
-## Sort risults
-Metodo di ordinamento del dei processi in modo decrescente
-(dal piu grande al piu piccolo).
-
-```c main.c
-int * sort(){
-    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
-    int *r=malloc(sizeof(int)*dim);
-    int i;
-
-    for(i=0; i<dim; i++)
-        r[i]=i;
-    
-    qsort(r, dim, sizeof(int), cmpfunc);
-    return r;
-}
-```
-
-
-## PrintStatus Nodes and Users
-Questo metodo non solo mostra lo stato di tutti gli
-utenti e nodi, ritorna anche una variabile boolean per identificare
-se ci sono ancora utenti disponibili.
-
-```c main.c
-
-bool printStatus(){
-
-    /*User var*/
-    int activeUsers=0;
-    int inactiveUsers=0;
-    int sommaBudget=0;
-    bool ActiveU;
-
-    /*Node var*/
-    int activeNodes=0;
-    int inactiveNodes=0;
-    int sommaRewards=0;
-    bool ActiveN;
-
-    /*Share var*/
-    int i=0;
-    int *pa;
-
-    pa=sort();
-
-    /*Attributi*/
-    printf("\n\n");
-    printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
-    printf("||===========================|##|============================||\n");
-
-    
-    /*Stampa risultati*/
-    for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
-
-        if(i<configurazione.SO_USERS_NUM){
-            ActiveU = checkUser[*(pa+i)];
-            sommaBudget += budgetlist[*(pa+i)];
-            if(ActiveU)
-                activeUsers++;
-            else
-                inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),budgetlist[*(pa+i)], ActiveU?"True  ":"False ");
-        }else{
-            printf("#|         |         |        ||\n");
-        }
-
-        if(i< configurazione.SO_NODES_NUM){
-            sommaRewards+=rewardlist[i];
-            ActiveN = checkNode[i];
-            if(ActiveN)
-                activeNodes++;
-            else
-                inactiveNodes++;
-            printf("#|%9d|%9d|%8s||\n", i, rewardlist[i],ActiveN?"True  ":"False ");
-        }else{
-            printf("#|         |         |        ||\n");
-        }
-    }
-
-    printf("---------------------------------------------------------------\n");
-    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
-    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
-    printf("\n");
-
-    free(pa);
-    return activeUsers!=0;
-}
-
-```
-
-
 ## Main Function
 
 ```c main.c
@@ -944,7 +977,7 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus()){
+            if(!printStatus(40)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
@@ -959,6 +992,7 @@ int main(int argc,char *argv[]){
 
 
         }
+        printStatus(configurazione.SO_USERS_NUM);
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
