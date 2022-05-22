@@ -28,7 +28,6 @@ Importa tutte le variabili del Main
 
 ```c User.c
 /*variabili condivise tra diversi thread.*/
-extern int *retrylist ;     /*thread id di ogni utente*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern bool *checkUser;
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
@@ -83,20 +82,18 @@ serve per trovare un nodo libero per fare la transazione.
 /*cerca un nodo libero per fare la trasazione.*/
 int nodoLibero(int id){
     int nodo;
+    int retry = 0;
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
-        if( retrylist[id] > configurazione.SO_RETRY){
+        if( retry > configurazione.SO_RETRY){
             printf("L'utenete %d non ha trovato nessun nodo libero\n",id);
+            checkUser[id]= false;
             pthread_cancel(utenti_id[id]);
         }
-        retrylist[id]++;
-    }while(sem_trywait(&semafori[nodo])<0);
-    
-    if( retrylist[id] <= configurazione.SO_RETRY ){
-        retrylist[id] = 0;
-    }
-
+        retry;
+    }while(sem_trywait(&semafori[nodo])<0 && checkUser[id]);
     return nodo;
+    
 }
 
 ```
@@ -120,11 +117,10 @@ Transazione generateTransaction(int id){
     /*debo reparar lo de los intentos*/
     do{
 		altroUtente= randomInt(0,configurazione.SO_USERS_NUM);
-	}while(altroUtente==id || retrylist[altroUtente] > configurazione.SO_RETRY);
+	}while(altroUtente==id || !checkUser[altroUtente]);
 	transaccion.receiver = altroUtente;
 	/*calcola il timestamp in base al tempo di simulazione.*/
 	transaccion.timestamp = difftime(time(0),startSimulation);
-    retrylist[id] = 0;
 
 	return transaccion;
 }
@@ -140,34 +136,34 @@ void* utente(void *conf){
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
+    int retry=0;
 
 	/*setting default values delle variabili condivise*/
-    retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
     checkUser[id] = true;
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
 
 	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     
 
-	while(retrylist[id]<configurazione.SO_RETRY){
+	while(retry < configurazione.SO_RETRY){
     
 		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
     
 		if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/                                
-    
 			Transazione transaction;              /*Creiamo una nuova transazione*/
+            retry = 0;
 			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
     
 			/*scelglie un nodo libero a caso*/
             mailbox[nodoLibero(id)] = transaction;
             budgetlist[id] -= transaction.quantita;
         }else{
-			retrylist[id]++;
+			retry++;
 		}
     
 		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
     
-		if(retrylist[id] >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
+		if(retry >= configurazione.SO_RETRY || !checkUser[i] ){/*Se raggiunge il n° max di tentativi*/
 			printf("utente %d fermato\n",id);       /*ferma il procceso*/
 		}
     }

@@ -14,7 +14,6 @@ int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
 
 /*variabili condivise tra diversi thread.*/
-int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 bool *checkUser;
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
@@ -191,7 +190,6 @@ int main(int argc,char *argv[]){
         }
 
         /*generatore dei utenti*/
-        retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         checkUser = malloc(configurazione.SO_USERS_NUM * sizeof(bool));
