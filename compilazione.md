@@ -6,21 +6,15 @@ SO_BLOCK_SIZE = 100
 SO_REGISTRY_SIZE = 1000
 ```makefile Makefile
 1:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
 ```
-con debug
-```makefile Makefile
-g1:
-	gcc -std=c89 -g -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
-```
-
 
 ### configurazione 2:
 SO_BLOCK_SIZE = 10
 SO_REGISTRY_SIZE = 10000
 ```makefile Makefile
 2:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
 ```
 
 ### configurazione 3:
@@ -28,7 +22,7 @@ SO_BLOCK_SIZE = 10
 SO_REGISTRY_SIZE = 1000
 ```makefile Makefile
 3:
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
 ```
 
 ### configurazione custom:
@@ -40,7 +34,7 @@ custom:
 	@read block
 	@echo -n "SO_REGISTRY_SIZE: "
 	@read registry
-	gcc -std=c89 -pthread -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE = $(block) -DSO_REGISTRY_SIZE = $(registry) main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE = $(block) -DSO_REGISTRY_SIZE = $(registry) main.c -lm -o main
 	
 ```
 
