@@ -9,6 +9,7 @@
 #include <semaphore.h>   /*Aggiunge i semafori*/
 
 #include "User.c"
+#include "print.c"
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
@@ -55,84 +56,6 @@ void segnale(Transazione programmato){
     printf("Segnale ->");
     prinTrans(programmato);
 }
-int cmpfunc(const void *a, const void *b) {
-    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
-}
-int * sort(){
-    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
-    int *r=malloc(sizeof(int)*dim);
-    int i;
-
-    for(i=0; i<dim; i++)
-        r[i]=i;
-    
-    qsort(r, dim, sizeof(int), cmpfunc);
-    return r;
-}
-
-bool printStatus(){
-
-    /*User var*/
-    int activeUsers=0;
-    int inactiveUsers=0;
-    int sommaBudget=0;
-    bool ActiveU;
-
-    /*Node var*/
-    int activeNodes=0;
-    int inactiveNodes=0;
-    int sommaRewards=0;
-    bool ActiveN;
-
-    /*Share var*/
-    int i=0;
-    int *pa;
-
-    pa=sort();
-
-    /*Attributi*/
-    printf("\n\n");
-    printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
-    printf("||===========================|##|============================||\n");
-
-    
-    /*Stampa risultati*/
-    for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
-
-        if(i<configurazione.SO_USERS_NUM){
-            ActiveU = checkUser[*(pa+i)];
-            sommaBudget += budgetlist[*(pa+i)];
-            if(ActiveU)
-                activeUsers++;
-            else
-                inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),budgetlist[*(pa+i)], ActiveU?"True  ":"False ");
-        }else{
-            printf("#|         |         |        ||\n");
-        }
-
-        if(i< configurazione.SO_NODES_NUM){
-            sommaRewards+=rewardlist[i];
-            ActiveN = checkNode[i];
-            if(ActiveN)
-                activeNodes++;
-            else
-                inactiveNodes++;
-            printf("#|%9d|%9d|%8s||\n", i, rewardlist[i],ActiveN?"True  ":"False ");
-        }else{
-            printf("#|         |         |        ||\n");
-        }
-    }
-
-    printf("---------------------------------------------------------------\n");
-    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
-    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
-    printf("\n");
-
-    free(pa);
-    return activeUsers!=0;
-}
-
 int main(int argc,char *argv[]){
     int i;
 	float now;
@@ -215,7 +138,7 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus()){
+            if(!printStatus(40)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
@@ -230,6 +153,7 @@ int main(int argc,char *argv[]){
 
 
         }
+        finalprint();
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){

@@ -22,6 +22,7 @@
 importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
 ```c main.c
 #include "User.c"
+#include "print.c"
 ```
 
 # Controllo LIBRO MASTRO
@@ -130,110 +131,6 @@ void segnale(Transazione programmato){
 }
 ```
 
-# Main
-
-## Compare Function
-Metodo che compara due valori e restituisce un numero positivo se b è piu
-grande di a e negativo se b è piu piccolo di a:
-```c main.c
-int cmpfunc(const void *a, const void *b) {
-    return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
-}
-```
-
-
-## Sort risults
-Metodo di ordinamento del dei processi in modo decrescente
-(dal piu grande al piu piccolo).
-
-```c main.c
-int * sort(){
-    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
-    int *r=malloc(sizeof(int)*dim);
-    int i;
-
-    for(i=0; i<dim; i++)
-        r[i]=i;
-    
-    qsort(r, dim, sizeof(int), cmpfunc);
-    return r;
-}
-```
-
-
-## PrintStatus Nodes and Users
-Questo metodo non solo mostra lo stato di tutti gli
-utenti e nodi, ritorna anche una variabile boolean per identificare
-se ci sono ancora utenti disponibili.
-
-```c main.c
-
-bool printStatus(){
-
-    /*User var*/
-    int activeUsers=0;
-    int inactiveUsers=0;
-    int sommaBudget=0;
-    bool ActiveU;
-
-    /*Node var*/
-    int activeNodes=0;
-    int inactiveNodes=0;
-    int sommaRewards=0;
-    bool ActiveN;
-
-    /*Share var*/
-    int i=0;
-    int *pa;
-
-    pa=sort();
-
-    /*Attributi*/
-    printf("\n\n");
-    printf("|| User_ID | Budget | Status |##| Node_ID | Rewards | Status ||\n");
-    printf("||===========================|##|============================||\n");
-
-    
-    /*Stampa risultati*/
-    for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
-
-        if(i<configurazione.SO_USERS_NUM){
-            ActiveU = checkUser[*(pa+i)];
-            sommaBudget += budgetlist[*(pa+i)];
-            if(ActiveU)
-                activeUsers++;
-            else
-                inactiveUsers++;
-            printf("||%9d|%8d|%8s|#",*(pa+i),budgetlist[*(pa+i)], ActiveU?"True  ":"False ");
-        }else{
-            printf("#|         |         |        ||\n");
-        }
-
-        if(i< configurazione.SO_NODES_NUM){
-            sommaRewards+=rewardlist[i];
-            ActiveN = checkNode[i];
-            if(ActiveN)
-                activeNodes++;
-            else
-                inactiveNodes++;
-            printf("#|%9d|%9d|%8s||\n", i, rewardlist[i],ActiveN?"True  ":"False ");
-        }else{
-            printf("#|         |         |        ||\n");
-        }
-    }
-
-    printf("---------------------------------------------------------------\n");
-    printf("|| Active Users | Tot Budget |##| Active Nodes | Tot Rewards ||\n");
-    printf("||%14d|%12d|##|%14d|%13d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
-    printf("\n");
-
-    free(pa);
-    return activeUsers!=0;
-}
-
-```
-
-
 ## Main Function
 
 ```c main.c
@@ -319,7 +216,7 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus()){
+            if(!printStatus(40)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
@@ -334,6 +231,7 @@ int main(int argc,char *argv[]){
 
 
         }
+        finalprint();
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
