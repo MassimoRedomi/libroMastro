@@ -101,7 +101,7 @@ bool printStatus(){
     for(i=0; i<MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM); i++){
 
         if(i<configurazione.SO_USERS_NUM){
-            ActiveU = retrylist[*(pa+i)]<configurazione.SO_RETRY;
+            ActiveU = checkUser[*(pa+i)];
             sommaBudget += budgetlist[*(pa+i)];
             if(ActiveU)
                 activeUsers++;
@@ -114,7 +114,7 @@ bool printStatus(){
 
         if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
-            ActiveN = poolsizelist[i] < configurazione.SO_TP_SIZE;
+            ActiveN = checkNode[i];
             if(ActiveN)
                 activeNodes++;
             else
