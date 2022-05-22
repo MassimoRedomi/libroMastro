@@ -8,6 +8,8 @@ extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
+extern bool *checkNode;
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -45,7 +47,8 @@ void* nodo(void *conf){
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
-    mythr = pthread_self();
+    checkNode[id] = true;
+    /*mythr = pthread_self();
     /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/

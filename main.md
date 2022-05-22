@@ -69,10 +69,13 @@ o in alternativa sceglie unn'altra via per l'accesso.
 /*variabili condivise tra diversi thread.*/
 int *retrylist;      /*numero di tentativi di ogni utente*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
+bool *checkUser;
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
+bool *checkNode;
+
 time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
@@ -286,6 +289,7 @@ int main(int argc,char *argv[]){
         semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
         mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
+        checkNode = malloc(configurazione.SO_NODES_NUM * sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,NULL);
         }
@@ -294,6 +298,7 @@ int main(int argc,char *argv[]){
         retrylist =malloc(configurazione.SO_USERS_NUM * sizeof(int));
         budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
+        checkUser = malloc(configurazione.SO_USERS_NUM * sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&utenti_id[i],NULL,utente,NULL);
         }

@@ -344,6 +344,8 @@ extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
+extern bool *checkNode;
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -400,7 +402,8 @@ void* nodo(void *conf){
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
-    mythr = pthread_self();
+    checkNode[id] = true;
+    /*mythr = pthread_self();
     /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
@@ -481,6 +484,7 @@ Importa tutte le variabili del Main
 /*variabili condivise tra diversi thread.*/
 extern int *retrylist ;     /*thread id di ogni utente*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
+extern bool *checkUser;
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
@@ -593,6 +597,7 @@ void* utente(void *conf){
 
 	/*setting default values delle variabili condivise*/
     retrylist[id] = 0; /*stabilisco in 0 il numero di tentativi*/
+    checkUser[id] = true;
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
 
 	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
