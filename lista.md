@@ -19,10 +19,6 @@
 
 - [x] Lettura ogni istante.
 
-- [ ] comunicar el main con hilos(30 pts).
-
-- [ ] revivir procesos zombies que vienen llamados por otros nodos(30 pts).
-
 - [x] sync time al publico.
 
 - [x] asignar tid individual para cada hilo.
@@ -40,13 +36,25 @@
     se sono meno di 300 utenti: mostra tutto.
     Altrimenti: mostra solo gli utenti che hanno meno di di SO_RETRY tentativi.
 
-- [ ] print final
+- [x] print final
     - [x] motivo del final de la ejecucion.
     - [x] bilancio di ogni processo utente , compresi quelli che sono terminati.
     - [x] bilancio di ogni processo nodo.
     - [x] numero di processi utente terminati prematuramente
-    - [ ] numero di blocchi nel libro mastro
-    - [ ] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
+    - [x] numero di blocchi nel libro mastro
+    - [x] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
+
+- [ ] generare un nuovo nodo. (30 punti)
+    quando un nodo non riesce a inviare una transazione a nessun nodo amico,
+    manda questa transazione a un mailbox del processo maestro per dopo generare un nuovo
+    nodo e inviarelo
+    - [ ] creare un mailbox maestro
+    - [ ] creare un semaforo maestro
+    - [ ] ingrandire tutte le liste
+    - [ ] creare un nuovo processo nodo
+    - [ ] notificare la creazione del nuovo nodo
+    - [ ] incrementare il valore di configurazione.SO_NODES_NUM
+
 
 # [UTENTE](User.md)
 - [x] construir transacción.
@@ -89,5 +97,7 @@
 
 - [ ] enviar transaccion al nodo amigo(30 pts).
 
+
 # [STRUCTS](Structs.md)
+- [ ] transaction: replace double by timespec struct.
 - [ ] riparare il warning di randomSleep
