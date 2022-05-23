@@ -35,6 +35,7 @@ importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [N
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
+sem_t mainSem;
 
 ```
 
@@ -176,6 +177,7 @@ int main(int argc,char *argv[]){
         /*now that we have all the variables we can start the process
         master*/
     
+        sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);
         startSimulation = time(0);/* el tiempo de ahora*/
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
@@ -187,7 +189,8 @@ int main(int argc,char *argv[]){
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         checkNode = malloc(configurazione.SO_NODES_NUM * sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-			pthread_create(&nodi_id[i],NULL,nodo,NULL);
+			pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
+            sem_wait(&mainSem);
         }
 
         /*generatore dei utenti*/
@@ -195,7 +198,8 @@ int main(int argc,char *argv[]){
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
         checkUser = malloc(configurazione.SO_USERS_NUM * sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-			pthread_create(&utenti_id[i],NULL,utente,NULL);
+			pthread_create(&utenti_id[i],NULL,utente,(void *)i);
+            sem_wait(&mainSem);
         }
     
 		/*now start the master process*/

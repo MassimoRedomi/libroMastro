@@ -2,6 +2,7 @@
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
+extern sem_t mainSem;
 
 /*variabili condivise tra diversi thread.*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
@@ -35,7 +36,7 @@ Transazione riasunto(int id, int somma){
 }
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
-    int id = trovaNid();
+    int id = (int)conf;
     int i;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
@@ -44,6 +45,7 @@ void* nodo(void *conf){
     Transazione finalReward;
     int mythr; 
     int semvalue;/*valore del semaforo*/
+    sem_post(&mainSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/

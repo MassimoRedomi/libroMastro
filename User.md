@@ -18,7 +18,7 @@ Importazione del libroMastro e tutte le variabili:
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
-
+extern sem_t mainSem;
 
 ```
 
@@ -132,15 +132,15 @@ Transazione generateTransaction(int id){
 ```c User.c
 /*PROCESSO UTENTE:*/
 void* utente(void *conf){
-	int id = trovaId();                       /*Id processo utente*/
+	int id = (int)conf;                       /*Id processo utente*/
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
     int retry=0;
-
 	/*setting default values delle variabili condivise*/
     checkUser[id] = true;
 	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+    sem_post(&mainSem);
 
 	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
     
