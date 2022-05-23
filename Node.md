@@ -90,7 +90,7 @@ void* nodo(void *conf){
     /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
-    while(poolsizelist[id] < configurazione.SO_TP_SIZE){
+    while(checkNode[id]){
     
 		/*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
@@ -128,7 +128,9 @@ void* nodo(void *conf){
 	    	}
             if(poolsizelist[id] < configurazione.SO_TP_SIZE){
                 sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
-	        }
+	        }else{
+                checkNode[id]=false;
+            }
     
 		}
     

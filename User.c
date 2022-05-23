@@ -51,7 +51,7 @@ int nodoLibero(int id){
             checkUser[id]= false;
             pthread_cancel(utenti_id[id]);
         }
-        retry;
+        retry++;
     }while(sem_trywait(&semafori[nodo])<0 && checkUser[id]);
     return nodo;
     
