@@ -14,7 +14,6 @@
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
-#include <sched.h>       /*Scheduling*/
 #include <semaphore.h>   /*Aggiunge i semafori*/
 
 ```
@@ -69,13 +68,19 @@ o in alternativa sceglie unn'altra via per l'accesso.
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
-userStruct *userList;
-nodeStruct *nodeList;
+int *budgetlist;     /*un registro del budget di ogni utente*/
+bool *checkUser;
+int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
+int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
+sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
+Transazione *mailbox;/*struttura per condividere */
+bool *checkNode;
 
-pthread_t *utenti_id;   /*lista id di processi utenti*/
+time_t startSimulation;
+pthread_t *utenti_id;     /*lista id di processi utenti*/
 pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
-time_t startSimulation;
+
 ```
 # Transazioni programmate(para quien me lea. traduzcanme por favor)
 Las transacciones progrmadas son una lista de transacciones que vienen son leidos
@@ -118,9 +123,9 @@ creata dal master con valori predefiniti.
 
 /*segnale che forza una transazione di un'utente.*/
 void segnale(Transazione programmato){
-    nodeList[nodoLibero(programmato.sender)].mailbox = programmato;/*assegno la transazione in un mailbox*/
+    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
 
-    userList[programmato.sender].budget -= programmato.quantita;
+    budgetlist[programmato.sender] -= programmato.quantita;
     printf("Segnale ->");
     prinTrans(programmato);
 }
@@ -175,16 +180,20 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
-        /*somma di tutte le variabili dei nodi*/
-        nodeList= malloc(configurazione.SO_NODES_NUM *((6*sizeof(int))+sizeof(double) + sizeof(sem_t)+ sizeof(bool)));
+        poolsizelist=malloc(configurazione.SO_TP_SIZE * sizeof(int));
+        rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
+        semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
+        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
         nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
+        checkNode = malloc(configurazione.SO_NODES_NUM * sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,NULL);
         }
 
         /*generatore dei utenti*/
-        userList  = malloc(configurazione.SO_USERS_NUM * (2 * sizeof(int) + sizeof(bool)));
+        budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
         utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
+        checkUser = malloc(configurazione.SO_USERS_NUM * sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&utenti_id[i],NULL,utente,NULL);
         }
@@ -202,7 +211,7 @@ int main(int argc,char *argv[]){
 
 	    	now = difftime(time(0), startSimulation);
             
-            if(libroCounter >= SO_REGISTRY_SIZE){
+            if(libroCounter > SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
                 break;
             }
@@ -222,10 +231,24 @@ int main(int argc,char *argv[]){
 
 
         }
-
-        clear();
-        printStatus(MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM));
+        finalprint();
     
+        /*kill all the threads*/
+        for(i=0; i<configurazione.SO_NODES_NUM ; i++){
+			pthread_cancel(nodi_id[i]);
+		}
+        for(i=0; i<configurazione.SO_USERS_NUM; i++){
+            pthread_cancel(utenti_id[i]);
+        }
+    
+		/*
+        printf("numero di blocchi: %d\n\n",libroCounter);
+		solo por confirmar al final
+		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
+			prinTrans(libroMastro[i]); per ora non mostro tutte transazioni
+        }
+        */
+        
 	}
 	return 0;
 }

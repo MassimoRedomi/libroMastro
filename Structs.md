@@ -55,8 +55,7 @@ extern Configurazione configurazione;
 #define clear() printf("\033[H\033[J") /*clear the screen*/
 #define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
 #define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
-#define B(b) ((b) ? "true" : "false")
-
+#define boolString(b) ((b) ? "True":"False")/*make the %b*/
 ```
 
 Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> 
@@ -86,31 +85,31 @@ void readconf(char fileName[]){
       char line[20];/*str per prendere le righe*/
     
     /*Inserisco le variabili riga per riga alla struttura.*/
-    configurazione.SO_USERS_NUM = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_USERS_NUM);
     printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
-    configurazione.SO_NODES_NUM = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_NODES_NUM);
     printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
-    configurazione.SO_BUDGET_INIT = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_BUDGET_INIT);
     printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
-    configurazione.SO_REWARD = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_REWARD);
     printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
-    configurazione.SO_MIN_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
     printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
-    configurazione.SO_MAX_TRANS_GEN_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
     printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
-    configurazione.SO_RETRY = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_RETRY);
     printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
-    configurazione.SO_TP_SIZE = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_TP_SIZE);
     printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
-    configurazione.SO_MIN_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
     printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
-    configurazione.SO_MAX_TRANS_PROC_NSEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
     printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
-    configurazione.SO_SIM_SEC = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_SIM_SEC);
     printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
-    configurazione.SO_FRIENDS_NUM = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_FRIENDS_NUM);
     printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
-    configurazione.SO_HOPS = readAndInt(line,20,file);
+    fscanf(file,"%d",&configurazione.SO_HOPS);
     printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
     }
     fclose(file);/*chiusura del file.*/
@@ -198,45 +197,6 @@ void prinTrans(Transazione t){
 }
 
 ```
-
-## User Struct
-È una struttura che porta tutte le variabili pubbliche collegate a un'utente.
-
-| variabile | type | definizione                                      |
-| --------- | ---- | ------------------------------------------------ |
-| budget    | int  | Quantità di denaro che l'utente ha.              |
-| retry     | int  | Numero di tentativi falliti consecutivi.         |
-| stato     | bool | lo stato di attivo o inattivo dell'utente        |
-
-```c Structs.c
-typedef struct userStruct{
-    int retry;
-    int budget;
-    bool stato;
-}userStruct;
-```
-
-## Node Struct
-È una struttura con tutte le variabili pubbliche.
-
-| variabile | type        | descrizione                                                                |
-| --------- | ----------- | -------------------------------------------------------------------------- |
-| poolsize  | int         | Numero di elemnti nella pool del nodo.                                     |
-| reward    | int         | Comissioni accumulate delle transazioni elaborate.                         |
-| semaforo  | sem_t       | Semaforo per controllare la disponibilià del nodo.                         |
-| mailbox   | transazione | Variabile dove l'utente mette la transazione quando il nodo è disponibile. |
-| stato     | bool        | Stato di attivo o inattivo del nodo                                        |
-
-```c Structs.c
-typedef struct nodeStruct{
-    int poolsize;
-    int reward;
-    sem_t semaforo;
-    Transazione mailbox;
-    bool stato;
-}nodeStruct;
-```
-
 
 ## RandomInt & RandomLong
 
