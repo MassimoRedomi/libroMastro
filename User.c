@@ -30,16 +30,6 @@ int userUpdate(int id, int lastUpdate){
     return lastUpdate;
 }
 
-/*Trova thread id in utenti_id*/
-int trovaId(){
-    int id;
-    for(id=0;id<configurazione.SO_USERS_NUM;id++){
-        if(utenti_id[id] == pthread_self()){
-            return id;
-        }
-    }
-}
-
 /*cerca un nodo libero per fare la trasazione.*/
 int nodoLibero(int id){
     int nodo;

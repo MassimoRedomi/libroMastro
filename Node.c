@@ -15,16 +15,6 @@ extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 
-/*Trova thread id in nodi_id*/
-int trovaNid(){
-    int i;
-    for(i=0;i<configurazione.SO_NODES_NUM;i++){
-        if(nodi_id[i] == pthread_self()){
-            return i;
-        }
-    }
-}
-
 /*funzione dell'ultima transazione del blocco.*/
 Transazione riasunto(int id, int somma){
     Transazione transaction;

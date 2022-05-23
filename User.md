@@ -60,21 +60,6 @@ int userUpdate(int id, int lastUpdate){
 }
 
 ```
-## Trova thread id
-Questo metodo cerca la posizione dell'utente in base alla posizione del 
-thread nella lista utenti_id(User id)
-```c User.c
-/*Trova thread id in utenti_id*/
-int trovaId(){
-    int id;
-    for(id=0;id<configurazione.SO_USERS_NUM;id++){
-        if(utenti_id[id] == pthread_self()){
-            return id;
-        }
-    }
-}
-
-```
 
 ## trova nodo
 serve per trovare un nodo libero per fare la transazione.

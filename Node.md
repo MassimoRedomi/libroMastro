@@ -37,22 +37,6 @@ extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 ```
 
 
-## Trova thread id
-Questo metodo cerca la posizione del nodo in base alla posizione del 
-thread nella lista nodi_id
-```c Node.c
-/*Trova thread id in nodi_id*/
-int trovaNid(){
-    int i;
-    for(i=0;i<configurazione.SO_NODES_NUM;i++){
-        if(nodi_id[i] == pthread_self()){
-            return i;
-        }
-    }
-}
-
-```
-
 ## transazione di riasunto
 Questo metodo genera l'ultima transazione del blocco.
 questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in 

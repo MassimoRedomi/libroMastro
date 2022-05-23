@@ -354,22 +354,6 @@ extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 ```
 
 
-## Trova thread id
-Questo metodo cerca la posizione del nodo in base alla posizione del 
-thread nella lista nodi_id
-```c Node.c
-/*Trova thread id in nodi_id*/
-int trovaNid(){
-    int i;
-    for(i=0;i<configurazione.SO_NODES_NUM;i++){
-        if(nodi_id[i] == pthread_self()){
-            return i;
-        }
-    }
-}
-
-```
-
 ## transazione di riasunto
 Questo metodo genera l'ultima transazione del blocco.
 questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in 
@@ -515,21 +499,6 @@ int userUpdate(int id, int lastUpdate){
         lastUpdate++;
 	}
     return lastUpdate;
-}
-
-```
-## Trova thread id
-Questo metodo cerca la posizione dell'utente in base alla posizione del 
-thread nella lista utenti_id(User id)
-```c User.c
-/*Trova thread id in utenti_id*/
-int trovaId(){
-    int id;
-    for(id=0;id<configurazione.SO_USERS_NUM;id++){
-        if(utenti_id[id] == pthread_self()){
-            return id;
-        }
-    }
 }
 
 ```
