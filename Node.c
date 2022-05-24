@@ -33,9 +33,11 @@ void inviaAdAmico(int amici[],int id){
     int i;
     do{
         for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
-            if(sem_trywait(&semafori[*(amici+i)])){
-                mailbox[*(amici+i)]=mailbox[id];
-                inviaAmico=false;
+            if(checkNode[*(amici+i)]){/*evito inviare a un nodo pieno.*/
+                if(sem_trywait(&semafori[*(amici+i)])){
+                    mailbox[*(amici+i)]=mailbox[id];
+                    inviaAmico=false;
+                }
             }
         }
         if(inviaAmico){
