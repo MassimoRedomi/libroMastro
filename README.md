@@ -714,7 +714,7 @@ bool printStatus(int nstamp){
     printf("||%16d|%14d|##|%16d|%16d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
     printf("\n");
     
-    return activeUsers!=0;
+    return activeUsers>1;
 }
 ```
 
@@ -988,7 +988,8 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus(40)){
+            test = printStatus(40);
+            if(!test){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
@@ -1011,6 +1012,9 @@ int main(int argc,char *argv[]){
 		}
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
+        }
+        if(!test){
+            printf("tutti gli utenti sono disattivati\n");
         }
     
 		/*

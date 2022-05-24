@@ -142,7 +142,8 @@ int main(int argc,char *argv[]){
                 break;
             }
 
-            if(!printStatus(40)){
+            test = printStatus(40);
+            if(!test){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
@@ -165,6 +166,9 @@ int main(int argc,char *argv[]){
 		}
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
+        }
+        if(!test){
+            printf("tutti gli utenti sono disattivati\n");
         }
     
 		/*

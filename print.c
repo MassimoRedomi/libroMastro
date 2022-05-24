@@ -66,7 +66,7 @@ bool printStatus(int nstamp){
     printf("||%16d|%14d|##|%16d|%16d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
     printf("\n");
     
-    return activeUsers!=0;
+    return activeUsers>1;
 }
 void finalprint(){
     /*User var*/
