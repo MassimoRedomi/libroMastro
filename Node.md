@@ -68,6 +68,7 @@ void* nodo(void *conf){
     int mythr; 
     int semvalue;/*valore del semaforo*/
     int *amici = calloc(configurazione.SO_FRIENDS_NUM, sizeof(int));
+    bool inviaAmico=true;
     for(i=0;i<configurazione.SO_FRIENDS_NUM;i++){
         do{
             amici[i] = randomInt(0,configurazione.SO_FRIENDS_NUM);
@@ -89,6 +90,21 @@ void* nodo(void *conf){
         if(semvalue <= 0){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
+             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
+                for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
+                    if(sem_trywait(&semafori[*(amici+i)])){
+                        mailbox[i]=mailbox[id];
+                        inviaAmico=false;
+                        printf("nodo %d invia transazione al amico %d\n",id,i);
+                    }
+                }
+                if(inviaAmico){
+                    printf("Il nodo %d non ha nessun amico\n",id);
+                }else{
+                    sem_post(&semafori[id]);
+                    continue;
+                }
+             }
 	    	 pool[poolsizelist[id]]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
     
@@ -113,6 +129,7 @@ void* nodo(void *conf){
 	    	    sem_post(&libroluck);
 	    	    counterBlock=0;
 	    	    sommaBlocco=0;
+                inviaAmico=true;
 				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
 	    	    /*free(&mailbox[id]);*/
     
