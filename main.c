@@ -104,21 +104,21 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
     
         /*generatore dei nodi*/
-        poolsizelist=malloc(configurazione.SO_TP_SIZE * sizeof(int));
-        rewardlist=malloc(configurazione.SO_NODES_NUM * sizeof(int));
-        semafori=malloc(configurazione.SO_NODES_NUM * sizeof(sem_t));
-        mailbox=malloc(configurazione.SO_NODES_NUM * ((4 * sizeof(int)) + sizeof(double)));
-        nodi_id = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
-        checkNode = malloc(configurazione.SO_NODES_NUM * sizeof(bool));
+        poolsizelist=calloc(configurazione.SO_TP_SIZE , sizeof(int));
+        rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
+        semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
+        mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
+        nodi_id = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
+        checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
 			pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
             sem_wait(&mainSem);
         }
 
         /*generatore dei utenti*/
-        budgetlist=malloc(configurazione.SO_USERS_NUM * sizeof(int));
-        utenti_id = malloc(configurazione.SO_USERS_NUM * sizeof(pthread_t));
-        checkUser = malloc(configurazione.SO_USERS_NUM * sizeof(bool));
+        budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
+        utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
+        checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
 			pthread_create(&utenti_id[i],NULL,utente,(void *)i);
             sem_wait(&mainSem);
