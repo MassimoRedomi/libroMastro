@@ -93,7 +93,7 @@
 
 - [x] limpiar los outputs
 
-- [ ] crear lista de nodos amigos a los que se les puede  enviar una transaccion cuando la pool de nuestra transaccion este ocupada(30 pts).
+- [x] crear lista de nodos amigos a los que se les puede  enviar una transaccion cuando la pool de nuestra transaccion este ocupada(30 pts).
 
 - [ ] enviar transaccion al nodo amigo(30 pts).
 

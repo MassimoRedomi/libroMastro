@@ -35,6 +35,12 @@ void* nodo(void *conf){
     Transazione finalReward;
     int mythr; 
     int semvalue;/*valore del semaforo*/
+    int *amici = calloc(configurazione.SO_FRIENDS_NUM, sizeof(int));
+    for(i=0;i<configurazione.SO_FRIENDS_NUM;i++){
+        do{
+            amici[i] = randomInt(0,configurazione.SO_FRIENDS_NUM);
+        }while(amici[i]==i);
+    }
     sem_post(&mainSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
 	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
