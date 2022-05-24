@@ -44,16 +44,16 @@
     - [x] numero di blocchi nel libro mastro
     - [x] per ogni processo nodo, numero di transazioni ancora presenti nella transaction pool
 
-- [ ] generare un nuovo nodo. (30 punti)
+- [x] generare un nuovo nodo. (30 punti)
     quando un nodo non riesce a inviare una transazione a nessun nodo amico,
     manda questa transazione a un mailbox del processo maestro per dopo generare un nuovo
     nodo e inviarelo
-    - [ ] creare un mailbox maestro
-    - [ ] creare un semaforo maestro
-    - [ ] ingrandire tutte le liste
-    - [ ] creare un nuovo processo nodo
-    - [ ] notificare la creazione del nuovo nodo
-    - [ ] incrementare il valore di configurazione.SO_NODES_NUM
+    - [x] creare un mailbox maestro
+    - [x] creare un semaforo maestro
+    - [x] ingrandire tutte le liste
+    - [x] creare un nuovo processo nodo
+    - [x] notificare la creazione del nuovo nodo
+    - [x] incrementare il valore di configurazione.SO_NODES_NUM
 
 
 # [UTENTE](User.md)
