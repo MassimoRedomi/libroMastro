@@ -347,6 +347,7 @@ extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 
+extern Transazione mainMailbox;
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -359,6 +360,7 @@ Questo metodo genera l'ultima transazione del blocco.
 questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in 
 questo blocco. 
 ```c Node.c
+
 /*funzione dell'ultima transazione del blocco.*/
 Transazione riasunto(int id, int somma){
     Transazione transaction;
@@ -367,6 +369,37 @@ Transazione riasunto(int id, int somma){
     transaction.quantita  = somma; /*la somma di tutto il reward generato*/
     transaction.timestamp = difftime(time(0),startSimulation);/*quanto tempo ha passato dal inizio della simulazione.*/
     return transaction;
+}
+
+```
+
+## invia transazione a nodo amico
+```c Node.c
+void inviaAdAmico(int amici[],int id){
+    bool inviaAmico=true;
+    int hops=0;
+    int i;
+    do{
+        for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
+            if(sem_trywait(&semafori[*(amici+i)])){
+                mailbox[*(amici+i)]=mailbox[id];
+                inviaAmico=false;
+            }
+        }
+        if(inviaAmico){
+            printf("Il nodo %d non ha nessun amico\n",id);
+            hops++;
+            if(hops==configurazione.SO_HOPS){
+                mainMailbox=(Transazione)mailbox[id];
+                sem_wait(&mainSem);
+                hops=0;
+                inviaAmico=false;
+            }
+        }else{
+            sem_post(&semafori[id]);
+            continue;
+        }
+    }while(inviaAmico);
 }
 ```
 
@@ -377,6 +410,7 @@ void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
     int id = (int)conf;
     int i;
+    int hops=0;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
@@ -408,19 +442,9 @@ void* nodo(void *conf){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
              if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
-                for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
-                    if(sem_trywait(&semafori[*(amici+i)])){
-                        mailbox[i]=mailbox[id];
-                        inviaAmico=false;
-                        printf("nodo %d invia transazione al amico %d\n",id,i);
-                    }
-                }
-                if(inviaAmico){
-                    printf("Il nodo %d non ha nessun amico\n",id);
-                }else{
-                    sem_post(&semafori[id]);
-                    continue;
-                }
+                inviaAdAmico(amici,id);
+                inviaAmico=false;
+                continue;
              }
 	    	 pool[poolsizelist[id]]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];
@@ -615,6 +639,7 @@ void* utente(void *conf){
     
 		if(retry >= configurazione.SO_RETRY || !checkUser[i] ){/*Se raggiunge il n° max di tentativi*/
 			printf("utente %d fermato\n",id);       /*ferma il procceso*/
+            checkUser[id]=false;
 		}
     }
 }
@@ -843,6 +868,7 @@ int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 Transazione *mailbox;/*struttura per condividere */
+Transazione mainMailbox;
 bool *checkNode;
 
 time_t startSimulation;
@@ -900,6 +926,49 @@ void segnale(Transazione programmato){
 }
 ```
 
+## nuovo nodo
+funzione che redimensziona tutte le liste per creare un nuovo nodo.
+```c main.c
+
+void nuovoNodo(Transazione t){
+    int i;
+
+    /*array temporali*/
+    int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
+    int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
+    sem_t *tempSemafori = calloc(configurazione.SO_NODES_NUM+1,sizeof(sem_t));
+    Transazione *tempmailbox = calloc(configurazione.SO_NODES_NUM+1, ((4*sizeof(int))+sizeof(double)));
+    pthread_t *tempThreads = calloc(configurazione.SO_NODES_NUM+1,sizeof(pthread_t));
+    bool *tempcheck =  calloc(configurazione.SO_NODES_NUM+1,sizeof(bool));
+
+    /*copia tutti i valori*/
+    for(i=0;i<configurazione.SO_NODES_NUM;i++){
+        tempPoolsize[i]=poolsizelist[i];
+        tempRewardList[i]=rewardlist[i];
+        tempSemafori[i] = semafori[i];
+        tempmailbox[i] = mailbox[i];
+        tempThreads[i] = nodi_id[i];
+        tempcheck[i] = checkNode[i];
+    }
+    
+    /*riimpiaza le liste*/
+    poolsizelist=tempPoolsize;
+    rewardlist =tempRewardList;
+    semafori =tempSemafori;
+    mailbox = tempmailbox;
+    nodi_id = tempThreads;
+    checkNode = tempcheck;
+
+    /*inizia il nuovo trhead*/
+    pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
+    sem_wait(&mainSem);
+    mailbox[configurazione.SO_NODES_NUM] = t;
+    printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
+    configurazione.SO_NODES_NUM++;
+}
+
+```
+
 ## Main Function
 
 ```c main.c
@@ -907,7 +976,8 @@ int main(int argc,char *argv[]){
     int i;
 	float now;
     bool test;
-    int counterAttivi;
+    int semvalue;
+
 
     /*variabili delle transazioni programmate*/
     int programmateCounter;
@@ -1001,6 +1071,15 @@ int main(int argc,char *argv[]){
                     programmateChecklist[i] = false;
                 }
             }
+            
+            /*vedo se c'e una nuova transazione nel mailbox*/
+            sem_getvalue(&mainSem,&semvalue);
+            if(semvalue<=0){
+                /*genero un nuovo nodo per inviare transazione*/
+                sem_post(&mainSem);
+                nuovoNodo(mainMailbox);
+                
+            }
 
 
         }
@@ -1017,14 +1096,6 @@ int main(int argc,char *argv[]){
             printf("tutti gli utenti sono disattivati\n");
         }
     
-		/*
-        printf("numero di blocchi: %d\n\n",libroCounter);
-		solo por confirmar al final
-		for(i=0;i<libroCounter*SO_BLOCK_SIZE;i++){
-			prinTrans(libroMastro[i]); per ora non mostro tutte transazioni
-        }
-        */
-        
 	}
 	return 0;
 }

@@ -30,6 +30,7 @@ extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 
+extern Transazione mainMailbox;
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -42,6 +43,7 @@ Questo metodo genera l'ultima transazione del blocco.
 questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in 
 questo blocco. 
 ```c Node.c
+
 /*funzione dell'ultima transazione del blocco.*/
 Transazione riasunto(int id, int somma){
     Transazione transaction;
@@ -50,6 +52,37 @@ Transazione riasunto(int id, int somma){
     transaction.quantita  = somma; /*la somma di tutto il reward generato*/
     transaction.timestamp = difftime(time(0),startSimulation);/*quanto tempo ha passato dal inizio della simulazione.*/
     return transaction;
+}
+
+```
+
+## invia transazione a nodo amico
+```c Node.c
+void inviaAdAmico(int amici[],int id){
+    bool inviaAmico=true;
+    int hops=0;
+    int i;
+    do{
+        for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
+            if(sem_trywait(&semafori[*(amici+i)])){
+                mailbox[*(amici+i)]=mailbox[id];
+                inviaAmico=false;
+            }
+        }
+        if(inviaAmico){
+            printf("Il nodo %d non ha nessun amico\n",id);
+            hops++;
+            if(hops==configurazione.SO_HOPS){
+                mainMailbox=(Transazione)mailbox[id];
+                sem_wait(&mainSem);
+                hops=0;
+                inviaAmico=false;
+            }
+        }else{
+            sem_post(&semafori[id]);
+            continue;
+        }
+    }while(inviaAmico);
 }
 ```
 
@@ -60,6 +93,7 @@ void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
     int id = (int)conf;
     int i;
+    int hops=0;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
@@ -91,19 +125,9 @@ void* nodo(void *conf){
             /*printf("hay algo en el mailbox #%d\n",id);*/
 			/*scrivo la nuova transazione nel blocco e nella pool*/
              if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
-                for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
-                    if(sem_trywait(&semafori[*(amici+i)])){
-                        mailbox[i]=mailbox[id];
-                        inviaAmico=false;
-                        printf("nodo %d invia transazione al amico %d\n",id,i);
-                    }
-                }
-                if(inviaAmico){
-                    printf("Il nodo %d non ha nessun amico\n",id);
-                }else{
-                    sem_post(&semafori[id]);
-                    continue;
-                }
+                inviaAdAmico(amici,id);
+                inviaAmico=false;
+                continue;
              }
 	    	 pool[poolsizelist[id]]=mailbox[id];
 	    	 blocco[counterBlock]=mailbox[id];

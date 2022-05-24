@@ -106,6 +106,7 @@ void* utente(void *conf){
     
 		if(retry >= configurazione.SO_RETRY || !checkUser[i] ){/*Se raggiunge il n° max di tentativi*/
 			printf("utente %d fermato\n",id);       /*ferma il procceso*/
+            checkUser[id]=false;
 		}
     }
 }
