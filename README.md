@@ -40,21 +40,17 @@ custom:
 
 
 ## significato di ogni flag
- - std=c89: set the language standard C89.
+ - std=c89: Stabilisce il linguagio standard C89.
 
- - pthread
-Setting the binary for thread processing.
-
+ - pthread: Stabilisce il binario per processare threads.
  - pedantic
 
- - D_GNU_SOURCE: enables GNU extensions to the C and OS standards supported by the GNU C library.
+ - D_GNU_SOURCE: Abilita estensioni GNU agli standard C e OS supportati dalla libreria GNU C.
+ - SO_BLOCK_SIZE: La grandezza del blocco nella simulzaione.
 
- - SO_BLOCK_SIZE: The size of the block in the simulation.
+ - SO_REGISTRY_SIZE: La grandezza massima del libro mastro.
 
-
- - SO_REGISTRY_SIZE: The max size of the libro mastro.
-
- - lm: Compiles against the shared library.
+ - lm: Compila con le librerie condivise.
 
 
 # Esecuzione del programma
