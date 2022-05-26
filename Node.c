@@ -9,6 +9,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
+extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
 extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
@@ -44,7 +45,7 @@ void inviaAdAmico(int amici[],int id){
         if(inviaAmico){
             printf("Il nodo %d non ha nessun amico\n",id);
             hops++;
-            if(hops==configurazione.SO_HOPS){
+            if(hops>=configurazione.SO_HOPS){
                 mainMailbox=(Transazione)mailbox[id];
                 sem_wait(&mainSem);
                 hops=0;
@@ -52,7 +53,6 @@ void inviaAdAmico(int amici[],int id){
             }
         }else{
             sem_post(&semafori[id]);
-            continue;
         }
     }while(inviaAmico);
 }
@@ -75,7 +75,7 @@ void* nodo(void *conf){
             amici[i] = randomInt(0,configurazione.SO_FRIENDS_NUM);
         }while(amici[i]==i);
     }
-    sem_post(&mainSem);
+    sem_post(&NodeStartSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
@@ -126,13 +126,18 @@ void* nodo(void *conf){
 
 
             }
-            if(poolsizelist[id] < configurazione.SO_TP_SIZE){
-                sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
-            }else{
+            sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
+            if(poolsizelist[id] >= configurazione.SO_TP_SIZE){
                 checkNode[id]=false;
             }
 
         }
 
+    }
+    while(true){
+        sem_getvalue(&semafori[id],&semvalue);
+        if(semvalue <= 0){
+            inviaAdAmico(amici,id);
+        }
     }
 }

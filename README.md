@@ -360,18 +360,22 @@ sem_t mainSem;
 In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivise servono agli altri processi in qualche momento o almeno sono dati che gli serve al main per stampare lo stato dei processi.
 
 
-### Lista Semafori e altri Dati Condivisi tra i threads:
+### Lista Dati Condivisi tra i threads:
 
 ```c main.c
 /*variabili condivise tra diversi thread.*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
-bool *checkUser;
+bool *checkUser;     /*mostra lo stato di ogni utente.*/
+sem_t UserStartSem;  /*un semaforo dedicato unicamente per iniziare processi utente*/
+
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
+sem_t NodeStartSem;  /*un semaforo dedicato unicamente per iniziare processi nodo*/
 Transazione *mailbox;/*struttura per condividere */
+bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
+
 Transazione mainMailbox;
-bool *checkNode;
 
 time_t startSimulation;
 pthread_t *utenti_id;     /*lista id di processi utenti*/
@@ -428,41 +432,55 @@ void segnale(Transazione programmato){
 Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
 ```c main.c
 
-void nuovoNodo(Transazione t){
+void* gestore(){
     int i;
+    int semvalue;
 
-    /*array temporali*/
-    int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
-    int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
-    sem_t *tempSemafori = calloc(configurazione.SO_NODES_NUM+1,sizeof(sem_t));
-    Transazione *tempmailbox = calloc(configurazione.SO_NODES_NUM+1, ((4*sizeof(int))+sizeof(double)));
-    pthread_t *tempThreads = calloc(configurazione.SO_NODES_NUM+1,sizeof(pthread_t));
-    bool *tempcheck =  calloc(configurazione.SO_NODES_NUM+1,sizeof(bool));
+    while(difftime(time(0), startSimulation)){
+        sem_getvalue(&mainSem,&i);
+        if(semvalue <=0){
+            sem_post(&mainSem);
+            /*array temporali*/
+            int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
+            int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
+            sem_t *tempSemafori = calloc(configurazione.SO_NODES_NUM+1,sizeof(sem_t));
+            Transazione *tempmailbox = calloc(configurazione.SO_NODES_NUM+1, ((4*sizeof(int))+sizeof(double)));
+            pthread_t *tempThreads = calloc(configurazione.SO_NODES_NUM+1,sizeof(pthread_t));
+            bool *tempcheck =  calloc(configurazione.SO_NODES_NUM+1,sizeof(bool));
 
-    /*copia tutti i valori*/
-    for(i=0;i<configurazione.SO_NODES_NUM;i++){
-        tempPoolsize[i]=poolsizelist[i];
-        tempRewardList[i]=rewardlist[i];
-        tempSemafori[i] = semafori[i];
-        tempmailbox[i] = mailbox[i];
-        tempThreads[i] = nodi_id[i];
-        tempcheck[i] = checkNode[i];
+            /*copia tutti i valori*/
+            for(i=0;i<configurazione.SO_NODES_NUM;i++){
+                tempPoolsize[i]=poolsizelist[i];
+                tempRewardList[i]=rewardlist[i];
+                tempSemafori[i] = semafori[i];
+                tempmailbox[i] = mailbox[i];
+                tempThreads[i] = nodi_id[i];
+                tempcheck[i] = checkNode[i];
+            }
+
+            /*riimpiaza le liste*/
+            poolsizelist=tempPoolsize;
+            free(tempPoolsize);
+            rewardlist =tempRewardList;
+            free(tempPoolsize);
+            semafori =tempSemafori;
+            free(tempSemafori);
+            mailbox = tempmailbox;
+            free(tempmailbox);
+            nodi_id = tempThreads;
+            free(tempThreads);
+            checkNode = tempcheck;
+            free(tempcheck);
+
+            /*inizia il nuovo trhead*/
+            pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
+            sem_wait(&NodeStartSem);
+
+            /*mailbox[configurazione.SO_NODES_NUM] = t;*/
+            printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
+            configurazione.SO_NODES_NUM++;
+        }
     }
-    
-    /*riimpiaza le liste*/
-    poolsizelist=tempPoolsize;
-    rewardlist =tempRewardList;
-    semafori =tempSemafori;
-    mailbox = tempmailbox;
-    nodi_id = tempThreads;
-    checkNode = tempcheck;
-
-    /*inizia il nuovo trhead*/
-    pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
-    sem_wait(&mainSem);
-    mailbox[configurazione.SO_NODES_NUM] = t;
-    printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
-    configurazione.SO_NODES_NUM++;
 }
 
 ```
@@ -484,6 +502,7 @@ int main(int argc,char *argv[]){
     float now;
     bool test;
     int semvalue;
+    pthread_t thrGestore;
 
 
     /*variabili delle transazioni programmate*/
@@ -518,15 +537,16 @@ int main(int argc,char *argv[]){
         }else{
             programmateCounter = 0;
         }
+        
  
         /*now that we have all the variables we can start the process
         master*/
-    
+        sem_init(&libroluck,configurazione.SO_NODES_NUM,1);/*inizia il semaforo del libromastro*/
         sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);
-        startSimulation = time(0);/* el tiempo de ahora*/
-        sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
+        startSimulation = time(0);/* el tiempo de inicio*/
     
         /*generatore dei nodi*/
+        sem_init(&NodeStartSem,configurazione.SO_NODES_NUM,1);
         poolsizelist=calloc(configurazione.SO_TP_SIZE , sizeof(int));
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
@@ -535,23 +555,33 @@ int main(int argc,char *argv[]){
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
             pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
-            sem_wait(&mainSem);
+            sem_wait(&NodeStartSem);
         }
 
+        pthread_create(&thrGestore,NULL,gestore,NULL);
+
         /*generatore dei utenti*/
+        sem_init(&UserStartSem,configurazione.SO_USERS_NUM,1);
         budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
         utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
             pthread_create(&utenti_id[i],NULL,utente,(void *)i);
-            sem_wait(&mainSem);
+            sem_wait(&UserStartSem);
         }
 
-        /*now start the master process*/
+        
         now = difftime(time(0), startSimulation);
 
         while(now < configurazione.SO_SIM_SEC){
 
+            /*vedo se c'e una nuova transazione nel mailbox*/
+            /*sem_getvalue(&mainSem,&semvalue);
+            if(semvalue<=0){
+                sem_post(&mainSem);
+                nuovoNodo(mainMailbox);
+                
+            }*/
             sleep(1);
             clear();
 
@@ -564,6 +594,7 @@ int main(int argc,char *argv[]){
                 printf("%f: libro mastro pieno\n",now);
                 break;
             }
+            
 
             test = printStatus(40);
             if(!test){
@@ -578,16 +609,6 @@ int main(int argc,char *argv[]){
                     programmateChecklist[i] = false;
                 }
             }
-            
-            /*vedo se c'e una nuova transazione nel mailbox*/
-            sem_getvalue(&mainSem,&semvalue);
-            if(semvalue<=0){
-                /*genero un nuovo nodo per inviare transazione*/
-                sem_post(&mainSem);
-                nuovoNodo(mainMailbox);
-                
-            }
-
 
         }
         finalprint();
@@ -639,6 +660,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
+extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
 extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
@@ -686,7 +708,7 @@ void inviaAdAmico(int amici[],int id){
         if(inviaAmico){
             printf("Il nodo %d non ha nessun amico\n",id);
             hops++;
-            if(hops==configurazione.SO_HOPS){
+            if(hops>=configurazione.SO_HOPS){
                 mainMailbox=(Transazione)mailbox[id];
                 sem_wait(&mainSem);
                 hops=0;
@@ -694,7 +716,6 @@ void inviaAdAmico(int amici[],int id){
             }
         }else{
             sem_post(&semafori[id]);
-            continue;
         }
     }while(inviaAmico);
 }
@@ -722,7 +743,7 @@ void* nodo(void *conf){
             amici[i] = randomInt(0,configurazione.SO_FRIENDS_NUM);
         }while(amici[i]==i);
     }
-    sem_post(&mainSem);
+    sem_post(&NodeStartSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
@@ -773,14 +794,19 @@ void* nodo(void *conf){
 
 
             }
-            if(poolsizelist[id] < configurazione.SO_TP_SIZE){
-                sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
-            }else{
+            sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
+            if(poolsizelist[id] >= configurazione.SO_TP_SIZE){
                 checkNode[id]=false;
             }
 
         }
 
+    }
+    while(true){
+        sem_getvalue(&semafori[id],&semvalue);
+        if(semvalue <= 0){
+            inviaAdAmico(amici,id);
+        }
     }
 }
 ```
@@ -816,10 +842,13 @@ Importa tutte le variabili del Main
 /*variabili condivise tra diversi thread.*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern bool *checkUser;
+extern sem_t UserStartSem;
+
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
@@ -911,7 +940,7 @@ void* utente(void *conf){
     /*setting default values delle variabili condivise*/
     checkUser[id] = true;
     budgetlist[id] = configurazione.SO_BUDGET_INIT;
-    sem_post(&mainSem);
+    sem_post(&UserStartSem);
 
     /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
