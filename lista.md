@@ -97,6 +97,8 @@
 
 - [x] enviar transaccion al nodo amigo(30 pts).
 
+- [ ] modo zombie del nodo:
+    se debe rehacer de cero.
 
 # [STRUCTS](Structs.md)
 - [ ] transaction: replace double by timespec struct.

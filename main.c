@@ -98,7 +98,7 @@ void nuovoNodo(Transazione t){
 
 int main(int argc,char *argv[]){
     int i;
-	float now;
+    float now;
     bool test;
     int semvalue;
 
@@ -109,20 +109,20 @@ int main(int argc,char *argv[]){
     Transazione programmate[100];
 
 
-    srand((unsigned) time(0)); /*aleatorio*/
+    srand(time(0)); /*aleatorio*/
 
     if(argc<2){
-	    printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
+        printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
         exit(EXIT_FAILURE);
     }else if(argc>3){
-		printf("troppi argomenti.\n");
-		exit(EXIT_FAILURE);
+        printf("troppi argomenti.\n");
+        exit(EXIT_FAILURE);
     }else{
-		/*in caso di voler inserire i valori a mano*/
-		if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
-			writeConf();
-		}else{
-	    	 readconf(argv[1]);/*lettura del file*/
+        /*in caso di voler inserire i valori a mano*/
+        if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
+            writeConf();
+        }else{
+            readconf(argv[1]);/*lettura del file*/
         }
     
         /*lettura di transazioni programmate*/
@@ -151,7 +151,7 @@ int main(int argc,char *argv[]){
         nodi_id = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-			pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
+            pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
             sem_wait(&mainSem);
         }
 
@@ -160,23 +160,23 @@ int main(int argc,char *argv[]){
         utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-			pthread_create(&utenti_id[i],NULL,utente,(void *)i);
+            pthread_create(&utenti_id[i],NULL,utente,(void *)i);
             sem_wait(&mainSem);
         }
-    
-		/*now start the master process*/
-		now = difftime(time(0), startSimulation);
 
-		while(now < configurazione.SO_SIM_SEC){
+        /*now start the master process*/
+        now = difftime(time(0), startSimulation);
 
-			sleep(1);
+        while(now < configurazione.SO_SIM_SEC){
+
+            sleep(1);
             clear();
-    
-			/*show last update*/
-	    	printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
-	    	now = difftime(time(0), startSimulation);
-            
+            /*show last update*/
+            printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
+
+            now = difftime(time(0), startSimulation);
+
             if(libroCounter > SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
                 break;
@@ -211,15 +211,15 @@ int main(int argc,char *argv[]){
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-			pthread_cancel(nodi_id[i]);
-		}
+            pthread_cancel(nodi_id[i]);
+        }
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
         }
         if(!test){
             printf("tutti gli utenti sono disattivati\n");
         }
-    
-	}
-	return 0;
+
+    }
+    return 0;
 }

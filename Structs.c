@@ -1,7 +1,7 @@
 
 /*struttura della configurazione.*/
 typedef struct Configurazione{
-	int SO_USERS_NUM;          /*numero di processi utente*/
+    int SO_USERS_NUM;          /*numero di processi utente*/
     int SO_NODES_NUM;          /*numero di processi nodo*/
     int SO_BUDGET_INIT;        /*budget iniziale di ciascun processo utente*/
     int SO_REWARD;             /*la percentuale di reward pagata da ogni utente per il processamento di una transazione*/
@@ -24,7 +24,7 @@ extern Configurazione configurazione;
 /*Un metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero)*/
 int readAndInt(char *str, int n, FILE *stream){
-	fgets(str,n,stream);
+    fgets(str,n,stream);
     return atoi(str);
 }
 /*Funzione che cerca la maniera di leggere il config file.
@@ -36,45 +36,45 @@ void readconf(char fileName[]){
     FILE *file= fopen(fileName, "r");
     
     if(!file){
-	      printf("non si trova il config file.\n");
-          exit(EXIT_FAILURE);
+        printf("non si trova il config file.\n");
+        exit(EXIT_FAILURE);
     }else{
-      char line[20];/*str per prendere le righe*/
+        char line[20];/*str per prendere le righe*/
     
-    /*Inserisco le variabili riga per riga alla struttura.*/
-    fscanf(file,"%d",&configurazione.SO_USERS_NUM);
-    printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
-    fscanf(file,"%d",&configurazione.SO_NODES_NUM);
-    printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
-    fscanf(file,"%d",&configurazione.SO_BUDGET_INIT);
-    printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
-    fscanf(file,"%d",&configurazione.SO_REWARD);
-    printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
-    fscanf(file,"%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
-    printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
-    fscanf(file,"%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
-    printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
-    fscanf(file,"%d",&configurazione.SO_RETRY);
-    printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
-    fscanf(file,"%d",&configurazione.SO_TP_SIZE);
-    printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
-    fscanf(file,"%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
-    printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
-    fscanf(file,"%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
-    printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
-    fscanf(file,"%d",&configurazione.SO_SIM_SEC);
-    printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
-    fscanf(file,"%d",&configurazione.SO_FRIENDS_NUM);
-    printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
-    fscanf(file,"%d",&configurazione.SO_HOPS);
-    printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
+        /*Inserisco le variabili riga per riga alla struttura.*/
+        fscanf(file,"%d",&configurazione.SO_USERS_NUM);
+        printf("SO_USERS_NUM: %d\n",configurazione.SO_USERS_NUM);
+        fscanf(file,"%d",&configurazione.SO_NODES_NUM);
+        printf("SO_NODES_NUM: %d\n",configurazione.SO_NODES_NUM);
+        fscanf(file,"%d",&configurazione.SO_BUDGET_INIT);
+        printf("SO_BUDGET_INIT: %d\n",configurazione.SO_BUDGET_INIT);
+        fscanf(file,"%d",&configurazione.SO_REWARD);
+        printf("SO_REWARD: %d\n",configurazione.SO_REWARD);
+        fscanf(file,"%d",&configurazione.SO_MIN_TRANS_GEN_NSEC);
+        printf("SO_MIN_TRANS_GEN_NSEC: %d\n",configurazione.SO_MIN_TRANS_GEN_NSEC);
+        fscanf(file,"%d",&configurazione.SO_MAX_TRANS_GEN_NSEC);
+        printf("SO_MAX_TRANS_GEN_NSEC: %d\n",configurazione.SO_MAX_TRANS_GEN_NSEC);
+        fscanf(file,"%d",&configurazione.SO_RETRY);
+        printf("SO_RETRY: %d\n",configurazione.SO_RETRY);
+        fscanf(file,"%d",&configurazione.SO_TP_SIZE);
+        printf("SO_TP_SIZE: %d\n",configurazione.SO_TP_SIZE);
+        fscanf(file,"%d",&configurazione.SO_MIN_TRANS_PROC_NSEC);
+        printf("SO_MIN_TRANS_PROC_NSEC: %d\n",configurazione.SO_MIN_TRANS_PROC_NSEC);
+        fscanf(file,"%d",&configurazione.SO_MAX_TRANS_PROC_NSEC);
+        printf("SO_MAX_TRANS_PROC_NSEC: %d\n",configurazione.SO_MAX_TRANS_PROC_NSEC);
+        fscanf(file,"%d",&configurazione.SO_SIM_SEC);
+        printf("SO_SIM_SEC: %d\n",configurazione.SO_SIM_SEC);
+        fscanf(file,"%d",&configurazione.SO_FRIENDS_NUM);
+        printf("SO_FRIENDS_NUM: %d\n",configurazione.SO_FRIENDS_NUM);
+        fscanf(file,"%d",&configurazione.SO_HOPS);
+        printf("SO_HOPS: %d\n",configurazione.SO_HOPS);
     }
     fclose(file);/*chiusura del file.*/
 }
 
 /*scritura manuale dei valori del sistema.*/
 void writeConf(){
-	printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
+    printf("inserendo il parametro 'mano' o 'manual' si attiva il inserimento manuale dei valori\n\n");
     printf("SO_USERS_NUM: ");
     scanf("%d",&configurazione.SO_USERS_NUM);
     printf("SO_NODES_NUM: ");
@@ -107,8 +107,8 @@ void writeConf(){
 
 /*struttura della configurazione.*/
 typedef struct Transazione{
-	double timestamp;/*Quando viene effettuata la transazione.*/
-	int sender;      /*Utente che ha generato la transazione.*/
+    double timestamp;/*Quando viene effettuata la transazione.*/
+    int sender;      /*Utente che ha generato la transazione.*/
     int receiver;    /*Utente destinatario de la somma.*/
     int quantita;    /*Quantita di denaro inviata.*/
     int reward;      /*denaro dal sender al nodo che processa la transazione.*/

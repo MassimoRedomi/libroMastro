@@ -114,7 +114,7 @@ void* nodo(void *conf){
     }
     sem_post(&mainSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
-	rewardlist[id]=0;/*set il reward di questo nodo in 0*/
+    rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
     checkNode[id] = true;
     /*mythr = pthread_self();
@@ -122,55 +122,55 @@ void* nodo(void *conf){
     
     /*inizio del funzionamento*/
     while(checkNode[id]){
-    
-		/*aggiorno il valore del semaforo*/
+
+        /*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             /*printf("hay algo en el mailbox #%d\n",id);*/
-			/*scrivo la nuova transazione nel blocco e nella pool*/
-             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
+            /*scrivo la nuova transazione nel blocco e nella pool*/
+            if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);
                 inviaAmico=false;
                 continue;
              }
-	    	 pool[poolsizelist[id]]=mailbox[id];
-	    	 blocco[counterBlock]=mailbox[id];
-    
-	    	 /*somma il reward*/
-	    	 sommaBlocco    += blocco[counterBlock].reward;
-	    	 rewardlist[id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
-    
-	    	 /*incremento i contatori di posizione di pool e block*/
-	    	 counterBlock++;
-	    	 poolsizelist[id]++;
+             pool[poolsizelist[id]]=mailbox[id];
+             blocco[counterBlock]=mailbox[id];
 
-	    	 if(counterBlock == SO_BLOCK_SIZE - 1){
+             /*somma il reward*/
+             sommaBlocco    += blocco[counterBlock].reward;
+             rewardlist[id] += blocco[counterBlock].reward;/*si mette al registro publico totale*/
+
+             /*incremento i contatori di posizione di pool e block*/
+             counterBlock++;
+             poolsizelist[id]++;
+
+             if(counterBlock == SO_BLOCK_SIZE - 1){
 	    	    /*si aggiunge una nuova transazione come chiusura del blocco*/
 	    	    blocco[counterBlock]=riasunto(id, sommaBlocco);/*aggiunge la transazione al blocco.*/
-    
-	    	    sem_wait(&libroluck);
-	    	    for(i=0;i< SO_BLOCK_SIZE;i++){
-	    	       libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
-	    	    }
-	    	    /*si spostano i contatori*/
-	    	    libroCounter++;
-	    	    sem_post(&libroluck);
-	    	    counterBlock=0;
-	    	    sommaBlocco=0;
+
+                sem_wait(&libroluck);
+                for(i=0;i< SO_BLOCK_SIZE;i++){
+                    libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
+                }
+                /*si spostano i contatori*/
+                libroCounter++;
+                sem_post(&libroluck);
+                counterBlock=0;
+                sommaBlocco=0;
                 inviaAmico=true;
-				randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
+                randomSleep(configurazione.SO_MIN_TRANS_PROC_NSEC,configurazione.SO_MAX_TRANS_PROC_NSEC);
 	    	    /*free(&mailbox[id]);*/
-    
-	    	      
-	    	}
+
+
+            }
             if(poolsizelist[id] < configurazione.SO_TP_SIZE){
                 sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
-	        }else{
+            }else{
                 checkNode[id]=false;
             }
-    
-		}
-    
-	}
+
+        }
+
+    }
 }
 ```

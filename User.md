@@ -47,15 +47,15 @@ L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione.
 ```c User.c
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
-	int i;
+    int i;
     while(lastUpdate < libroCounter){
-		for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
-			if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
-	    	    budgetlist[id] += libroMastro[i].quantita - libroMastro[i].reward;
-	    	 }
+        for(i=lastUpdate*SO_BLOCK_SIZE; i < (lastUpdate+1)*SO_BLOCK_SIZE; i++){
+            if(libroMastro[i].receiver == id && libroMastro[i].sender != -1){
+                budgetlist[id] += libroMastro[i].quantita - libroMastro[i].reward;
+            }
         }
         lastUpdate++;
-	}
+    }
     return lastUpdate;
 }
 
@@ -88,26 +88,26 @@ comprime tutto il processo di generare la transazione.
 ```c User.c
 Transazione generateTransaction(int id){
     int altroUtente;
-	Transazione transaccion;
+    Transazione transaccion;
     transaccion.sender   = id;
     transaccion.quantita = randomInt(2,budgetlist[id]/2);/*set quantita a caso*/
-	transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
+    transaccion.reward   = transaccion.quantita * configurazione.SO_REWARD/100;/*percentuale de la quantita*/
     
 	/*se il reward non arriva a 1, allora diventa 1*/
     if(transaccion.reward < 1){
-		transaccion.reward = 1;
+        transaccion.reward = 1;
     }
     
     /*ricerca del riceiver*/
     /*debo reparar lo de los intentos*/
     do{
-		altroUtente= randomInt(0,configurazione.SO_USERS_NUM);
-	}while(altroUtente==id || !checkUser[altroUtente]);
-	transaccion.receiver = altroUtente;
-	/*calcola il timestamp in base al tempo di simulazione.*/
-	transaccion.timestamp = difftime(time(0),startSimulation);
+        altroUtente= randomInt(0,configurazione.SO_USERS_NUM);
+    }while(altroUtente==id || !checkUser[altroUtente]);
+    transaccion.receiver = altroUtente;
+    /*calcola il timestamp in base al tempo di simulazione.*/
+    transaccion.timestamp = difftime(time(0),startSimulation);
 
-	return transaccion;
+    return transaccion;
 }
 
 ```
@@ -117,41 +117,41 @@ Transazione generateTransaction(int id){
 ```c User.c
 /*PROCESSO UTENTE:*/
 void* utente(void *conf){
-	int id = (int)conf;                       /*Id processo utente*/
+    int id = (int)conf;                       /*Id processo utente*/
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
     int retry=0;
-	/*setting default values delle variabili condivise*/
+    /*setting default values delle variabili condivise*/
     checkUser[id] = true;
-	budgetlist[id] = configurazione.SO_BUDGET_INIT;
+    budgetlist[id] = configurazione.SO_BUDGET_INIT;
     sem_post(&mainSem);
 
-	/*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
-    
+    /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
-	while(retry < configurazione.SO_RETRY){
-    
-		lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
-    
-		if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/                                
-			Transazione transaction;              /*Creiamo una nuova transazione*/
+    while(retry < configurazione.SO_RETRY){
+
+        lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
+
+        if(budgetlist[id]>=2){                   /*Condizione Budget >= 2*/
+
+            Transazione transaction;              /*Creiamo una nuova transazione*/
             retry = 0;
-			transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
-    
-			/*scelglie un nodo libero a caso*/
+            transaction = generateTransaction(id);/*Chiamiamo la func generateTransaction*/
+
+            /*scelglie un nodo libero a caso*/
             mailbox[nodoLibero(id)] = transaction;
             budgetlist[id] -= transaction.quantita;
         }else{
-			retry++;
-		}
-    
-		randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
-    
-		if(retry >= configurazione.SO_RETRY || !checkUser[i] ){/*Se raggiunge il n° max di tentativi*/
-			printf("utente %d fermato\n",id);       /*ferma il procceso*/
+            retry++;
+        }
+
+        randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
+
+        if(retry >= configurazione.SO_RETRY || !checkUser[i] ){/*Se raggiunge il n° max di tentativi*/
+            printf("utente %d fermato\n",id);       /*ferma il procceso*/
             checkUser[id]=false;
-		}
+        }
     }
 }
 ```
