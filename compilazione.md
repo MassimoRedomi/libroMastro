@@ -3,7 +3,9 @@
 La compilazione avviene tramite MAKEFILE:
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
+
 SO_REGISTRY_SIZE = 1000
+
 ```makefile Makefile
 1:
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
@@ -11,7 +13,9 @@ SO_REGISTRY_SIZE = 1000
 
 ### configurazione 2:
 SO_BLOCK_SIZE = 10
+
 SO_REGISTRY_SIZE = 10000
+
 ```makefile Makefile
 2:
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
@@ -19,7 +23,9 @@ SO_REGISTRY_SIZE = 10000
 
 ### configurazione 3:
 SO_BLOCK_SIZE = 10
+
 SO_REGISTRY_SIZE = 1000
+
 ```makefile Makefile
 3:
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
@@ -75,3 +81,8 @@ argomento la parola "mano" o "manuale".
 
 ## aggiunge segnali
 nel caso delle segnali per forzare certe transazioni, non è obbligatorio per inizializare il programma, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
+
+```sh
+./main conf1.dat transactions.dat
+```
+con il file __transactions.dat__ come il file con tutte le transazioni programmate.

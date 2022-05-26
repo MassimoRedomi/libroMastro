@@ -6,31 +6,29 @@ oggetto della vita reale.
 
 ## Configurazione
 
-questa struttura solo serve per avere un archivio di dati ordinati
-dei dati letti del file di configurazione. questi dati sono:
+Questa struttura solo serve per avere un archivio di dati ordinati
+dei dati letti del file di configurazione. Questi dati sono:
 
-| variables                            | descripcion                                                                                                      |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| SO_USERS_NUM                         | numero di processi untente                                                                                       |
-| SO_NODES_NUM                         | numero di processi nodo                                                                                          |
-| SO_BUDGETNUM                         | budget iniziale di ciascun processo utente                                                                       |
-| SO_REWARD                            | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
-| SO_MIN_TRANS_GEN_NSEC                | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
-| SO_MAX_TRANS_GEN_NSEC                | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
-| SO_RETRY                             | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
-| SO_TPSIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
-| SO_BLOCKSIZE                         | numero di transazioni contenute in un blocco                                                                     |
-| SO_MIN_TRANS_PROC                    | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
-| SO_MAX_TRANS_PROC                    | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
-| SO_REGISTRY_SIZE                     | numero massimo di blocchi nel libro mastro.                                                                      |
-| SO_SIM_SEC                           | durata della simulazione.                                                                                        |
-| SO_NUM_FRIENDS(solo versione max 30) | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
-| SO_HOPS                              | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
+| variables             | descripcion                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| SO_USERS_NUM          | numero di processi untente                                   |
+| SO_NODES_NUM          | numero di processi nodo                                      |
+| SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                   |
+| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione |
+| SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina |
+| SO_TP_SIZE            | numero massimo di transazioni nella transaction pool dei processi nodo |
+| SO_BLOCK_SIZE         | numero di transazioni contenute in un blocco                 |
+| SO_MIN_TRANS_PROC     | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
+| SO_MAX_TRANS_PROC     | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
+| SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                  |
+| SO_SIM_SEC            | durata della simulazione.                                    |
+| SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full) |
+| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo |
 
 
-Anche è vero che si poteva leggere tutte le variabili senza metterlo
-in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto 
-cosi.
+Anche è vero che si poteva leggere tutte le variabili senza metterlo in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto cosi.
 
 ```c Structs.c
 
@@ -52,14 +50,10 @@ typedef struct Configurazione{
 }Configurazione;
 
 extern Configurazione configurazione;
-#define clear() printf("\033[H\033[J") /*clear the screen*/
-#define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
-#define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
-#define boolString(b) ((b) ? "True":"False")/*make the %b*/
+
 ```
 
-Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> 
-perche solo c'è una lettura delle variabili di configurazione.
+Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perche solo c'è una lettura delle variabili di configurazione.
 #  Lettura Configurazione
 
 ## Legge File
@@ -119,10 +113,6 @@ void readconf(char fileName[]){
 
 ## Scrittura Manuale
 
-Forse per la parte di prove. possiamo cambiare la intro delle variabili.
-probabilmente cancelliamo questo alla fine del progetto.
-l'idea e' poter inserire le variabili a mano
-
 ```c Structs.c
 /*scritura manuale dei valori del sistema.*/
 void writeConf(){
@@ -153,7 +143,6 @@ void writeConf(){
     scanf("%d",&configurazione.SO_FRIENDS_NUM);
     printf("SO_HOPS: ");
     scanf("%d",&configurazione.SO_HOPS);
-    clear();
     
 }
 
@@ -188,8 +177,9 @@ typedef struct Transazione{
 
 ```
 
-
 ## printTrans
+
+Uso generico per stampare una transazioni. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
 
 ```c Structs.c
 void prinTrans(Transazione t){

@@ -1,3 +1,9 @@
+/*macros per il print*/
+#define clear() printf("\033[H\033[J") /*clear the screen*/
+#define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
+#define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
+#define boolString(b) ((b) ? "True":"False")/*make the %b*/
+
 /*variabili degli utenti*/
 extern int *budgetlist;
 extern bool *checkUser;
@@ -68,6 +74,7 @@ bool printStatus(int nstamp){
     
     return activeUsers>1;
 }
+
 void finalprint(){
     /*User var*/
     int activeUsers=0;

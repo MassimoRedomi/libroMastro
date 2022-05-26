@@ -15,22 +15,25 @@ Import del libroMastro e tutte le variabili:
 ```c Node.c
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
-extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
-extern sem_t mainSem;
+extern sem_t libroluck; /*luchetto per accedere solo un nodo alla volta*/
 
 ```
 
+### Memoria Condivisa
 
-### Sincronizzazione tra Processi
+Il nodo non ha bisogno delle variabili degli utenti. Quindi solo servono le variabili del main e dei altri nodi nodi.
+
 ```c Node.c
 /*variabili condivise tra diversi thread.*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
-extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
+extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 
 extern Transazione mainMailbox;
+extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -39,9 +42,8 @@ extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 
 
 ## transazione di riasunto
-Questo metodo genera l'ultima transazione del blocco.
-questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in 
-questo blocco. 
+Questo metodo genera l'ultima transazione del blocco. Questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in questo blocco. 
+
 ```c Node.c
 
 /*funzione dell'ultima transazione del blocco.*/
@@ -56,9 +58,8 @@ Transazione riasunto(int id, int somma){
 
 ```
 
-## invia transazione a nodo amico
-questa funzione invia una transazione a un amico o crea un
-nuovo nodo per inviarselo. 
+## Invia transazione a nodo amico
+Questa funzione invia una transazione a un amico o crea un nuovo nodo per inviarselo. 
 ```c Node.c
 void inviaAdAmico(int amici[],int id){
     bool inviaAmico=true;
@@ -91,7 +92,7 @@ void inviaAdAmico(int amici[],int id){
 ```
 
 
-## Funzione Principale
+## Funzione principale del nodo.
 ```c Node.c
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/

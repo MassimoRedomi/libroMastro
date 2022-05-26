@@ -17,10 +17,7 @@ typedef struct Configurazione{
 }Configurazione;
 
 extern Configurazione configurazione;
-#define clear() printf("\033[H\033[J") /*clear the screen*/
-#define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
-#define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
-#define boolString(b) ((b) ? "True":"False")/*make the %b*/
+
 /*Un metodo che fa un fgets(con gli stessi parametri e lo 
 ritorna come un valore intero)*/
 int readAndInt(char *str, int n, FILE *stream){
@@ -101,7 +98,6 @@ void writeConf(){
     scanf("%d",&configurazione.SO_FRIENDS_NUM);
     printf("SO_HOPS: ");
     scanf("%d",&configurazione.SO_HOPS);
-    clear();
     
 }
 

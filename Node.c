@@ -1,17 +1,18 @@
 #include "Structs.c"
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
-extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
-extern sem_t mainSem;
+extern sem_t libroluck; /*luchetto per accedere solo un nodo alla volta*/
 
 /*variabili condivise tra diversi thread.*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
-extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
+extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 
 extern Transazione mainMailbox;
+extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/

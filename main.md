@@ -40,29 +40,10 @@ sem_t mainSem;
 ```
 
 
-# Funzioni in parallelo
-questo spazio è riservato alle funzioni del multithread
 
-## Memoria condivisa (work in progress)
+## Memoria condivisa 
 
-i semafori vengono usati per gestire il flusso del programma
-e ad evitare che i processi accedano contemporaneamente ai dati. 
-Un Semaforo ha 3 stati:
-
-###  0 avanti
-Il processo puo accedere direttamente al dato.
-
-
-### <0 aspetta
-Il processo aspetta per accedere al dato
-o in alternativa sceglie unn'altra via per l'accesso.
-
-### external resources
-
-1.  General Semaphore Example:
-    <https://www.delftstack.com/howto/c/semaphore-example-in-c/>
-2.  trywait:
-    <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
+In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivise servono agli altri processi in qualche momento o almeno sono dati che gli serve al main per stampare lo stato dei processi.
 
 
 ### Lista Semafori e altri Dati Condivisi tra i threads:
@@ -84,17 +65,14 @@ pthread_t *nodi_id;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
 ```
-# Transazioni programmate(para quien me lea. traduzcanme por favor)
-Las transacciones progrmadas son una lista de transacciones que vienen son leidos
-desde un file externo que contiene una transaccion por linea; cada linea contiene
-su timestamp, sender id, receiver id y cantidad. cuando sea la hora de cada 
-transaccion, se hara una señal desde el main 
+# Transazioni programmate
+
+le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender fa questa transazione.
+
+
 
 ## Lettura del file di transazioni pianificati
-questa funzione non ha bisogno di ritornare un array perche puo essere pasato
-come parametro della funzione e si scrive direttamente nell'array. per questo
-motivo il return della funzione ritornera un valore intero che rapressenta la
-quantita di transazioni programmate.
+questa funzione non ha bisogno di ritornare un array perche puo essere pasato come parametro della funzione e si scrive direttamente nell'array. per questo motivo il return della funzione ritornera un valore intero che rapressenta la quantita di transazioni programmate.
 
 ```c main.c
 
@@ -119,8 +97,7 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 ```
 
 ## Segnale
-La segnale è una maniera di forzare a un'utente a fare una transazione gia
-creata dal master con valori predefiniti.
+La segnale è una maniera di forzare a un'utente a fare una transazione gia creata dal master con valori predefiniti.
 ```c main.c
 
 /*segnale che forza una transazione di un'utente.*/
@@ -134,7 +111,7 @@ void segnale(Transazione programmato){
 ```
 
 ## nuovo nodo
-funzione che redimensziona tutte le liste per creare un nuovo nodo.
+Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
 ```c main.c
 
 void nuovoNodo(Transazione t){
@@ -176,7 +153,16 @@ void nuovoNodo(Transazione t){
 
 ```
 
-## Main Function
+## Funzione Master
+
+E' il metodo principale del progetto. Il suoi compiti sono
+
+- leggere la configurazione, sia file o manuale
+- inizializare tutta la memoria condivisa
+- creare tutti i processi nodo e utente
+- stampare l'informazione dei processi attivi
+- creare un nodo nuovo quando nessun nodo riesce a prendere una transazione dopo HOPS volte.
+- chiudere tutti i processi 
 
 ```c main.c
 int main(int argc,char *argv[]){

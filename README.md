@@ -3,7 +3,9 @@
 La compilazione avviene tramite MAKEFILE:
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
+
 SO_REGISTRY_SIZE = 1000
+
 ```makefile Makefile
 1:
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=100 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
@@ -11,7 +13,9 @@ SO_REGISTRY_SIZE = 1000
 
 ### configurazione 2:
 SO_BLOCK_SIZE = 10
+
 SO_REGISTRY_SIZE = 10000
+
 ```makefile Makefile
 2:
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
@@ -19,7 +23,9 @@ SO_REGISTRY_SIZE = 10000
 
 ### configurazione 3:
 SO_BLOCK_SIZE = 10
+
 SO_REGISTRY_SIZE = 1000
+
 ```makefile Makefile
 3:
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
@@ -75,6 +81,11 @@ argomento la parola "mano" o "manuale".
 
 ## aggiunge segnali
 nel caso delle segnali per forzare certe transazioni, non è obbligatorio per inizializare il programma, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
+
+```sh
+./main conf1.dat transactions.dat
+```
+con il file __transactions.dat__ come il file con tutte le transazioni programmate.
 # structures
 
  Le strutture sono gruppi di variabili che rapressentano un
@@ -83,31 +94,29 @@ oggetto della vita reale.
 
 ## Configurazione
 
-questa struttura solo serve per avere un archivio di dati ordinati
-dei dati letti del file di configurazione. questi dati sono:
+Questa struttura solo serve per avere un archivio di dati ordinati
+dei dati letti del file di configurazione. Questi dati sono:
 
-| variables                            | descripcion                                                                                                      |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| SO_USERS_NUM                         | numero di processi untente                                                                                       |
-| SO_NODES_NUM                         | numero di processi nodo                                                                                          |
-| SO_BUDGETNUM                         | budget iniziale di ciascun processo utente                                                                       |
-| SO_REWARD                            | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
-| SO_MIN_TRANS_GEN_NSEC                | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
-| SO_MAX_TRANS_GEN_NSEC                | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
-| SO_RETRY                             | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
-| SO_TPSIZE                            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
-| SO_BLOCKSIZE                         | numero di transazioni contenute in un blocco                                                                     |
-| SO_MIN_TRANS_PROC                    | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
-| SO_MAX_TRANS_PROC                    | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
-| SO_REGISTRY_SIZE                     | numero massimo di blocchi nel libro mastro.                                                                      |
-| SO_SIM_SEC                           | durata della simulazione.                                                                                        |
-| SO_NUM_FRIENDS(solo versione max 30) | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
-| SO_HOPS                              | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
+| variables             | descripcion                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| SO_USERS_NUM          | numero di processi untente                                   |
+| SO_NODES_NUM          | numero di processi nodo                                      |
+| SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                   |
+| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione |
+| SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina |
+| SO_TP_SIZE            | numero massimo di transazioni nella transaction pool dei processi nodo |
+| SO_BLOCK_SIZE         | numero di transazioni contenute in un blocco                 |
+| SO_MIN_TRANS_PROC     | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
+| SO_MAX_TRANS_PROC     | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
+| SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                  |
+| SO_SIM_SEC            | durata della simulazione.                                    |
+| SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full) |
+| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo |
 
 
-Anche è vero che si poteva leggere tutte le variabili senza metterlo
-in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto 
-cosi.
+Anche è vero che si poteva leggere tutte le variabili senza metterlo in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto cosi.
 
 ```c Structs.c
 
@@ -129,14 +138,10 @@ typedef struct Configurazione{
 }Configurazione;
 
 extern Configurazione configurazione;
-#define clear() printf("\033[H\033[J") /*clear the screen*/
-#define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
-#define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
-#define boolString(b) ((b) ? "True":"False")/*make the %b*/
+
 ```
 
-Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> 
-perche solo c'è una lettura delle variabili di configurazione.
+Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perche solo c'è una lettura delle variabili di configurazione.
 #  Lettura Configurazione
 
 ## Legge File
@@ -196,10 +201,6 @@ void readconf(char fileName[]){
 
 ## Scrittura Manuale
 
-Forse per la parte di prove. possiamo cambiare la intro delle variabili.
-probabilmente cancelliamo questo alla fine del progetto.
-l'idea e' poter inserire le variabili a mano
-
 ```c Structs.c
 /*scritura manuale dei valori del sistema.*/
 void writeConf(){
@@ -230,7 +231,6 @@ void writeConf(){
     scanf("%d",&configurazione.SO_FRIENDS_NUM);
     printf("SO_HOPS: ");
     scanf("%d",&configurazione.SO_HOPS);
-    clear();
     
 }
 
@@ -265,8 +265,9 @@ typedef struct Transazione{
 
 ```
 
-
 ## printTrans
+
+Uso generico per stampare una transazioni. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
 
 ```c Structs.c
 void prinTrans(Transazione t){
@@ -311,6 +312,301 @@ void randomSleep(int min, int max){
 }
 
 ```
+
+# Headers
+## Basic libraries
+```c main.c
+#include <stdio.h>  /*Standard input-output header*/
+#include <stdlib.h> /*Libreria Standard*/  
+#include <time.h>   /*Acquisizione e manipolazione del tempo*/
+#include <stdbool.h>/*Aggiunge i boolean var*/
+#include <string.h>/*Standar library for string type*/
+
+```
+
+## Specific Libraries
+```c main.c
+#include <unistd.h>      /*Header per sleep()*/
+#include <pthread.h>     /*Creazione/Modifica thread*/
+#include <semaphore.h>   /*Aggiunge i semafori*/
+
+```
+
+## Funzioni Utente
+importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
+```c main.c
+#include "User.c"
+#include "print.c"
+```
+
+# Controllo LIBRO MASTRO
+
+## Creazione del Libro_Mastro e Variabili:
+- __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
+- __libroCounter__: Contatore della quantità di blocchi scritti nel libroMastro.
+
+```c main.c
+Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
+int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
+sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
+sem_t mainSem;
+
+```
+
+
+
+## Memoria condivisa 
+
+In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivise servono agli altri processi in qualche momento o almeno sono dati che gli serve al main per stampare lo stato dei processi.
+
+
+### Lista Semafori e altri Dati Condivisi tra i threads:
+
+```c main.c
+/*variabili condivise tra diversi thread.*/
+int *budgetlist;     /*un registro del budget di ogni utente*/
+bool *checkUser;
+int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
+int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
+sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
+Transazione *mailbox;/*struttura per condividere */
+Transazione mainMailbox;
+bool *checkNode;
+
+time_t startSimulation;
+pthread_t *utenti_id;     /*lista id di processi utenti*/
+pthread_t *nodi_id;     /*lista id di processi nodi  */
+Configurazione configurazione;
+
+```
+# Transazioni programmate
+
+le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender fa questa transazione.
+
+
+
+## Lettura del file di transazioni pianificati
+questa funzione non ha bisogno di ritornare un array perche puo essere pasato come parametro della funzione e si scrive direttamente nell'array. per questo motivo il return della funzione ritornera un valore intero che rapressenta la quantita di transazioni programmate.
+
+```c main.c
+
+/*legge le transazioni e gli scrive in un array di transazioni per scriverle 
+dopo nel libro mastro.*/
+int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
+    int i = 0;
+    FILE *file = fopen(fileName,"r");
+    if(!file){
+        printf("non si trova il libro di transazioni programmate.\n");
+    }else{
+        /*legge riga a riga fino alla fine(EOF), mettendo tutti le variabili nell'array 
+        delle transazioni programmate.*/
+        while(fscanf(file,"%lf %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
+            programmate[i].reward = programmate[i].quantita * configurazione.SO_REWARD / 100;
+            i++;
+        }
+    }
+    return i;
+}
+
+```
+
+## Segnale
+La segnale è una maniera di forzare a un'utente a fare una transazione gia creata dal master con valori predefiniti.
+```c main.c
+
+/*segnale che forza una transazione di un'utente.*/
+void segnale(Transazione programmato){
+    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
+
+    budgetlist[programmato.sender] -= programmato.quantita;
+    printf("Segnale ->");
+    prinTrans(programmato);
+}
+```
+
+## nuovo nodo
+Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
+```c main.c
+
+void nuovoNodo(Transazione t){
+    int i;
+
+    /*array temporali*/
+    int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
+    int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
+    sem_t *tempSemafori = calloc(configurazione.SO_NODES_NUM+1,sizeof(sem_t));
+    Transazione *tempmailbox = calloc(configurazione.SO_NODES_NUM+1, ((4*sizeof(int))+sizeof(double)));
+    pthread_t *tempThreads = calloc(configurazione.SO_NODES_NUM+1,sizeof(pthread_t));
+    bool *tempcheck =  calloc(configurazione.SO_NODES_NUM+1,sizeof(bool));
+
+    /*copia tutti i valori*/
+    for(i=0;i<configurazione.SO_NODES_NUM;i++){
+        tempPoolsize[i]=poolsizelist[i];
+        tempRewardList[i]=rewardlist[i];
+        tempSemafori[i] = semafori[i];
+        tempmailbox[i] = mailbox[i];
+        tempThreads[i] = nodi_id[i];
+        tempcheck[i] = checkNode[i];
+    }
+    
+    /*riimpiaza le liste*/
+    poolsizelist=tempPoolsize;
+    rewardlist =tempRewardList;
+    semafori =tempSemafori;
+    mailbox = tempmailbox;
+    nodi_id = tempThreads;
+    checkNode = tempcheck;
+
+    /*inizia il nuovo trhead*/
+    pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
+    sem_wait(&mainSem);
+    mailbox[configurazione.SO_NODES_NUM] = t;
+    printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
+    configurazione.SO_NODES_NUM++;
+}
+
+```
+
+## Funzione Master
+
+E' il metodo principale del progetto. Il suoi compiti sono
+
+- leggere la configurazione, sia file o manuale
+- inizializare tutta la memoria condivisa
+- creare tutti i processi nodo e utente
+- stampare l'informazione dei processi attivi
+- creare un nodo nuovo quando nessun nodo riesce a prendere una transazione dopo HOPS volte.
+- chiudere tutti i processi 
+
+```c main.c
+int main(int argc,char *argv[]){
+    int i;
+    float now;
+    bool test;
+    int semvalue;
+
+
+    /*variabili delle transazioni programmate*/
+    int programmateCounter;
+    bool *programmateChecklist;
+    Transazione programmate[100];
+
+
+    srand(time(0)); /*aleatorio*/
+
+    if(argc<2){
+        printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
+        exit(EXIT_FAILURE);
+    }else if(argc>3){
+        printf("troppi argomenti.\n");
+        exit(EXIT_FAILURE);
+    }else{
+        /*in caso di voler inserire i valori a mano*/
+        if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
+            writeConf();
+        }else{
+            readconf(argv[1]);/*lettura del file*/
+        }
+    
+        /*lettura di transazioni programmate*/
+        if(argc >= 3){
+            programmateCounter = leggeLibroDiTransazioni(argv[2], programmate);
+            programmateChecklist = malloc(programmateCounter * sizeof(bool));
+            for(i=0; i < programmateCounter; i++){
+                programmateChecklist[i] = true;
+            }
+        }else{
+            programmateCounter = 0;
+        }
+ 
+        /*now that we have all the variables we can start the process
+        master*/
+    
+        sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);
+        startSimulation = time(0);/* el tiempo de ahora*/
+        sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
+    
+        /*generatore dei nodi*/
+        poolsizelist=calloc(configurazione.SO_TP_SIZE , sizeof(int));
+        rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
+        semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
+        mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
+        nodi_id = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
+        checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
+        for(i=0;i<configurazione.SO_NODES_NUM;i++){
+            pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
+            sem_wait(&mainSem);
+        }
+
+        /*generatore dei utenti*/
+        budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
+        utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
+        checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
+        for(i=0;i<configurazione.SO_USERS_NUM;i++){
+            pthread_create(&utenti_id[i],NULL,utente,(void *)i);
+            sem_wait(&mainSem);
+        }
+
+        /*now start the master process*/
+        now = difftime(time(0), startSimulation);
+
+        while(now < configurazione.SO_SIM_SEC){
+
+            sleep(1);
+            clear();
+
+            /*show last update*/
+            printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
+
+            now = difftime(time(0), startSimulation);
+
+            if(libroCounter > SO_REGISTRY_SIZE){
+                printf("%f: libro mastro pieno\n",now);
+                break;
+            }
+
+            test = printStatus(40);
+            if(!test){
+                printf("tutti gli utenti sono disattivati");
+                break;
+            }
+
+            /* transazioni programmate mancanti*/
+            for(i=0; i< programmateCounter; i++){
+                if(programmate[i].timestamp <= now && programmateChecklist[i]){
+                    segnale(programmate[i]);
+                    programmateChecklist[i] = false;
+                }
+            }
+            
+            /*vedo se c'e una nuova transazione nel mailbox*/
+            sem_getvalue(&mainSem,&semvalue);
+            if(semvalue<=0){
+                /*genero un nuovo nodo per inviare transazione*/
+                sem_post(&mainSem);
+                nuovoNodo(mainMailbox);
+                
+            }
+
+
+        }
+        finalprint();
+    
+        /*kill all the threads*/
+        for(i=0; i<configurazione.SO_NODES_NUM ; i++){
+            pthread_cancel(nodi_id[i]);
+        }
+        for(i=0; i<configurazione.SO_USERS_NUM; i++){
+            pthread_cancel(utenti_id[i]);
+        }
+        if(!test){
+            printf("tutti gli utenti sono disattivati\n");
+        }
+
+    }
+    return 0;
+}
+```
 # Node
 
 ## Importa Variabili Globali
@@ -328,22 +624,25 @@ Import del libroMastro e tutte le variabili:
 ```c Node.c
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
-extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
-extern sem_t mainSem;
+extern sem_t libroluck; /*luchetto per accedere solo un nodo alla volta*/
 
 ```
 
+### Memoria Condivisa
 
-### Sincronizzazione tra Processi
+Il nodo non ha bisogno delle variabili degli utenti. Quindi solo servono le variabili del main e dei altri nodi nodi.
+
 ```c Node.c
 /*variabili condivise tra diversi thread.*/
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
-extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/
+extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 
 extern Transazione mainMailbox;
+extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
+
 extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *nodi_id;       /*lista dei processi nodi*/
@@ -352,9 +651,8 @@ extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 
 
 ## transazione di riasunto
-Questo metodo genera l'ultima transazione del blocco.
-questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in 
-questo blocco. 
+Questo metodo genera l'ultima transazione del blocco. Questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in questo blocco. 
+
 ```c Node.c
 
 /*funzione dell'ultima transazione del blocco.*/
@@ -369,9 +667,8 @@ Transazione riasunto(int id, int somma){
 
 ```
 
-## invia transazione a nodo amico
-questa funzione invia una transazione a un amico o crea un
-nuovo nodo per inviarselo. 
+## Invia transazione a nodo amico
+Questa funzione invia una transazione a un amico o crea un nuovo nodo per inviarselo. 
 ```c Node.c
 void inviaAdAmico(int amici[],int id){
     bool inviaAmico=true;
@@ -404,7 +701,7 @@ void inviaAdAmico(int amici[],int id){
 ```
 
 
-## Funzione Principale
+## Funzione principale del nodo.
 ```c Node.c
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
@@ -644,10 +941,38 @@ void* utente(void *conf){
     }
 }
 ```
-
 # Prints
 
+Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. Le principali funzioni sono:
+
+__printStatus__: mostra una tabella con la info degli utenti piu attivi e i nodi. Si usa per mostrare i dati aggiornati in ogni secodo de la simulazione.
+
+__finalPrint__: mosta una tabella con tutti gli utenti e tutti i nodi, anche mostra piu dati. Come il nome indica, si usa per stampare tutti i dati alla fine della simulazione. 
+
+## Macros
+
+Lista di macros che ci servono per stampare tutti i valori:
+
+- __clear__: pulisce lo schermo.
+- __MAX__: ritorna il numero maggiore tra i due.
+- __MIN__: invia il numero minore tra i due. 
+- __boolString__: fa la funzione di %b in altri linguagi di programazione.
+
+```c print.c
+/*macros per il print*/
+#define clear() printf("\033[H\033[J") /*clear the screen*/
+#define MAX(x,y) ((x>y)?x:y) /*max between to parameters*/
+#define MIN(z,w) ((z<w)?z:w) /*min between to parameters*/
+#define boolString(b) ((b) ? "True":"False")/*make the %b*/
+
+```
+
+
+
 ## memoria condivise
+
+Tutte le variabili che devono stampare le funzioni di stampa
+
 ```c print.c
 /*variabili degli utenti*/
 extern int *budgetlist;
@@ -689,9 +1014,7 @@ int * sort(){
 
 
 ## PrintStatus Nodes and Users
-Questo metodo non solo mostra lo stato di tutti gli
-utenti e nodi, ritorna anche una variabile boolean per identificare
-se ci sono ancora utenti disponibili.
+Questo metodo non solo mostra lo stato di tutti gli utenti e nodi, ritorna anche una variabile boolean per identificare se ci sono ancora utenti disponibili.
 
 ```c print.c
 bool printStatus(int nstamp){
@@ -741,9 +1064,13 @@ bool printStatus(int nstamp){
     
     return activeUsers>1;
 }
+
 ```
 
 ## final print
+
+Questo metodo fa l'utima stampa del proggetto. Mostrando tutti gli utenti e mostrando anche la grandezza de la Transaction Pool. Serve come riasunto della simulazione.
+
 ```c print.c
 void finalprint(){
     /*User var*/
@@ -789,314 +1116,5 @@ void finalprint(){
     printf("||-----------------------------------------------------------------------------||\n");
     printf("||    Tot Block    |%59d||\n", libroCounter);
     printf("---------------------------------------------------------------------------------\n");
-}
-```
-
-# Headers
-## Basic libraries
-```c main.c
-#include <stdio.h>  /*Standard input-output header*/
-#include <stdlib.h> /*Libreria Standard*/  
-#include <time.h>   /*Acquisizione e manipolazione del tempo*/
-#include <stdbool.h>/*Aggiunge i boolean var*/
-#include <string.h>/*Standar library for string type*/
-
-```
-
-## Specific Libraries
-```c main.c
-#include <unistd.h>      /*Header per sleep()*/
-#include <pthread.h>     /*Creazione/Modifica thread*/
-#include <semaphore.h>   /*Aggiunge i semafori*/
-
-```
-
-## Funzioni Utente
-importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
-```c main.c
-#include "User.c"
-#include "print.c"
-```
-
-# Controllo LIBRO MASTRO
-
-## Creazione del Libro_Mastro e Variabili:
-- __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
-- __libroCounter__: Contatore della quantità di blocchi scritti nel libroMastro.
-
-```c main.c
-Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
-int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
-sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
-sem_t mainSem;
-
-```
-
-
-# Funzioni in parallelo
-questo spazio è riservato alle funzioni del multithread
-
-## Memoria condivisa (work in progress)
-
-i semafori vengono usati per gestire il flusso del programma
-e ad evitare che i processi accedano contemporaneamente ai dati. 
-Un Semaforo ha 3 stati:
-
-###  0 avanti
-Il processo puo accedere direttamente al dato.
-
-
-### <0 aspetta
-Il processo aspetta per accedere al dato
-o in alternativa sceglie unn'altra via per l'accesso.
-
-### external resources
-
-1.  General Semaphore Example:
-    <https://www.delftstack.com/howto/c/semaphore-example-in-c/>
-2.  trywait:
-    <https://stackoverflow.com/questions/27294954/how-to-use-sem-trywait>
-
-
-### Lista Semafori e altri Dati Condivisi tra i threads:
-
-```c main.c
-/*variabili condivise tra diversi thread.*/
-int *budgetlist;     /*un registro del budget di ogni utente*/
-bool *checkUser;
-int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
-int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
-sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-Transazione *mailbox;/*struttura per condividere */
-Transazione mainMailbox;
-bool *checkNode;
-
-time_t startSimulation;
-pthread_t *utenti_id;     /*lista id di processi utenti*/
-pthread_t *nodi_id;     /*lista id di processi nodi  */
-Configurazione configurazione;
-
-```
-# Transazioni programmate(para quien me lea. traduzcanme por favor)
-Las transacciones progrmadas son una lista de transacciones que vienen son leidos
-desde un file externo que contiene una transaccion por linea; cada linea contiene
-su timestamp, sender id, receiver id y cantidad. cuando sea la hora de cada 
-transaccion, se hara una señal desde el main 
-
-## Lettura del file di transazioni pianificati
-questa funzione non ha bisogno di ritornare un array perche puo essere pasato
-come parametro della funzione e si scrive direttamente nell'array. per questo
-motivo il return della funzione ritornera un valore intero che rapressenta la
-quantita di transazioni programmate.
-
-```c main.c
-
-/*legge le transazioni e gli scrive in un array di transazioni per scriverle 
-dopo nel libro mastro.*/
-int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
-    int i = 0;
-    FILE *file = fopen(fileName,"r");
-    if(!file){
-        printf("non si trova il libro di transazioni programmate.\n");
-    }else{
-        /*legge riga a riga fino alla fine(EOF), mettendo tutti le variabili nell'array 
-        delle transazioni programmate.*/
-        while(fscanf(file,"%lf %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
-            programmate[i].reward = programmate[i].quantita * configurazione.SO_REWARD / 100;
-            i++;
-        }
-    }
-    return i;
-}
-
-```
-
-## Segnale
-La segnale è una maniera di forzare a un'utente a fare una transazione gia
-creata dal master con valori predefiniti.
-```c main.c
-
-/*segnale che forza una transazione di un'utente.*/
-void segnale(Transazione programmato){
-    mailbox[nodoLibero(programmato.sender)] = programmato;/*assegno la transazione in un mailbox*/
-
-    budgetlist[programmato.sender] -= programmato.quantita;
-    printf("Segnale ->");
-    prinTrans(programmato);
-}
-```
-
-## nuovo nodo
-funzione che redimensziona tutte le liste per creare un nuovo nodo.
-```c main.c
-
-void nuovoNodo(Transazione t){
-    int i;
-
-    /*array temporali*/
-    int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
-    int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
-    sem_t *tempSemafori = calloc(configurazione.SO_NODES_NUM+1,sizeof(sem_t));
-    Transazione *tempmailbox = calloc(configurazione.SO_NODES_NUM+1, ((4*sizeof(int))+sizeof(double)));
-    pthread_t *tempThreads = calloc(configurazione.SO_NODES_NUM+1,sizeof(pthread_t));
-    bool *tempcheck =  calloc(configurazione.SO_NODES_NUM+1,sizeof(bool));
-
-    /*copia tutti i valori*/
-    for(i=0;i<configurazione.SO_NODES_NUM;i++){
-        tempPoolsize[i]=poolsizelist[i];
-        tempRewardList[i]=rewardlist[i];
-        tempSemafori[i] = semafori[i];
-        tempmailbox[i] = mailbox[i];
-        tempThreads[i] = nodi_id[i];
-        tempcheck[i] = checkNode[i];
-    }
-    
-    /*riimpiaza le liste*/
-    poolsizelist=tempPoolsize;
-    rewardlist =tempRewardList;
-    semafori =tempSemafori;
-    mailbox = tempmailbox;
-    nodi_id = tempThreads;
-    checkNode = tempcheck;
-
-    /*inizia il nuovo trhead*/
-    pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
-    sem_wait(&mainSem);
-    mailbox[configurazione.SO_NODES_NUM] = t;
-    printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
-    configurazione.SO_NODES_NUM++;
-}
-
-```
-
-## Main Function
-
-```c main.c
-int main(int argc,char *argv[]){
-    int i;
-    float now;
-    bool test;
-    int semvalue;
-
-
-    /*variabili delle transazioni programmate*/
-    int programmateCounter;
-    bool *programmateChecklist;
-    Transazione programmate[100];
-
-
-    srand(time(0)); /*aleatorio*/
-
-    if(argc<2){
-        printf("si aspettava un file con la configurazione o il commando 'manual'.\n");
-        exit(EXIT_FAILURE);
-    }else if(argc>3){
-        printf("troppi argomenti.\n");
-        exit(EXIT_FAILURE);
-    }else{
-        /*in caso di voler inserire i valori a mano*/
-        if( strcmp(argv[1],"mano")==0 || strcmp(argv[1],"manual")==0 ){
-            writeConf();
-        }else{
-            readconf(argv[1]);/*lettura del file*/
-        }
-    
-        /*lettura di transazioni programmate*/
-        if(argc >= 3){
-            programmateCounter = leggeLibroDiTransazioni(argv[2], programmate);
-            programmateChecklist = malloc(programmateCounter * sizeof(bool));
-            for(i=0; i < programmateCounter; i++){
-                programmateChecklist[i] = true;
-            }
-        }else{
-            programmateCounter = 0;
-        }
- 
-        /*now that we have all the variables we can start the process
-        master*/
-    
-        sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);
-        startSimulation = time(0);/* el tiempo de ahora*/
-        sem_init(&libroluck,0,1);/*inizia il semaforo del libromastro*/
-    
-        /*generatore dei nodi*/
-        poolsizelist=calloc(configurazione.SO_TP_SIZE , sizeof(int));
-        rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
-        semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
-        mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
-        nodi_id = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
-        checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
-        for(i=0;i<configurazione.SO_NODES_NUM;i++){
-            pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
-            sem_wait(&mainSem);
-        }
-
-        /*generatore dei utenti*/
-        budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
-        utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
-        checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
-        for(i=0;i<configurazione.SO_USERS_NUM;i++){
-            pthread_create(&utenti_id[i],NULL,utente,(void *)i);
-            sem_wait(&mainSem);
-        }
-
-        /*now start the master process*/
-        now = difftime(time(0), startSimulation);
-
-        while(now < configurazione.SO_SIM_SEC){
-
-            sleep(1);
-            clear();
-
-            /*show last update*/
-            printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
-
-            now = difftime(time(0), startSimulation);
-
-            if(libroCounter > SO_REGISTRY_SIZE){
-                printf("%f: libro mastro pieno\n",now);
-                break;
-            }
-
-            test = printStatus(40);
-            if(!test){
-                printf("tutti gli utenti sono disattivati");
-                break;
-            }
-
-            /* transazioni programmate mancanti*/
-            for(i=0; i< programmateCounter; i++){
-                if(programmate[i].timestamp <= now && programmateChecklist[i]){
-                    segnale(programmate[i]);
-                    programmateChecklist[i] = false;
-                }
-            }
-            
-            /*vedo se c'e una nuova transazione nel mailbox*/
-            sem_getvalue(&mainSem,&semvalue);
-            if(semvalue<=0){
-                /*genero un nuovo nodo per inviare transazione*/
-                sem_post(&mainSem);
-                nuovoNodo(mainMailbox);
-                
-            }
-
-
-        }
-        finalprint();
-    
-        /*kill all the threads*/
-        for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-            pthread_cancel(nodi_id[i]);
-        }
-        for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(utenti_id[i]);
-        }
-        if(!test){
-            printf("tutti gli utenti sono disattivati\n");
-        }
-
-    }
-    return 0;
 }
 ```
