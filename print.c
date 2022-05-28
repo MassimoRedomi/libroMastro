@@ -18,7 +18,7 @@ int cmpfunc(const void  *a, const void *b) {
     return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
 }
 int * sort(){
-    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    int dim=configurazione.SO_USERS_NUM;
     int *r=malloc(sizeof(int)*dim);
     int i;
     for(i=0; i<dim; i++)
@@ -41,7 +41,7 @@ bool printStatus(int nstamp){
     /*Share var*/
     int i=0;
     int *pa;
-    int dim=MIN(configurazione.SO_USERS_NUM, nstamp);
+    int dim=MIN(MAX(configurazione.SO_USERS_NUM,configurazione.SO_NODES_NUM), nstamp);
     pa=sort();
     printf("\n\n");
     printf("------------------------------------------------------------------------\n");
@@ -56,6 +56,8 @@ bool printStatus(int nstamp){
 
         if(i<dim){
             printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+        }else{
+            printf("||          |          |         |#");
         }
 
         if(i< dim){
@@ -127,7 +129,7 @@ void finalprint(){
 
     /*motivo del termine*/
     if(activeUsers==0){
-        printf("Motivo di chiusura:tutti gli utenti sono disattivati\n");
+        printf("Motivo di chiusura:tutti gli utenti sono disattivati.\n");
     }else if(libroCounter >= SO_REGISTRY_SIZE){
         printf("Motivo di chiusura: libroMastro pieno.\n");
     }else{

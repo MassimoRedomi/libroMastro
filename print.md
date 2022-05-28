@@ -58,7 +58,7 @@ Metodo di ordinamento del dei processi in modo decrescente
 
 ```c print.c
 int * sort(){
-    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    int dim=configurazione.SO_USERS_NUM;
     int *r=malloc(sizeof(int)*dim);
     int i;
     for(i=0; i<dim; i++)
@@ -88,7 +88,7 @@ bool printStatus(int nstamp){
     /*Share var*/
     int i=0;
     int *pa;
-    int dim=MIN(configurazione.SO_USERS_NUM, nstamp);
+    int dim=MIN(MAX(configurazione.SO_USERS_NUM,configurazione.SO_NODES_NUM), nstamp);
     pa=sort();
     printf("\n\n");
     printf("------------------------------------------------------------------------\n");
@@ -103,6 +103,8 @@ bool printStatus(int nstamp){
 
         if(i<dim){
             printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+        }else{
+            printf("||          |          |         |#");
         }
 
         if(i< dim){

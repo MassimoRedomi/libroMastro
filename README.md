@@ -436,7 +436,7 @@ void* gestore(){
     int i;
     int semvalue;
 
-    while(difftime(time(0), startSimulation)){
+    while(difftime(time(0), startSimulation) < configurazione.SO_SIM_SEC){
         sem_getvalue(&mainSem,&i);
         if(semvalue <=0){
             sem_post(&mainSem);
@@ -465,13 +465,21 @@ void* gestore(){
             mailbox = tempmailbox;
             nodi_id = tempThreads;
             checkNode = tempcheck;
+            /*
+            free(tempPoolsize);
+            free(tempRewardList);
+            free(tempSemafori);
+            free(tempmailbox);
+            free(tempThreads);
+            free(tempcheck);
+            */
 
             /*inizia il nuovo trhead*/
             pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
             sem_wait(&NodeStartSem);
 
-            /*mailbox[configurazione.SO_NODES_NUM] = t;*/
-            printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
+            mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
+            /*printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);*/
             configurazione.SO_NODES_NUM++;
         }
     }
@@ -569,17 +577,11 @@ int main(int argc,char *argv[]){
 
         while(now < configurazione.SO_SIM_SEC){
 
-            /*vedo se c'e una nuova transazione nel mailbox*/
-            /*sem_getvalue(&mainSem,&semvalue);
-            if(semvalue<=0){
-                sem_post(&mainSem);
-                nuovoNodo(mainMailbox);
-                
-            }*/
             sleep(1);
             clear();
 
             /*show last update*/
+            sem_getvalue(&mainSem,&semvalue);
             printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
             now = difftime(time(0), startSimulation);
@@ -614,10 +616,6 @@ int main(int argc,char *argv[]){
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
         }
-        if(!test){
-            printf("tutti gli utenti sono disattivati\n");
-        }
-
     }
     return 0;
 }
@@ -694,9 +692,9 @@ void inviaAdAmico(int amici[],int id){
     int len = sizeof(amici)/sizeof(int);
     do{
         for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
-            if(checkNode[*(amici+i)]){/*evito inviare a un nodo pieno.*/
+            if(checkNode[amici[i]]){/*evito inviare a un nodo pieno.*/
                 if(sem_trywait(&semafori[*(amici+i)])){
-                    mailbox[*(amici+i)]=mailbox[id];
+                    mailbox[amici[i]]=mailbox[id];
                     inviaAmico=false;
                 }
             }
@@ -705,7 +703,7 @@ void inviaAdAmico(int amici[],int id){
             /*printf("Il nodo %d non ha nessun amico\n",id);*/
             hops++;
             if(hops > configurazione.SO_HOPS){
-                int tempamici= calloc(len+1,sizeof(int));
+                int *tempamici= calloc(len+1,sizeof(int));
                 for(i=0; i<len; i++){
                     tempamici=amici[i];
                 }
@@ -715,8 +713,6 @@ void inviaAdAmico(int amici[],int id){
                 hops=0;
                 inviaAmico=false;
             }
-        }else{
-            sem_post(&semafori[id]);
         }
     }while(inviaAmico);
 }
@@ -763,6 +759,7 @@ void* nodo(void *conf){
             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);
                 inviaAmico=false;
+                sem_post(&semafori[id]);
                 continue;
              }
              pool[poolsizelist[id]]=mailbox[id];
@@ -803,7 +800,7 @@ void* nodo(void *conf){
         }
 
     }
-    while(true){
+    while(difftime(time(0),startSimulation)<configurazione.SO_SIM_SEC){
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             inviaAdAmico(amici,id);
@@ -1031,7 +1028,7 @@ Metodo di ordinamento del dei processi in modo decrescente
 
 ```c print.c
 int * sort(){
-    int dim=MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
+    int dim=configurazione.SO_USERS_NUM;
     int *r=malloc(sizeof(int)*dim);
     int i;
     for(i=0; i<dim; i++)
@@ -1061,7 +1058,7 @@ bool printStatus(int nstamp){
     /*Share var*/
     int i=0;
     int *pa;
-    int dim=MIN(configurazione.SO_USERS_NUM, nstamp);
+    int dim=MIN(MAX(configurazione.SO_USERS_NUM,configurazione.SO_NODES_NUM), nstamp);
     pa=sort();
     printf("\n\n");
     printf("------------------------------------------------------------------------\n");
@@ -1075,10 +1072,12 @@ bool printStatus(int nstamp){
         checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
 
         if(i<dim){
-            printf("||%10d|%10d|%9s|#",*(pa+i),budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+            printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+        }else{
+            printf("||          |          |         |#");
         }
 
-        if(i< configurazione.SO_NODES_NUM){
+        if(i< dim){
             sommaRewards+=rewardlist[i];
             checkNode[i] ? activeNodes++ : inactiveNodes++;
             printf("#|%11d|%11d|%9s||\n", i, rewardlist[i],boolString(checkNode[i]));
@@ -1092,7 +1091,7 @@ bool printStatus(int nstamp){
     printf("||%16d|%14d|##|%16d|%16d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
     printf("\n");
     
-    return activeUsers>1;
+    return activeUsers>0;
 }
 
 ```
@@ -1115,17 +1114,22 @@ void finalprint(){
     bool ActiveN;
     /*Share var*/
     int i=0;
+    int dim = MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
  
     printf("\n\n");
     printf("---------------------------------------------------------------------------------\n");
     printf("||  User_ID |  Budget  |  Status |##|  Node_ID  |  Rewards  |  p_size | Status ||\n");
     printf("||===============================|##|==========================================||\n");
-    for(i=0; i< configurazione.SO_USERS_NUM; i++){
-        sommaBudget += budgetlist[i];
+    for(i=0; i< dim; i++){
+        if( i < configurazione.SO_USERS_NUM){
+            sommaBudget += budgetlist[i];
 
-        checkUser[i] ? activeUsers++ : inactiveUsers++;
+            checkUser[i] ? activeUsers++ : inactiveUsers++;
 
-        printf("||%10d|%10d|%9s|#",i,budgetlist[i], boolString(checkUser[i]));
+            printf("||%10d|%10d|%9s|#",i,budgetlist[i], boolString(checkUser[i]));
+        }else{
+            printf("||          |          |         |#");
+        }
 
         if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
@@ -1146,5 +1150,14 @@ void finalprint(){
     printf("||-----------------------------------------------------------------------------||\n");
     printf("||    Tot Block    |%59d||\n", libroCounter);
     printf("---------------------------------------------------------------------------------\n");
+
+    /*motivo del termine*/
+    if(activeUsers==0){
+        printf("Motivo di chiusura:tutti gli utenti sono disattivati.\n");
+    }else if(libroCounter >= SO_REGISTRY_SIZE){
+        printf("Motivo di chiusura: libroMastro pieno.\n");
+    }else{
+        printf("Simulazione finita perfettamente.\n");
+    }
 }
 ```
