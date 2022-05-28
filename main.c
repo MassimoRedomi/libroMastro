@@ -91,17 +91,11 @@ void* gestore(){
 
             /*riimpiaza le liste*/
             poolsizelist=tempPoolsize;
-            free(tempPoolsize);
             rewardlist =tempRewardList;
-            free(tempPoolsize);
             semafori =tempSemafori;
-            free(tempSemafori);
             mailbox = tempmailbox;
-            free(tempmailbox);
             nodi_id = tempThreads;
-            free(tempThreads);
             checkNode = tempcheck;
-            free(tempcheck);
 
             /*inizia il nuovo trhead*/
             pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);

@@ -1,4 +1,5 @@
 #include "Structs.c"
+#define defaultSender -1
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck; /*luchetto per accedere solo un nodo alla volta*/
@@ -22,7 +23,7 @@ extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 /*funzione dell'ultima transazione del blocco.*/
 Transazione riasunto(int id, int somma){
     Transazione transaction;
-    transaction.sender    = -1;
+    transaction.sender    = defaultSender;
     transaction.receiver  = id; /*id del nodo*/
     transaction.quantita  = somma; /*la somma di tutto il reward generato*/
     transaction.timestamp = difftime(time(0),startSimulation);/*quanto tempo ha passato dal inizio della simulazione.*/
@@ -33,6 +34,7 @@ void inviaAdAmico(int amici[],int id){
     bool inviaAmico=true;
     int hops=0;
     int i;
+    int len = sizeof(amici)/sizeof(int);
     do{
         for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
             if(checkNode[*(amici+i)]){/*evito inviare a un nodo pieno.*/
@@ -43,9 +45,14 @@ void inviaAdAmico(int amici[],int id){
             }
         }
         if(inviaAmico){
-            printf("Il nodo %d non ha nessun amico\n",id);
+            /*printf("Il nodo %d non ha nessun amico\n",id);*/
             hops++;
-            if(hops>=configurazione.SO_HOPS){
+            if(hops > configurazione.SO_HOPS){
+                int tempamici= calloc(len+1,sizeof(int));
+                for(i=0; i<len; i++){
+                    tempamici=amici[i];
+                }
+                amici[len]= configurazione.SO_NODES_NUM;
                 mainMailbox=(Transazione)mailbox[id];
                 sem_wait(&mainSem);
                 hops=0;
@@ -72,7 +79,7 @@ void* nodo(void *conf){
     bool inviaAmico=true;
     for(i=0;i<configurazione.SO_FRIENDS_NUM;i++){
         do{
-            amici[i] = randomInt(0,configurazione.SO_FRIENDS_NUM);
+            amici[i] = randomInt(0,configurazione.SO_NODES_NUM);
         }while(amici[i]==i);
     }
     sem_post(&NodeStartSem);

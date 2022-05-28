@@ -107,7 +107,7 @@ void* utente(void *conf){
 
         randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
 
-        if(retry >= configurazione.SO_RETRY || !checkUser[i] ){/*Se raggiunge il n° max di tentativi*/
+        if(retry >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
             printf("utente %d fermato\n",id);       /*ferma il procceso*/
             checkUser[id]=false;
         }
