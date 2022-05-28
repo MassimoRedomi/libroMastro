@@ -67,7 +67,7 @@ void* gestore(){
     int i;
     int semvalue;
 
-    while(difftime(time(0), startSimulation)){
+    while(difftime(time(0), startSimulation) < configurazione.SO_SIM_SEC){
         sem_getvalue(&mainSem,&i);
         if(semvalue <=0){
             sem_post(&mainSem);
@@ -96,13 +96,21 @@ void* gestore(){
             mailbox = tempmailbox;
             nodi_id = tempThreads;
             checkNode = tempcheck;
+            /*
+            free(tempPoolsize);
+            free(tempRewardList);
+            free(tempSemafori);
+            free(tempmailbox);
+            free(tempThreads);
+            free(tempcheck);
+            */
 
             /*inizia il nuovo trhead*/
             pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
             sem_wait(&NodeStartSem);
 
-            /*mailbox[configurazione.SO_NODES_NUM] = t;*/
-            printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);
+            mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
+            /*printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);*/
             configurazione.SO_NODES_NUM++;
         }
     }
@@ -186,17 +194,11 @@ int main(int argc,char *argv[]){
 
         while(now < configurazione.SO_SIM_SEC){
 
-            /*vedo se c'e una nuova transazione nel mailbox*/
-            /*sem_getvalue(&mainSem,&semvalue);
-            if(semvalue<=0){
-                sem_post(&mainSem);
-                nuovoNodo(mainMailbox);
-                
-            }*/
             sleep(1);
             clear();
 
             /*show last update*/
+            sem_getvalue(&mainSem,&semvalue);
             printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
             now = difftime(time(0), startSimulation);
@@ -231,10 +233,6 @@ int main(int argc,char *argv[]){
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
         }
-        if(!test){
-            printf("tutti gli utenti sono disattivati\n");
-        }
-
     }
     return 0;
 }

@@ -70,9 +70,9 @@ void inviaAdAmico(int amici[],int id){
     int len = sizeof(amici)/sizeof(int);
     do{
         for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
-            if(checkNode[*(amici+i)]){/*evito inviare a un nodo pieno.*/
+            if(checkNode[amici[i]]){/*evito inviare a un nodo pieno.*/
                 if(sem_trywait(&semafori[*(amici+i)])){
-                    mailbox[*(amici+i)]=mailbox[id];
+                    mailbox[amici[i]]=mailbox[id];
                     inviaAmico=false;
                 }
             }
@@ -81,7 +81,7 @@ void inviaAdAmico(int amici[],int id){
             /*printf("Il nodo %d non ha nessun amico\n",id);*/
             hops++;
             if(hops > configurazione.SO_HOPS){
-                int tempamici= calloc(len+1,sizeof(int));
+                int *tempamici= calloc(len+1,sizeof(int));
                 for(i=0; i<len; i++){
                     tempamici=amici[i];
                 }
@@ -91,8 +91,6 @@ void inviaAdAmico(int amici[],int id){
                 hops=0;
                 inviaAmico=false;
             }
-        }else{
-            sem_post(&semafori[id]);
         }
     }while(inviaAmico);
 }
@@ -139,6 +137,7 @@ void* nodo(void *conf){
             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);
                 inviaAmico=false;
+                sem_post(&semafori[id]);
                 continue;
              }
              pool[poolsizelist[id]]=mailbox[id];
@@ -179,7 +178,7 @@ void* nodo(void *conf){
         }
 
     }
-    while(true){
+    while(difftime(time(0),startSimulation)<configurazione.SO_SIM_SEC){
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             inviaAdAmico(amici,id);
