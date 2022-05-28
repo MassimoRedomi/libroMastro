@@ -55,10 +55,10 @@ bool printStatus(int nstamp){
         checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
 
         if(i<dim){
-            printf("||%10d|%10d|%9s|#",*(pa+i),budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+            printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
         }
 
-        if(i< configurazione.SO_NODES_NUM){
+        if(i< dim){
             sommaRewards+=rewardlist[i];
             checkNode[i] ? activeNodes++ : inactiveNodes++;
             printf("#|%11d|%11d|%9s||\n", i, rewardlist[i],boolString(checkNode[i]));
@@ -72,7 +72,7 @@ bool printStatus(int nstamp){
     printf("||%16d|%14d|##|%16d|%16d||\n",activeUsers,sommaBudget,activeNodes, sommaRewards);
     printf("\n");
     
-    return activeUsers>1;
+    return activeUsers>0;
 }
 
 void finalprint(){
@@ -88,17 +88,22 @@ void finalprint(){
     bool ActiveN;
     /*Share var*/
     int i=0;
+    int dim = MAX(configurazione.SO_USERS_NUM, configurazione.SO_NODES_NUM);
  
     printf("\n\n");
     printf("---------------------------------------------------------------------------------\n");
     printf("||  User_ID |  Budget  |  Status |##|  Node_ID  |  Rewards  |  p_size | Status ||\n");
     printf("||===============================|##|==========================================||\n");
-    for(i=0; i< configurazione.SO_USERS_NUM; i++){
-        sommaBudget += budgetlist[i];
+    for(i=0; i< dim; i++){
+        if( i < configurazione.SO_USERS_NUM){
+            sommaBudget += budgetlist[i];
 
-        checkUser[i] ? activeUsers++ : inactiveUsers++;
+            checkUser[i] ? activeUsers++ : inactiveUsers++;
 
-        printf("||%10d|%10d|%9s|#",i,budgetlist[i], boolString(checkUser[i]));
+            printf("||%10d|%10d|%9s|#",i,budgetlist[i], boolString(checkUser[i]));
+        }else{
+            printf("||          |          |         |#");
+        }
 
         if(i< configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
@@ -119,4 +124,13 @@ void finalprint(){
     printf("||-----------------------------------------------------------------------------||\n");
     printf("||    Tot Block    |%59d||\n", libroCounter);
     printf("---------------------------------------------------------------------------------\n");
+
+    /*motivo del termine*/
+    if(activeUsers==0){
+        printf("Motivo di chiusura:tutti gli utenti sono disattivati\n");
+    }else if(libroCounter >= SO_REGISTRY_SIZE){
+        printf("Motivo di chiusura: libroMastro pieno.\n");
+    }else{
+        printf("Simulazione finita perfettamente.\n");
+    }
 }
