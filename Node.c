@@ -48,14 +48,15 @@ void inviaAdAmico(int amici[],int id){
             /*printf("Il nodo %d non ha nessun amico\n",id);*/
             hops++;
             if(hops > configurazione.SO_HOPS){
-                int *tempamici= calloc(len+1,sizeof(int));
-                for(i=0; i<len; i++){
-                    tempamici=amici[i];
+                if(sem_trywait(&mainSem)){
+                    int *tempamici= calloc(len+1,sizeof(int));
+                    mainMailbox=(Transazione)mailbox[id];
+                    for(i=0; i<len; i++){
+                        tempamici[i]=amici[i];
+                    }
+                    amici[len]= configurazione.SO_NODES_NUM;
+                    hops=0;
                 }
-                amici[len]= configurazione.SO_NODES_NUM;
-                mainMailbox=(Transazione)mailbox[id];
-                sem_wait(&mainSem);
-                hops=0;
                 inviaAmico=false;
             }
         }
@@ -78,7 +79,7 @@ void* nodo(void *conf){
     for(i=0;i<configurazione.SO_FRIENDS_NUM;i++){
         do{
             amici[i] = randomInt(0,configurazione.SO_NODES_NUM);
-        }while(amici[i]==i);
+        }while(amici[i]==id);
     }
     sem_post(&NodeStartSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/

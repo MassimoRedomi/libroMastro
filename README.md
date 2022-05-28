@@ -608,6 +608,8 @@ int main(int argc,char *argv[]){
 
         }
         finalprint();
+        sem_getvalue(&mainSem,&semvalue);
+        printf("semaforo del gestor:%d",semvalue);
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){
@@ -703,14 +705,15 @@ void inviaAdAmico(int amici[],int id){
             /*printf("Il nodo %d non ha nessun amico\n",id);*/
             hops++;
             if(hops > configurazione.SO_HOPS){
-                int *tempamici= calloc(len+1,sizeof(int));
-                for(i=0; i<len; i++){
-                    tempamici=amici[i];
+                if(sem_trywait(&mainSem)){
+                    int *tempamici= calloc(len+1,sizeof(int));
+                    mainMailbox=(Transazione)mailbox[id];
+                    for(i=0; i<len; i++){
+                        tempamici[i]=amici[i];
+                    }
+                    amici[len]= configurazione.SO_NODES_NUM;
+                    hops=0;
                 }
-                amici[len]= configurazione.SO_NODES_NUM;
-                mainMailbox=(Transazione)mailbox[id];
-                sem_wait(&mainSem);
-                hops=0;
                 inviaAmico=false;
             }
         }
@@ -738,7 +741,7 @@ void* nodo(void *conf){
     for(i=0;i<configurazione.SO_FRIENDS_NUM;i++){
         do{
             amici[i] = randomInt(0,configurazione.SO_NODES_NUM);
-        }while(amici[i]==i);
+        }while(amici[i]==id);
     }
     sem_post(&NodeStartSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
@@ -1066,21 +1069,25 @@ bool printStatus(int nstamp){
     printf("||===============================|##|=================================||\n");
     
     /*Stampa risultati*/
-    for(i=0; i<configurazione.SO_USERS_NUM; i++){
-        sommaBudget += budgetlist[*(pa+i)];
-
-        checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
-
-        if(i<dim){
-            printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
-        }else{
+    for(i=0; i<MAX(configurazione.SO_USERS_NUM,configurazione.SO_NODES_NUM); i++){
+        if(i<configurazione.SO_USERS_NUM){
+            sommaBudget += budgetlist[*(pa+i)];
+            checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
+            if(i<dim){
+                printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+            }
+        }else if(i<dim){
             printf("||          |          |         |#");
         }
 
-        if(i< dim){
+
+        if(i < configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
             checkNode[i] ? activeNodes++ : inactiveNodes++;
-            printf("#|%11d|%11d|%9s||\n", i, rewardlist[i],boolString(checkNode[i]));
+            if(i<dim){
+                printf("#|%11d|%11d|%9s||\n", i, rewardlist[i],boolString(checkNode[i]));
+            }
+
         }else if(i<dim){
             printf("#|           |           |         ||\n");
         }

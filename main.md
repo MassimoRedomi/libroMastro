@@ -294,6 +294,8 @@ int main(int argc,char *argv[]){
 
         }
         finalprint();
+        sem_getvalue(&mainSem,&semvalue);
+        printf("semaforo del gestor:%d",semvalue);
     
         /*kill all the threads*/
         for(i=0; i<configurazione.SO_NODES_NUM ; i++){

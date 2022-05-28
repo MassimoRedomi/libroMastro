@@ -49,21 +49,25 @@ bool printStatus(int nstamp){
     printf("||===============================|##|=================================||\n");
     
     /*Stampa risultati*/
-    for(i=0; i<configurazione.SO_USERS_NUM; i++){
-        sommaBudget += budgetlist[*(pa+i)];
-
-        checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
-
-        if(i<dim){
-            printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
-        }else{
+    for(i=0; i<MAX(configurazione.SO_USERS_NUM,configurazione.SO_NODES_NUM); i++){
+        if(i<configurazione.SO_USERS_NUM){
+            sommaBudget += budgetlist[*(pa+i)];
+            checkUser[*(pa+i)] ? activeUsers++ : inactiveUsers++;
+            if(i<dim){
+                printf("||%10d|%10d|%9s|#",pa[i],budgetlist[*(pa+i)], boolString(checkUser[*(pa+i)]));
+            }
+        }else if(i<dim){
             printf("||          |          |         |#");
         }
 
-        if(i< dim){
+
+        if(i < configurazione.SO_NODES_NUM){
             sommaRewards+=rewardlist[i];
             checkNode[i] ? activeNodes++ : inactiveNodes++;
-            printf("#|%11d|%11d|%9s||\n", i, rewardlist[i],boolString(checkNode[i]));
+            if(i<dim){
+                printf("#|%11d|%11d|%9s||\n", i, rewardlist[i],boolString(checkNode[i]));
+            }
+
         }else if(i<dim){
             printf("#|           |           |         ||\n");
         }
