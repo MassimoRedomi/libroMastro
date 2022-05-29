@@ -34,7 +34,9 @@ extern bool *checkNode;
 extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
-extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
+extern bool gestoreOccupato;
+/*extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
+
 
 extern Configurazione configurazione;
 extern time_t startSimulation;
@@ -81,9 +83,10 @@ void inviaAdAmico(int amici[],int id){
             /*printf("Il nodo %d non ha nessun amico\n",id);*/
             hops++;
             if(hops > configurazione.SO_HOPS){
-                if(sem_trywait(&mainSem)){
-                    int *tempamici= calloc(len+1,sizeof(int));
+                if(!gestoreOccupato){
+                    gestoreOccupato=true;
                     mainMailbox=(Transazione)mailbox[id];
+                    int *tempamici= calloc(len+1,sizeof(int));
                     for(i=0; i<len; i++){
                         tempamici[i]=amici[i];
                     }

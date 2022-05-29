@@ -18,7 +18,6 @@ Importazione del libroMastro e tutte le variabili:
 extern Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 extern int libroCounter;/*Counter controlla la quantitta di blocchi*/
 extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
-extern sem_t mainSem;
 
 ```
 
@@ -74,7 +73,7 @@ int nodoLibero(int id){
     do{
         nodo = randomInt(0,configurazione.SO_NODES_NUM);
         if( retry > configurazione.SO_RETRY){
-            printf("L'utenete %d non ha trovato nessun nodo libero\n",id);
+            /*printf("L'utenete %d non ha trovato nessun nodo libero\n",id);*/
             checkUser[id]= false;
             pthread_cancel(utenti_id[id]);
         }
@@ -152,7 +151,7 @@ void* utente(void *conf){
         randomSleep( configurazione.SO_MIN_TRANS_GEN_NSEC , configurazione.SO_MAX_TRANS_GEN_NSEC);
 
         if(retry >= configurazione.SO_RETRY){/*Se raggiunge il n° max di tentativi*/
-            printf("utente %d fermato\n",id);       /*ferma il procceso*/
+            /*printf("utente %d fermato\n",id);       /*ferma il procceso*/
             checkUser[id]=false;
         }
     }

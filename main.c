@@ -13,7 +13,7 @@
 Transazione libroMastro[SO_REGISTRY_SIZE * SO_BLOCK_SIZE];/*libro mastro dove si scrivono tutte le transazioni.*/
 int libroCounter=0;/*Counter controlla la quantitta di blocchi*/
 sem_t libroluck;/*Luchetto per accedere solo a un nodo alla volta*/
-sem_t mainSem;
+bool gestoreOccupato;
 
 /*variabili condivise tra diversi thread.*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
@@ -68,9 +68,7 @@ void* gestore(){
     int semvalue;
 
     while(difftime(time(0), startSimulation) < configurazione.SO_SIM_SEC){
-        sem_getvalue(&mainSem,&i);
-        if(semvalue <=0){
-            sem_post(&mainSem);
+        if(gestoreOccupato){
             /*array temporali*/
             int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
             int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
@@ -111,6 +109,7 @@ void* gestore(){
 
             mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
             /*printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);*/
+            gestoreOccupato=false;
             configurazione.SO_NODES_NUM++;
         }
     }
@@ -161,7 +160,8 @@ int main(int argc,char *argv[]){
         /*now that we have all the variables we can start the process
         master*/
         sem_init(&libroluck,configurazione.SO_NODES_NUM,1);/*inizia il semaforo del libromastro*/
-        sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);
+        /*sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);*/
+        gestoreOccupato=false;
         startSimulation = time(0);/* el tiempo de inicio*/
     
         /*generatore dei nodi*/
@@ -198,8 +198,7 @@ int main(int argc,char *argv[]){
             clear();
 
             /*show last update*/
-            sem_getvalue(&mainSem,&semvalue);
-            printf("ultimo aggiornamento: %.2f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
+            printf("ultimo aggiornamento: %.0f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
 
             now = difftime(time(0), startSimulation);
 
@@ -225,16 +224,14 @@ int main(int argc,char *argv[]){
 
         }
         finalprint();
-        sem_getvalue(&mainSem,&semvalue);
-        printf("semaforo del gestor:%d",semvalue);
     
         /*kill all the threads*/
-        for(i=0; i<configurazione.SO_NODES_NUM ; i++){
+        /*for(i=0; i<configurazione.SO_NODES_NUM ; i++){
             pthread_cancel(nodi_id[i]);
         }
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
             pthread_cancel(utenti_id[i]);
-        }
+        }*/
     }
     return 0;
 }
