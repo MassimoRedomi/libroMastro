@@ -718,6 +718,7 @@ void inviaAdAmico(int amici[],int id){
             }
         }
     }while(inviaAmico);
+    sem_post(&semafori[id]);
 }
 ```
 
@@ -762,7 +763,6 @@ void* nodo(void *conf){
             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);
                 inviaAmico=false;
-                sem_post(&semafori[id]);
                 continue;
              }
              pool[poolsizelist[id]]=mailbox[id];
@@ -798,6 +798,7 @@ void* nodo(void *conf){
             sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
             if(poolsizelist[id] >= configurazione.SO_TP_SIZE){
                 checkNode[id]=false;
+                mailbox[id].reward=0;
             }
 
         }
