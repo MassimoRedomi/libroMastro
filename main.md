@@ -235,7 +235,7 @@ int main(int argc,char *argv[]){
     
         /*generatore dei nodi*/
         sem_init(&NodeStartSem,configurazione.SO_NODES_NUM,1);
-        poolsizelist=calloc(configurazione.SO_TP_SIZE , sizeof(int));
+        poolsizelist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
         mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
