@@ -167,6 +167,8 @@ void* gestore(){
             gestoreOccupato=false;
             configurazione.SO_NODES_NUM++;
         }
+        nanosleep((const struct timespec[]){{0,randomlong(10,10)}},NULL);
+
     }
 }
 
