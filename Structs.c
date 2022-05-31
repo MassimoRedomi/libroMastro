@@ -113,7 +113,8 @@ int randomInt(int min, int max){
 }
     
 long randomlong(int min, int max){
-	return (long)(rand() % max +min);
+    long zero = 0;
+	return zero + (rand() % max +min);
 }
 
 /*si ferma per una quantita random di nano secondi*/
