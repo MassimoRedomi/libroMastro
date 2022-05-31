@@ -16,7 +16,7 @@ extern Transazione *mailbox;/*struttura per condividere */
 
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
+extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
@@ -41,7 +41,7 @@ int nodoLibero(int id){
         if( retry > configurazione.SO_RETRY){
             /*printf("L'utenete %d non ha trovato nessun nodo libero\n",id);*/
             checkUser[id]= false;
-            pthread_cancel(utenti_id[id]);
+            pthread_cancel(utenti_threads[id]);
         }
         retry++;
     }while(sem_trywait(&semafori[nodo])<0 && checkUser[id]);

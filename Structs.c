@@ -18,15 +18,7 @@ typedef struct Configurazione{
 
 extern Configurazione configurazione;
 
-/*Un metodo che fa un fgets(con gli stessi parametri e lo 
-ritorna come un valore intero)*/
-int readAndInt(char *str, int n, FILE *stream){
-    fgets(str,n,stream);
-    return atoi(str);
-}
-/*Funzione che cerca la maniera di leggere il config file.
-metodo basato in codice di stackoverflow per leggere file come
-una unica struttura.*/
+/*Funzione che cerca la maniera di leggere il config file.*/
 void readconf(char fileName[]){
 	/*secondo lo std c89 tutte le variabile devono 
     essere dichiarate prima del primo codice */

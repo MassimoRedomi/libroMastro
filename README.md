@@ -97,23 +97,23 @@ oggetto della vita reale.
 Questa struttura solo serve per avere un archivio di dati ordinati
 dei dati letti del file di configurazione. Questi dati sono:
 
-| variables             | descripcion                                                  |
-| --------------------- | ------------------------------------------------------------ |
-| SO_USERS_NUM          | numero di processi untente                                   |
-| SO_NODES_NUM          | numero di processi nodo                                      |
-| SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                   |
-| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione |
-| SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| variables             | descripcion                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| SO_USERS_NUM          | numero di processi untente                                                                                       |
+| SO_NODES_NUM          | numero di processi nodo                                                                                          |
+| SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                                                                       |
+| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
+| SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
 | SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
-| SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina |
-| SO_TP_SIZE            | numero massimo di transazioni nella transaction pool dei processi nodo |
-| SO_BLOCK_SIZE         | numero di transazioni contenute in un blocco                 |
-| SO_MIN_TRANS_PROC     | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
-| SO_MAX_TRANS_PROC     | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
-| SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                  |
-| SO_SIM_SEC            | durata della simulazione.                                    |
-| SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full) |
-| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo |
+| SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
+| SO_TP_SIZE            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
+| SO_BLOCK_SIZE         | numero di transazioni contenute in un blocco                                                                     |
+| SO_MIN_TRANS_PROC     | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
+| SO_MAX_TRANS_PROC     | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
+| SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                                                                      |
+| SO_SIM_SEC            | durata della simulazione.                                                                                        |
+| SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
+| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 
 
 Anche è vero che si poteva leggere tutte le variabili senza metterlo in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto cosi.
@@ -146,15 +146,7 @@ Questa struttura è gia dichiarata con la variabile <span class="underline">conf
 
 ## Legge File
 ```c Structs.c
-/*Un metodo che fa un fgets(con gli stessi parametri e lo 
-ritorna come un valore intero)*/
-int readAndInt(char *str, int n, FILE *stream){
-    fgets(str,n,stream);
-    return atoi(str);
-}
-/*Funzione che cerca la maniera di leggere il config file.
-metodo basato in codice di stackoverflow per leggere file come
-una unica struttura.*/
+/*Funzione che cerca la maniera di leggere il config file.*/
 void readconf(char fileName[]){
 	/*secondo lo std c89 tutte le variabile devono 
     essere dichiarate prima del primo codice */
@@ -378,8 +370,8 @@ bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 Transazione mainMailbox;
 
 time_t startSimulation;
-pthread_t *utenti_id;     /*lista id di processi utenti*/
-pthread_t *nodi_id;     /*lista id di processi nodi  */
+pthread_t *utenti_threads;     /*lista id di processi utenti*/
+pthread_t *nodi_threads;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
 ```
@@ -452,7 +444,7 @@ void* gestore(){
                 tempRewardList[i]=rewardlist[i];
                 tempSemafori[i] = semafori[i];
                 tempmailbox[i] = mailbox[i];
-                tempThreads[i] = nodi_id[i];
+                tempThreads[i] = nodi_threads[i];
                 tempcheck[i] = checkNode[i];
             }
 
@@ -461,7 +453,7 @@ void* gestore(){
             rewardlist =tempRewardList;
             semafori =tempSemafori;
             mailbox = tempmailbox;
-            nodi_id = tempThreads;
+            nodi_threads = tempThreads;
             checkNode = tempcheck;
             /*
             free(tempPoolsize);
@@ -473,7 +465,7 @@ void* gestore(){
             */
 
             /*inizia il nuovo trhead*/
-            pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
+            pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
             sem_wait(&NodeStartSem);
 
             mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
@@ -555,10 +547,10 @@ int main(int argc,char *argv[]){
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
         mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
-        nodi_id = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
+        nodi_threads = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-            pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
+            pthread_create(&nodi_threads[i],NULL,nodo,(void *)i);
             sem_wait(&NodeStartSem);
         }
 
@@ -567,10 +559,10 @@ int main(int argc,char *argv[]){
         /*generatore dei utenti*/
         sem_init(&UserStartSem,configurazione.SO_USERS_NUM,1);
         budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
-        utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
+        utenti_threads = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-            pthread_create(&utenti_id[i],NULL,utente,(void *)i);
+            pthread_create(&utenti_threads[i],NULL,utente,(void *)i);
             sem_wait(&UserStartSem);
         }
 
@@ -582,10 +574,11 @@ int main(int argc,char *argv[]){
             sleep(1);
             clear();
 
-            /*show last update*/
-            printf("ultimo aggiornamento: %.0f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
-
             now = difftime(time(0), startSimulation);
+
+            /*show last update*/
+            printf("ultimo aggiornamento: %.0f/%d\n",now,configurazione.SO_SIM_SEC);
+
 
             if(libroCounter > SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
@@ -612,10 +605,10 @@ int main(int argc,char *argv[]){
     
         /*kill all the threads*/
         /*for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-            pthread_cancel(nodi_id[i]);
+            pthread_cancel(nodi_threads[i]);
         }
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(utenti_id[i]);
+            pthread_cancel(utenti_threads[i]);
         }*/
     }
     return 0;
@@ -663,7 +656,6 @@ extern bool gestoreOccupato;
 
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 
 ```
 
@@ -800,7 +792,6 @@ void* nodo(void *conf){
             sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
             if(poolsizelist[id] >= configurazione.SO_TP_SIZE){
                 checkNode[id]=false;
-                mailbox[id].reward=0;
             }
 
         }
@@ -854,7 +845,7 @@ extern Transazione *mailbox;/*struttura per condividere */
 
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *utenti_id;      /*lista id dei processi utenti*/
+extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 
 ```
 
@@ -891,7 +882,7 @@ int nodoLibero(int id){
         if( retry > configurazione.SO_RETRY){
             /*printf("L'utenete %d non ha trovato nessun nodo libero\n",id);*/
             checkUser[id]= false;
-            pthread_cancel(utenti_id[id]);
+            pthread_cancel(utenti_threads[id]);
         }
         retry++;
     }while(sem_trywait(&semafori[nodo])<0 && checkUser[id]);

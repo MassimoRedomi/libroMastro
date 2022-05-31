@@ -9,23 +9,23 @@ oggetto della vita reale.
 Questa struttura solo serve per avere un archivio di dati ordinati
 dei dati letti del file di configurazione. Questi dati sono:
 
-| variables             | descripcion                                                  |
-| --------------------- | ------------------------------------------------------------ |
-| SO_USERS_NUM          | numero di processi untente                                   |
-| SO_NODES_NUM          | numero di processi nodo                                      |
-| SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                   |
-| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione |
-| SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
+| variables             | descripcion                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| SO_USERS_NUM          | numero di processi untente                                                                                       |
+| SO_NODES_NUM          | numero di processi nodo                                                                                          |
+| SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                                                                       |
+| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
+| SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
 | SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
-| SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina |
-| SO_TP_SIZE            | numero massimo di transazioni nella transaction pool dei processi nodo |
-| SO_BLOCK_SIZE         | numero di transazioni contenute in un blocco                 |
-| SO_MIN_TRANS_PROC     | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
-| SO_MAX_TRANS_PROC     | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo |
-| SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                  |
-| SO_SIM_SEC            | durata della simulazione.                                    |
-| SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full) |
-| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo |
+| SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
+| SO_TP_SIZE            | numero massimo di transazioni nella transaction pool dei processi nodo                                           |
+| SO_BLOCK_SIZE         | numero di transazioni contenute in un blocco                                                                     |
+| SO_MIN_TRANS_PROC     | minimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                  |
+| SO_MAX_TRANS_PROC     | massimo valore del tempo simulato(nanosecondi) di processamento di un blocco da parte di un nodo                 |
+| SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                                                                      |
+| SO_SIM_SEC            | durata della simulazione.                                                                                        |
+| SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
+| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 
 
 Anche è vero che si poteva leggere tutte le variabili senza metterlo in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto cosi.
@@ -58,15 +58,7 @@ Questa struttura è gia dichiarata con la variabile <span class="underline">conf
 
 ## Legge File
 ```c Structs.c
-/*Un metodo che fa un fgets(con gli stessi parametri e lo 
-ritorna come un valore intero)*/
-int readAndInt(char *str, int n, FILE *stream){
-    fgets(str,n,stream);
-    return atoi(str);
-}
-/*Funzione che cerca la maniera di leggere il config file.
-metodo basato in codice di stackoverflow per leggere file come
-una unica struttura.*/
+/*Funzione che cerca la maniera di leggere il config file.*/
 void readconf(char fileName[]){
 	/*secondo lo std c89 tutte le variabile devono 
     essere dichiarate prima del primo codice */

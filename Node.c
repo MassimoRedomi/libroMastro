@@ -19,7 +19,6 @@ extern bool gestoreOccupato;
 
 extern Configurazione configurazione;
 extern time_t startSimulation;
-extern pthread_t *nodi_id;       /*lista dei processi nodi*/
 
 
 /*funzione dell'ultima transazione del blocco.*/
@@ -139,7 +138,6 @@ void* nodo(void *conf){
             sem_post(&semafori[id]);/*stabilisco il semaforo come di nuovo disponibile*/
             if(poolsizelist[id] >= configurazione.SO_TP_SIZE){
                 checkNode[id]=false;
-                mailbox[id].reward=0;
             }
 
         }

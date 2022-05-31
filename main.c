@@ -30,8 +30,8 @@ bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 Transazione mainMailbox;
 
 time_t startSimulation;
-pthread_t *utenti_id;     /*lista id di processi utenti*/
-pthread_t *nodi_id;     /*lista id di processi nodi  */
+pthread_t *utenti_threads;     /*lista id di processi utenti*/
+pthread_t *nodi_threads;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
 
@@ -83,7 +83,7 @@ void* gestore(){
                 tempRewardList[i]=rewardlist[i];
                 tempSemafori[i] = semafori[i];
                 tempmailbox[i] = mailbox[i];
-                tempThreads[i] = nodi_id[i];
+                tempThreads[i] = nodi_threads[i];
                 tempcheck[i] = checkNode[i];
             }
 
@@ -92,7 +92,7 @@ void* gestore(){
             rewardlist =tempRewardList;
             semafori =tempSemafori;
             mailbox = tempmailbox;
-            nodi_id = tempThreads;
+            nodi_threads = tempThreads;
             checkNode = tempcheck;
             /*
             free(tempPoolsize);
@@ -104,7 +104,7 @@ void* gestore(){
             */
 
             /*inizia il nuovo trhead*/
-            pthread_create(&nodi_id[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
+            pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
             sem_wait(&NodeStartSem);
 
             mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
@@ -172,10 +172,10 @@ int main(int argc,char *argv[]){
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
         mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
-        nodi_id = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
+        nodi_threads = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-            pthread_create(&nodi_id[i],NULL,nodo,(void *)i);
+            pthread_create(&nodi_threads[i],NULL,nodo,(void *)i);
             sem_wait(&NodeStartSem);
         }
 
@@ -184,10 +184,10 @@ int main(int argc,char *argv[]){
         /*generatore dei utenti*/
         sem_init(&UserStartSem,configurazione.SO_USERS_NUM,1);
         budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
-        utenti_id = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
+        utenti_threads = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-            pthread_create(&utenti_id[i],NULL,utente,(void *)i);
+            pthread_create(&utenti_threads[i],NULL,utente,(void *)i);
             sem_wait(&UserStartSem);
         }
 
@@ -199,10 +199,11 @@ int main(int argc,char *argv[]){
             sleep(1);
             clear();
 
-            /*show last update*/
-            printf("ultimo aggiornamento: %.0f/%d\n",difftime(time(0),startSimulation),configurazione.SO_SIM_SEC);
-
             now = difftime(time(0), startSimulation);
+
+            /*show last update*/
+            printf("ultimo aggiornamento: %.0f/%d\n",now,configurazione.SO_SIM_SEC);
+
 
             if(libroCounter > SO_REGISTRY_SIZE){
                 printf("%f: libro mastro pieno\n",now);
@@ -229,10 +230,10 @@ int main(int argc,char *argv[]){
     
         /*kill all the threads*/
         /*for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-            pthread_cancel(nodi_id[i]);
+            pthread_cancel(nodi_threads[i]);
         }
         for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(utenti_id[i]);
+            pthread_cancel(utenti_threads[i]);
         }*/
     }
     return 0;
