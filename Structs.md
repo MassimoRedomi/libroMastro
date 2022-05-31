@@ -199,8 +199,7 @@ int randomInt(int min, int max){
 }
     
 long randomlong(int min, int max){
-    long zero = 0;
-	return zero + (rand() % max +min);
+	return 0L + (rand() % max +min);
 }
 
 ```
@@ -213,7 +212,8 @@ min
 ```c Structs.c
 /*si ferma per una quantita random di nano secondi*/
 void randomSleep(int min, int max){
-    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+    struct timespec sec,nano = {0,randomlong(min,max)};
+    nanosleep(&sec,&nano);
 }
 
 ```
