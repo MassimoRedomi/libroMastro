@@ -126,23 +126,23 @@ void* gestore(){
         if(gestoreOccupato){
             /*resize each list with realloc*/
             poolsizelist=realloc(poolsizelist,(configurazione.SO_NODES_NUM+1)*sizeof(int));
-            rewardlist = realloc(rewardlist,(configurazione.SO_NODES_NUM+1)*sizeof(int));
-            semafori = realloc(semafori,(configurazione.SO_NODES_NUM+1)*sizeof(sem_t));
-            mailbox = realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
+            rewardlist  =realloc(rewardlist ,(configurazione.SO_NODES_NUM+1)*sizeof(int));
+            semafori     =realloc(semafori,(configurazione.SO_NODES_NUM+1)*sizeof(sem_t));
+            checkNode    =realloc(checkNode,(configurazione.SO_NODES_NUM+1)*sizeof(bool));
             nodi_threads=realloc(nodi_threads,(configurazione.SO_NODES_NUM+1)*sizeof(pthread_t));
-            checkNode=realloc(checkNode,(configurazione.SO_NODES_NUM+1)*sizeof(bool));
-
+            mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
 
             /*inizia il nuovo trhead*/
             pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
             sem_wait(&NodeStartSem);
 
             mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
-            /*printf("nodo %d creato.\n",configurazione.SO_NODES_NUM);*/
+
+            /*si reapre il gestore di nuovi nodi*/
             gestoreOccupato=false;
             configurazione.SO_NODES_NUM++;
         }
-        nanosleep((const struct timespec[]){{0,randomlong(10,10)}},NULL);
+        randomSleep(10,10);
 
     }
 }
