@@ -431,39 +431,14 @@ void* gestore(){
 
     while(difftime(time(0), startSimulation) < configurazione.SO_SIM_SEC){
         if(gestoreOccupato){
-            /*array temporali*/
-            int *tempPoolsize= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
-            int *tempRewardList= calloc(configurazione.SO_NODES_NUM+1,sizeof(int));
-            sem_t *tempSemafori = calloc(configurazione.SO_NODES_NUM+1,sizeof(sem_t));
-            Transazione *tempmailbox = calloc(configurazione.SO_NODES_NUM+1, ((4*sizeof(int))+sizeof(double)));
-            pthread_t *tempThreads = calloc(configurazione.SO_NODES_NUM+1,sizeof(pthread_t));
-            bool *tempcheck =  calloc(configurazione.SO_NODES_NUM+1,sizeof(bool));
+            /*resize each list with realloc*/
+            poolsizelist=realloc(poolsizelist,(configurazione.SO_NODES_NUM+1)*sizeof(int));
+            rewardlist = realloc(rewardlist,(configurazione.SO_NODES_NUM+1)*sizeof(int));
+            semafori = realloc(semafori,(configurazione.SO_NODES_NUM+1)*sizeof(sem_t));
+            mailbox = realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
+            nodi_threads=realloc(nodi_threads,(configurazione.SO_NODES_NUM+1)*sizeof(pthread_t));
+            checkNode=realloc(checkNode,(configurazione.SO_NODES_NUM+1)*sizeof(bool));
 
-            /*copia tutti i valori*/
-            for(i=0;i<configurazione.SO_NODES_NUM;i++){
-                tempPoolsize[i]=poolsizelist[i];
-                tempRewardList[i]=rewardlist[i];
-                tempSemafori[i] = semafori[i];
-                tempmailbox[i] = mailbox[i];
-                tempThreads[i] = nodi_threads[i];
-                tempcheck[i] = checkNode[i];
-            }
-
-            /*riimpiaza le liste*/
-            poolsizelist=tempPoolsize;
-            rewardlist =tempRewardList;
-            semafori =tempSemafori;
-            mailbox = tempmailbox;
-            nodi_threads = tempThreads;
-            checkNode = tempcheck;
-            /*
-            free(tempPoolsize);
-            free(tempRewardList);
-            free(tempSemafori);
-            free(tempmailbox);
-            free(tempThreads);
-            free(tempcheck);
-            */
 
             /*inizia il nuovo trhead*/
             pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
@@ -702,10 +677,7 @@ void inviaAdAmico(int *amici,int id){
                 if(!gestoreOccupato){
                     gestoreOccupato=true;
                     mainMailbox=(Transazione)mailbox[id];
-                    int *tempamici= calloc(len+1,sizeof(int));
-                    for(i=0; i<len; i++){
-                        tempamici[i]=amici[i];
-                    }
+                    amici = realloc(amici,(len+1)*sizeof(int));
                     amici[len]= configurazione.SO_NODES_NUM;
                     hops=0;
                 }

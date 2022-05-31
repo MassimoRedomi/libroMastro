@@ -85,10 +85,7 @@ void inviaAdAmico(int *amici,int id){
                 if(!gestoreOccupato){
                     gestoreOccupato=true;
                     mainMailbox=(Transazione)mailbox[id];
-                    int *tempamici= calloc(len+1,sizeof(int));
-                    for(i=0; i<len; i++){
-                        tempamici[i]=amici[i];
-                    }
+                    amici = realloc(amici,(len+1)*sizeof(int));
                     amici[len]= configurazione.SO_NODES_NUM;
                     hops=0;
                 }
