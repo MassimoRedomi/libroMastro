@@ -64,13 +64,13 @@ Transazione riasunto(int id, int somma){
 ## Invia transazione a nodo amico
 Questa funzione invia una transazione a un amico o crea un nuovo nodo per inviarselo. 
 ```c Node.c
-void inviaAdAmico(int amici[],int id){
+void inviaAdAmico(int *amici,int id){
     bool inviaAmico=true;
     int hops=0;
     int i;
     int len = sizeof(amici)/sizeof(int);
-    do{
-        for(i=0; i<configurazione.SO_FRIENDS_NUM && inviaAmico;i++){
+    while(inviaAmico){
+        for(i=0; i<len && inviaAmico;i++){
             if(checkNode[amici[i]]){/*evito inviare a un nodo pieno.*/
                 if(sem_trywait(&semafori[*(amici+i)])){
                     mailbox[amici[i]]=mailbox[id];
@@ -95,7 +95,7 @@ void inviaAdAmico(int amici[],int id){
                 inviaAmico=false;
             }
         }
-    }while(inviaAmico);
+    }
     sem_post(&semafori[id]);
 }
 ```
