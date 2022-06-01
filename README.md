@@ -912,7 +912,7 @@ void* utente(void *conf){
 
     /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
-    while(retry < configurazione.SO_RETRY){
+    while(checkUser[id]){
 
         lastUpdate = userUpdate(id,lastUpdate);  /*Aggiorniamo Budgetdel Processo Utente*/
 
