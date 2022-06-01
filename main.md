@@ -255,8 +255,7 @@ int main(int argc,char *argv[]){
             }
             
 
-            test = printStatus(40);
-            if(!test){
+            if(!printStatus(40)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
