@@ -178,6 +178,7 @@ void* nodo(void *conf){
         }
 
     }
+    /*nodo zombie*/
     while(difftime(time(0),startSimulation)<configurazione.SO_SIM_SEC){
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){

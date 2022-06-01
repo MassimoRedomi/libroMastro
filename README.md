@@ -18,7 +18,7 @@ SO_REGISTRY_SIZE = 10000
 
 ```makefile Makefile
 2:
-	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=10000 main.c -o main
 ```
 
 ### configurazione 3:
@@ -28,7 +28,7 @@ SO_REGISTRY_SIZE = 1000
 
 ```makefile Makefile
 3:
-	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -o main
 ```
 
 ### configurazione custom:
@@ -40,7 +40,7 @@ custom:
 	@read block
 	@echo -n "SO_REGISTRY_SIZE: "
 	@read registry
-	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE = $(block) -DSO_REGISTRY_SIZE = $(registry) main.c -lm -o main
+	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE = $(block) -DSO_REGISTRY_SIZE = $(registry) main.c -o main
 	
 ```
 
@@ -48,10 +48,12 @@ custom:
 ## significato di ogni flag
  - std=c89: Stabilisce il linguagio standard C89.
 
+ - pedantic: Disattiva opzioni del compilatore producendo più errori.
+
  - pthread: Stabilisce il binario per processare threads.
- - pedantic
 
  - D_GNU_SOURCE: Abilita estensioni GNU agli standard C e OS supportati dalla libreria GNU C.
+
  - SO_BLOCK_SIZE: La grandezza del blocco nella simulzaione.
 
  - SO_REGISTRY_SIZE: La grandezza massima del libro mastro.
@@ -771,6 +773,7 @@ void* nodo(void *conf){
         }
 
     }
+    /*nodo zombie*/
     while(difftime(time(0),startSimulation)<configurazione.SO_SIM_SEC){
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
