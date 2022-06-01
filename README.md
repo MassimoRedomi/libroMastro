@@ -58,8 +58,6 @@ custom:
 
  - SO_REGISTRY_SIZE: La grandezza massima del libro mastro.
 
- - lm: Compila con le librerie condivise.
-
 
 # Esecuzione del programma
 Dopo di aver compilato il programma solo ci manca inizializzarlo.
@@ -565,8 +563,7 @@ int main(int argc,char *argv[]){
             }
             
 
-            test = printStatus(40);
-            if(!test){
+            if(!printStatus(40)){
                 printf("tutti gli utenti sono disattivati");
                 break;
             }
