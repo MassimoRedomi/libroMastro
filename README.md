@@ -300,8 +300,9 @@ min
 ```c Structs.c
 /*si ferma per una quantita random di nano secondi*/
 void randomSleep(int min, int max){
-    struct timespec sec,nano = {0,randomlong(min,max)};
-    nanosleep(&sec,&nano);
+    /*struct timespec sec,nano = {0,randomlong(min,max)};
+    nanosleep(&sec,&nano);*/
+    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
 }
 
 ```
