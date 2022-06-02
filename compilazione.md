@@ -62,7 +62,7 @@ custom:
  - SO_REGISTRY_SIZE: La grandezza massima del libro mastro.
 
 
-# 2.Esecuzione del programma
+# 2.Esecuzione
 Dopo di aver compilato il programma solo ci manca inizializzarlo.
 Per questo si puo fare due maniere diverse: passando un file con 
 tutta la configurazione, o scriverla manualmente.
