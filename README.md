@@ -409,6 +409,7 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 ```
 
 ## Segnale
+
 La segnale è una maniera di forzare a un'utente a fare una transazione gia creata dal master con valori predefiniti.
 ```c main.c
 
@@ -423,6 +424,7 @@ void segnale(Transazione programmato){
 ```
 
 ## nuovo nodo
+
 Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
 ```c main.c
 
@@ -440,9 +442,11 @@ void* gestore(){
             nodi_threads=realloc(nodi_threads,(configurazione.SO_NODES_NUM+1)*sizeof(pthread_t));
             mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
 
+            rewardlist[configurazione.SO_NODES_NUM]=0;
+            poolsizelist[configurazione.SO_NODES_NUM]=0;
+
             /*inizia il nuovo trhead*/
-            pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
-            sem_wait(&NodeStartSem);
+            pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,NULL);
 
             mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
 
@@ -471,6 +475,7 @@ E' il metodo principale del progetto. Il suoi compiti sono
 ```c main.c
 int main(int argc,char *argv[]){
     int i;
+    void *j;
     float now;
     bool test;
     int semvalue;
@@ -524,11 +529,10 @@ int main(int argc,char *argv[]){
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
         mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
-        nodi_threads = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
+        nodi_threads = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-            pthread_create(&nodi_threads[i],NULL,nodo,(void *)i);
-            sem_wait(&NodeStartSem);
+            pthread_create(&nodi_threads[i],NULL,nodo,NULL);
         }
 
         pthread_create(&thrGestore,NULL,gestore,NULL);
@@ -622,6 +626,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
+extern pthread_t *nodi_threads;
 extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
@@ -634,6 +639,21 @@ extern time_t startSimulation;
 
 ```
 
+## trova ID del Nodo
+Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
+```c Node.c
+/*cerca la posizione del thread del nodo.*/
+int trovaNodoID(){
+    int id;
+
+    for(id=configurazione.SO_NODES_NUM; id>=0; id--){
+        if(pthread_self() == nodi_threads[id]){
+            break;
+        }
+    }
+    return id;
+}
+```
 
 ## transazione di riasunto
 Questo metodo genera l'ultima transazione del blocco. Questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in questo blocco. 
@@ -693,7 +713,7 @@ void inviaAdAmico(int *amici,int id){
 ```c Node.c
 void* nodo(void *conf){
 	/*creazioni dei dati del nodo*/
-    int id = (int)conf;
+    int id = trovaNodoID();
     int i;
     int hops=0;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
@@ -710,7 +730,6 @@ void* nodo(void *conf){
             amici[i] = randomInt(0,configurazione.SO_NODES_NUM);
         }while(amici[i]==id);
     }
-    sem_post(&NodeStartSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
@@ -749,6 +768,10 @@ void* nodo(void *conf){
                 sem_wait(&libroluck);
                 for(i=0;i< SO_BLOCK_SIZE;i++){
                     libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
+                    /*se hai bisogno di dimostrare che si scrive il libro mastro,
+                    scomenta il seguente print. Questo stampa tutto il blocco quando si 
+                    scrive nel libroMastro.*/
+                    /*prinTrans(blocco[i]);*/
                 }
                 /*si spostano i contatori*/
                 libroCounter++;
@@ -823,7 +846,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base a lla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){

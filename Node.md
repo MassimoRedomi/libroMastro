@@ -31,6 +31,7 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
+extern pthread_t *nodi_threads;
 extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
@@ -43,6 +44,21 @@ extern time_t startSimulation;
 
 ```
 
+## trova ID del Nodo
+Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
+```c Node.c
+/*cerca la posizione del thread del nodo.*/
+int trovaNodoID(){
+    int id;
+
+    for(id=configurazione.SO_NODES_NUM; id>=0; id--){
+        if(pthread_self() == nodi_threads[id]){
+            break;
+        }
+    }
+    return id;
+}
+```
 
 ## transazione di riasunto
 Questo metodo genera l'ultima transazione del blocco. Questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in questo blocco. 
@@ -100,9 +116,9 @@ void inviaAdAmico(int *amici,int id){
 
 ## Funzione principale del nodo.
 ```c Node.c
-void* nodo(void *conf){
+void* nodo(){
 	/*creazioni dei dati del nodo*/
-    int id = (int)conf;
+    int id = trovaNodoID();
     int i;
     int hops=0;
     int counterBlock=0;/*contatore della quantita di transazioni nel blocco*/
@@ -119,7 +135,6 @@ void* nodo(void *conf){
             amici[i] = randomInt(0,configurazione.SO_NODES_NUM);
         }while(amici[i]==id);
     }
-    sem_post(&NodeStartSem);
     sem_init(&semafori[id],configurazione.SO_USERS_NUM,1);/*inizia il semaforo in 1*/
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
@@ -158,6 +173,10 @@ void* nodo(void *conf){
                 sem_wait(&libroluck);
                 for(i=0;i< SO_BLOCK_SIZE;i++){
                     libroMastro[(libroCounter * SO_BLOCK_SIZE) + i] = blocco[i];
+                    /*se hai bisogno di dimostrare che si scrive il libro mastro,
+                    scomenta il seguente print. Questo stampa tutto il blocco quando si 
+                    scrive nel libroMastro.*/
+                    /*prinTrans(blocco[i]);*/
                 }
                 /*si spostano i contatori*/
                 libroCounter++;

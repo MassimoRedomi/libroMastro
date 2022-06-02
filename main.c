@@ -77,9 +77,11 @@ void* gestore(){
             nodi_threads=realloc(nodi_threads,(configurazione.SO_NODES_NUM+1)*sizeof(pthread_t));
             mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
 
+            rewardlist[configurazione.SO_NODES_NUM]=0;
+            poolsizelist[configurazione.SO_NODES_NUM]=0;
+
             /*inizia il nuovo trhead*/
-            pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,(void *)configurazione.SO_NODES_NUM);
-            sem_wait(&NodeStartSem);
+            pthread_create(&nodi_threads[configurazione.SO_NODES_NUM],NULL,nodo,NULL);
 
             mailbox[configurazione.SO_NODES_NUM] = mainMailbox;
 
@@ -94,6 +96,7 @@ void* gestore(){
 
 int main(int argc,char *argv[]){
     int i;
+    void *j;
     float now;
     bool test;
     int semvalue;
@@ -147,11 +150,10 @@ int main(int argc,char *argv[]){
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
         mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
-        nodi_threads = calloc(configurazione.SO_NODES_NUM , sizeof(pthread_t));
+        nodi_threads = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
-            pthread_create(&nodi_threads[i],NULL,nodo,(void *)i);
-            sem_wait(&NodeStartSem);
+            pthread_create(&nodi_threads[i],NULL,nodo,NULL);
         }
 
         pthread_create(&thrGestore,NULL,gestore,NULL);
