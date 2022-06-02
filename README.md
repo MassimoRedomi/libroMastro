@@ -7,6 +7,9 @@ C'è un capitolo per ogni file.
 5. [Nodo (node.c)](#5.Nodo)
 6. [Utente (User.c)](#6.Utente)
 7. [Prints (print.c)](#7.Prints)
+
+
+
 # 1.Compilazione
 
 La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE][MAKEFILE] sono:
