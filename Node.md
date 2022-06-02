@@ -1,7 +1,7 @@
-# Node
+# 5.Nodo
 
 ## Importa Variabili Globali
-Importa funzioni e strutture di [Structs](Structs.md)
+Importa funzioni e strutture di [Structs](3.Strutture).
 ```c Node.c
 #include "Structs.c"
 #define defaultSender -1
@@ -45,7 +45,7 @@ extern time_t startSimulation;
 ```
 
 ## trova ID del Nodo
-Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
+Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
 ```c Node.c
 /*cerca la posizione del thread del nodo.*/
 int trovaNodoID(){

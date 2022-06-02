@@ -1,4 +1,4 @@
-
+# 4.Main
 # Headers
 ## Basic libraries
 ```c main.c
@@ -19,7 +19,7 @@
 ```
 
 ## Funzioni Utente
-importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
+importando le funzioni di [User.c](#6.Utente) sono incluse anche le funzioni di [Nodo](#5.Nodo) e [Structs](#3.Strutture).
 ```c main.c
 #include "User.c"
 #include "print.c"
@@ -115,7 +115,7 @@ void segnale(Transazione programmato){
 }
 ```
 
-## nuovo nodo
+## Nuovo nodo
 
 Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
 ```c main.c

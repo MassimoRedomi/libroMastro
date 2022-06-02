@@ -1,7 +1,7 @@
-# Utente
+# 6.Utente
 ## import
 Si importa il codice di Node.c che importa tutte le
-funzioni di [Node](Node.md) e [Structs](Structs.md).
+funzioni di [Node](#5.Nodo) e [Structs](#3.Strutture).
 
 ```c User.c
 #include "Node.c"
@@ -43,7 +43,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){

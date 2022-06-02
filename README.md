@@ -1,6 +1,15 @@
-# Compilazione
+# Index
+1. [Compilazione (MAKEFILE)](#1.Compilazione)
+2. [Esecuzione](#2.Esecuzione del programma)
+3. [Strutture (Structs.c)](#3.Strutture)
+4. [Main (main.c)](#4.Main)
+5. [Nodo (node.c)](#5.Nodo)
+6. [Utente (User.c)](#6.Utente)
+7. [Prints (print.c)](#7.Prints)
+# 1.Compilazione
 
-La compilazione avviene tramite MAKEFILE:
+La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE][MAKEFILE] sono:
+
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
 
@@ -32,7 +41,9 @@ SO_REGISTRY_SIZE = 1000
 ```
 
 ### configurazione custom:
-Questa configurazione viene pensato per modificare i valori 
+
+opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizati.
+
 ```makefile Makefile
 #setting con entrata libera per block size e registry size
 custom:
@@ -59,7 +70,7 @@ custom:
  - SO_REGISTRY_SIZE: La grandezza massima del libro mastro.
 
 
-# Esecuzione del programma
+# 2.Esecuzione del programma
 Dopo di aver compilato il programma solo ci manca inizializzarlo.
 Per questo si puo fare due maniere diverse: passando un file con 
 tutta la configurazione, o scriverla manualmente.
@@ -86,7 +97,8 @@ nel caso delle segnali per forzare certe transazioni, non è obbligatorio per in
 ./main conf1.dat transactions.dat
 ```
 con il file __transactions.dat__ come il file con tutte le transazioni programmate.
-# structures
+
+# 3.Strutture
 
  Le strutture sono gruppi di variabili che rapressentano un
 oggetto della vita reale.
@@ -306,7 +318,7 @@ void randomSleep(int min, int max){
 }
 
 ```
-
+# 4.Main
 # Headers
 ## Basic libraries
 ```c main.c
@@ -327,7 +339,7 @@ void randomSleep(int min, int max){
 ```
 
 ## Funzioni Utente
-importando le funzioni di [User.c](User.md) sono incluse anche le funzioni di [Nodo](Node.md) e [Structs](Structs.md).
+importando le funzioni di [User.c](#6.Utente) sono incluse anche le funzioni di [Nodo](#5.Nodo) e [Structs](#3.Strutture).
 ```c main.c
 #include "User.c"
 #include "print.c"
@@ -423,7 +435,7 @@ void segnale(Transazione programmato){
 }
 ```
 
-## nuovo nodo
+## Nuovo nodo
 
 Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
 ```c main.c
@@ -593,10 +605,10 @@ int main(int argc,char *argv[]){
     return 0;
 }
 ```
-# Node
+# 5.Nodo
 
 ## Importa Variabili Globali
-Importa funzioni e strutture di [Structs](Structs.md)
+Importa funzioni e strutture di [Structs](3.Strutture).
 ```c Node.c
 #include "Structs.c"
 #define defaultSender -1
@@ -640,7 +652,7 @@ extern time_t startSimulation;
 ```
 
 ## trova ID del Nodo
-Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
+Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
 ```c Node.c
 /*cerca la posizione del thread del nodo.*/
 int trovaNodoID(){
@@ -801,10 +813,10 @@ void* nodo(){
     }
 }
 ```
-# Utente
+# 6.Utente
 ## import
 Si importa il codice di Node.c che importa tutte le
-funzioni di [Node](Node.md) e [Structs](Structs.md).
+funzioni di [Node](#5.Nodo) e [Structs](#3.Strutture).
 
 ```c User.c
 #include "Node.c"
@@ -846,7 +858,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){
@@ -974,7 +986,7 @@ void* utente(){
     }
 }
 ```
-# Prints
+# 7.Prints
 
 Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. Le principali funzioni sono:
 

@@ -1,6 +1,7 @@
-# Compilazione
+# 1.Compilazione
 
-La compilazione avviene tramite MAKEFILE:
+La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE][MAKEFILE] sono:
+
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
 
@@ -32,7 +33,9 @@ SO_REGISTRY_SIZE = 1000
 ```
 
 ### configurazione custom:
-Questa configurazione viene pensato per modificare i valori 
+
+opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizati.
+
 ```makefile Makefile
 #setting con entrata libera per block size e registry size
 custom:
@@ -59,7 +62,7 @@ custom:
  - SO_REGISTRY_SIZE: La grandezza massima del libro mastro.
 
 
-# Esecuzione del programma
+# 2.Esecuzione del programma
 Dopo di aver compilato il programma solo ci manca inizializzarlo.
 Per questo si puo fare due maniere diverse: passando un file con 
 tutta la configurazione, o scriverla manualmente.
@@ -86,3 +89,4 @@ nel caso delle segnali per forzare certe transazioni, non è obbligatorio per in
 ./main conf1.dat transactions.dat
 ```
 con il file __transactions.dat__ come il file con tutte le transazioni programmate.
+

@@ -1,4 +1,4 @@
-# Prints
+# 7.Prints
 
 Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. Le principali funzioni sono:
 

@@ -1,4 +1,4 @@
-# structures
+# 3.Strutture
 
  Le strutture sono gruppi di variabili che rapressentano un
 oggetto della vita reale.
