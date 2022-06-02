@@ -11,7 +11,7 @@
 
 # 1.Compilazione
 
-La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE](MAKEFILE) sono:
+La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE](Makefile) sono:
 
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
