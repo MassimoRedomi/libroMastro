@@ -23,7 +23,7 @@ extern sem_t libroluck;/*luchetto per accedere solo un nodo alla volta*/
 
 #### Sincronizzazione tra Processi
 
-Importa tutte le variabili del Main 
+Importa tutte le variabili condivise
 
 ```c User.c
 /*variabili condivise tra diversi thread.*/
@@ -40,6 +40,21 @@ extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 
+```
+
+## trova ID del utente
+Per colpa del pedantic nel [Makefile][compilazione.md] non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base a lla posizione del thread nella lista utenti_threads.
+```c User.c
+/*cerca la posizione del thread del utente.*/
+int trovaUtenteID(){
+    int id;
+    for(id=0;id<configurazione.SO_USERS_NUM; id++){
+        if(pthread_self() == utenti_threads[id]){
+            break;
+        }
+    }
+    return id;
+}
 ```
 
 ## Aggiornamento Libro_Mastro
@@ -119,7 +134,7 @@ Transazione generateTransaction(int id){
 ```c User.c
 /*PROCESSO UTENTE:*/
 void* utente(void *conf){
-    int id = (int)conf;                       /*Id processo utente*/
+    int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
@@ -127,7 +142,6 @@ void* utente(void *conf){
     /*setting default values delle variabili condivise*/
     checkUser[id] = true;
     budgetlist[id] = configurazione.SO_BUDGET_INIT;
-    sem_post(&UserStartSem);
 
     /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 

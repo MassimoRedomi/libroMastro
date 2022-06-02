@@ -162,8 +162,7 @@ int main(int argc,char *argv[]){
         utenti_threads = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_USERS_NUM;i++){
-            pthread_create(&utenti_threads[i],NULL,utente,(void *)i);
-            sem_wait(&UserStartSem);
+            pthread_create(&utenti_threads[i],NULL,utente,NULL);
         }
 
         

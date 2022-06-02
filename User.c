@@ -18,6 +18,16 @@ extern Configurazione configurazione;
 extern time_t startSimulation;
 extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 
+/*cerca la posizione del thread del utente.*/
+int trovaUtenteID(){
+    int id;
+    for(id=0;id<configurazione.SO_USERS_NUM; id++){
+        if(pthread_self() == utenti_threads[id]){
+            break;
+        }
+    }
+    return id;
+}
 /*aggiornamento del budget in base al libro.*/
 int userUpdate(int id, int lastUpdate){
     int i;
@@ -75,7 +85,7 @@ Transazione generateTransaction(int id){
 
 /*PROCESSO UTENTE:*/
 void* utente(void *conf){
-    int id = (int)conf;                       /*Id processo utente*/
+    int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
@@ -83,7 +93,6 @@ void* utente(void *conf){
     /*setting default values delle variabili condivise*/
     checkUser[id] = true;
     budgetlist[id] = configurazione.SO_BUDGET_INIT;
-    sem_post(&UserStartSem);
 
     /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
