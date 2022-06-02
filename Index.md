@@ -1,4 +1,3 @@
-C'è un capitolo per ogni file.
 # Index
 1. [Compilazione (MAKEFILE)](#1.Compilazione)
 2. [Esecuzione](#2.Esecuzione)
