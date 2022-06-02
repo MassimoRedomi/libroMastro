@@ -1,6 +1,6 @@
 # 4.Main
-# Headers
-## Basic libraries
+## Headers
+### Basic libraries
 ```c main.c
 #include <stdio.h>  /*Standard input-output header*/
 #include <stdlib.h> /*Libreria Standard*/  
@@ -10,7 +10,7 @@
 
 ```
 
-## Specific Libraries
+### Specific Libraries
 ```c main.c
 #include <unistd.h>      /*Header per sleep()*/
 #include <pthread.h>     /*Creazione/Modifica thread*/
@@ -18,16 +18,16 @@
 
 ```
 
-## Funzioni Utente
+### Funzioni Utente
 importando le funzioni di [User.c](#6.Utente) sono incluse anche le funzioni di [Nodo](#5.Nodo) e [Structs](#3.Strutture).
 ```c main.c
 #include "User.c"
 #include "print.c"
 ```
 
-# Controllo LIBRO MASTRO
+## Controllo LIBRO MASTRO
 
-## Creazione del Libro_Mastro e Variabili:
+### Creazione del Libro_Mastro e Variabili:
 - __libroluck__: Semaforo per accedere alla scrittura del libroMastro.
 - __libroCounter__: Contatore della quantità di blocchi scritti nel libroMastro.
 
@@ -69,13 +69,13 @@ pthread_t *nodi_threads;     /*lista id di processi nodi  */
 Configurazione configurazione;
 
 ```
-# Transazioni programmate
+## Transazioni programmate
 
 le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender fa questa transazione.
 
 
 
-## Lettura del file di transazioni pianificati
+### Lettura del file di transazioni pianificati
 questa funzione non ha bisogno di ritornare un array perche puo essere pasato come parametro della funzione e si scrive direttamente nell'array. per questo motivo il return della funzione ritornera un valore intero che rapressenta la quantita di transazioni programmate.
 
 ```c main.c
@@ -100,7 +100,7 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 
 ```
 
-## Segnale
+### Segnale
 
 La segnale è una maniera di forzare a un'utente a fare una transazione gia creata dal master con valori predefiniti.
 ```c main.c

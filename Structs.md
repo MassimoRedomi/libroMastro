@@ -54,9 +54,9 @@ extern Configurazione configurazione;
 ```
 
 Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perche solo c'è una lettura delle variabili di configurazione.
-#  Lettura Configurazione
+###  Lettura Configurazione
 
-## Legge File
+#### Legge File
 ```c Structs.c
 /*Funzione che cerca la maniera di leggere il config file.*/
 void readconf(char fileName[]){
@@ -103,7 +103,7 @@ void readconf(char fileName[]){
 
 ```
 
-## Scrittura Manuale
+#### Scrittura Manuale
 
 ```c Structs.c
 /*scritura manuale dei valori del sistema.*/
@@ -169,7 +169,7 @@ typedef struct Transazione{
 
 ```
 
-## printTrans
+### printTrans
 
 Uso generico per stampare una transazioni. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
 
