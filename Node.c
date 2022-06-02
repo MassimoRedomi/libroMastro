@@ -74,7 +74,7 @@ void inviaAdAmico(int *amici,int id){
     }
     sem_post(&semafori[id]);
 }
-void* nodo(void *conf){
+void* nodo(){
 	/*creazioni dei dati del nodo*/
     int id = trovaNodoID();
     int i;

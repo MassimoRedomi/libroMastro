@@ -711,7 +711,7 @@ void inviaAdAmico(int *amici,int id){
 
 ## Funzione principale del nodo.
 ```c Node.c
-void* nodo(void *conf){
+void* nodo(){
 	/*creazioni dei dati del nodo*/
     int id = trovaNodoID();
     int i;
@@ -936,7 +936,7 @@ Transazione generateTransaction(int id){
 
 ```c User.c
 /*PROCESSO UTENTE:*/
-void* utente(void *conf){
+void* utente(){
     int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/

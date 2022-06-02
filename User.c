@@ -84,7 +84,7 @@ Transazione generateTransaction(int id){
 }
 
 /*PROCESSO UTENTE:*/
-void* utente(void *conf){
+void* utente(){
     int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
     pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
