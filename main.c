@@ -28,8 +28,9 @@ Transazione *mailbox;/*struttura per condividere */
 bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 
 Transazione mainMailbox;
+/*time_t startSimulation;*/
+struct timespec startSimulation;
 
-time_t startSimulation;
 pthread_t *utenti_threads;     /*lista id di processi utenti*/
 pthread_t *nodi_threads;     /*lista id di processi nodi  */
 Configurazione configurazione;
@@ -45,8 +46,11 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
     }else{
         /*legge riga a riga fino alla fine(EOF), mettendo tutti le variabili nell'array 
         delle transazioni programmate.*/
-        while(fscanf(file,"%lf %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
+        while(fscanf(file,"%ld %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
             programmate[i].reward = programmate[i].quantita * configurazione.SO_REWARD / 100;
+            if(programmate[i].reward < 1){
+                programmate[i].reward =1;
+            }
             i++;
         }
     }
@@ -67,7 +71,7 @@ void* gestore(){
     int i;
     int semvalue;
 
-    while(difftime(time(0), startSimulation) < configurazione.SO_SIM_SEC){
+    while(getTimeS() < configurazione.SO_SIM_SEC){
         if(gestoreOccupato){
             /*resize each list with realloc*/
             poolsizelist=realloc(poolsizelist,(configurazione.SO_NODES_NUM+1)*sizeof(int));
@@ -75,7 +79,7 @@ void* gestore(){
             semafori     =realloc(semafori,(configurazione.SO_NODES_NUM+1)*sizeof(sem_t));
             checkNode    =realloc(checkNode,(configurazione.SO_NODES_NUM+1)*sizeof(bool));
             nodi_threads=realloc(nodi_threads,(configurazione.SO_NODES_NUM+1)*sizeof(pthread_t));
-            mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
+            mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*6*sizeof(int));
 
             rewardlist[configurazione.SO_NODES_NUM]=0;
             poolsizelist[configurazione.SO_NODES_NUM]=0;
@@ -97,9 +101,8 @@ void* gestore(){
 int main(int argc,char *argv[]){
     int i;
     void *j;
-    float now;
-    bool test;
-    int semvalue;
+    int trascorso;
+    struct timespec now;
     pthread_t thrGestore;
 
 
@@ -142,14 +145,14 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,configurazione.SO_NODES_NUM,1);/*inizia il semaforo del libromastro*/
         /*sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);*/
         gestoreOccupato=false;
-        startSimulation = time(0);/* el tiempo de inicio*/
+        clock_gettime(CLOCK_REALTIME,&startSimulation);
     
         /*generatore dei nodi*/
         sem_init(&NodeStartSem,configurazione.SO_NODES_NUM,1);
         poolsizelist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
-        mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
+        mailbox=calloc(configurazione.SO_NODES_NUM , 6 * sizeof(int));
         nodi_threads = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
@@ -168,21 +171,16 @@ int main(int argc,char *argv[]){
         }
 
         
-        now = difftime(time(0), startSimulation);
-
-        while(now < configurazione.SO_SIM_SEC){
+        while(getTimeS() < configurazione.SO_SIM_SEC){
 
             sleep(1);
             clear();
 
-            now = difftime(time(0), startSimulation);
-
             /*show last update*/
-            printf("ultimo aggiornamento: %.0f/%d\n",now,configurazione.SO_SIM_SEC);
+            printf("ultimo aggiornamento: %ld/%d\n",getTimeS(),configurazione.SO_SIM_SEC);
 
 
             if(libroCounter > SO_REGISTRY_SIZE){
-                printf("%f: libro mastro pieno\n",now);
                 break;
             }
             
@@ -194,7 +192,7 @@ int main(int argc,char *argv[]){
 
             /* transazioni programmate mancanti*/
             for(i=0; i< programmateCounter; i++){
-                if(programmate[i].timestamp <= now && programmateChecklist[i]){
+                if(programmate[i].timestamp <= getTimeN() && programmateChecklist[i]){
                     segnale(programmate[i]);
                     programmateChecklist[i] = false;
                 }

@@ -95,7 +95,7 @@ void writeConf(){
 
 /*struttura della configurazione.*/
 typedef struct Transazione{
-    double timestamp;/*Quando viene effettuata la transazione.*/
+    long int timestamp;/*Quando viene effettuata la transazione.*/
     int sender;      /*Utente che ha generato la transazione.*/
     int receiver;    /*Utente destinatario de la somma.*/
     int quantita;    /*Quantita di denaro inviata.*/
@@ -104,7 +104,7 @@ typedef struct Transazione{
 }Transazione;
 
 void prinTrans(Transazione t){
-	printf("%f: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+	printf("%ld: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
 
 
@@ -116,10 +116,30 @@ long randomlong(int min, int max){
 	return 0L + (rand() % max +min);
 }
 
+#define nano 1000000000L
+extern struct timespec startSimulation;
+
+/*ritorna il tempo in secondi*/
+long int getTimeS(){
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME,&now);
+    return now.tv_sec - startSimulation.tv_sec;
+}
+
+/*ritorna il tempo in nanosecondi*/
+long int getTimeN(){
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME,&now);
+    return nano*(now.tv_sec-startSimulation.tv_sec) + now.tv_nsec - startSimulation.tv_nsec;
+
+}
 /*si ferma per una quantita random di nano secondi*/
 void randomSleep(int min, int max){
-    /*struct timespec sec,nano = {0,randomlong(min,max)};
-    nanosleep(&sec,&nano);*/
-    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+
+    struct timespec tim;
+    tim.tv_sec =0;
+    tim.tv_nsec=randomlong(min,max);
+    nanosleep(&tim,NULL);
+
 }
 

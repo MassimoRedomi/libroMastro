@@ -262,7 +262,7 @@ dei processi nodo, scelto a caso.
 ```c Structs.c
 /*struttura della configurazione.*/
 typedef struct Transazione{
-    double timestamp;/*Quando viene effettuata la transazione.*/
+    long int timestamp;/*Quando viene effettuata la transazione.*/
     int sender;      /*Utente che ha generato la transazione.*/
     int receiver;    /*Utente destinatario de la somma.*/
     int quantita;    /*Quantita di denaro inviata.*/
@@ -278,7 +278,7 @@ Uso generico per stampare una transazioni. E' usato per le transazioni programat
 
 ```c Structs.c
 void prinTrans(Transazione t){
-	printf("%f: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
+	printf("%ld: %d -> %d: %d\n",t.timestamp,t.sender,t.receiver,t.quantita);
 }
 
 ```
@@ -307,7 +307,31 @@ long randomlong(int min, int max){
 
 ```
 
-## randomSleep
+## Strutture di tempo
+Sezione con tutte le funzione collegate con il timespec o usano il un timespec.
+
+### getTime
+le funzioni di getTime usano il startSimulation come base del tempo durante tutto il processo. E si puo chiedere tanto secondi come nanosecondi.
+```c Structs.c
+#define nano 1000000000L
+extern struct timespec startSimulation;
+
+/*ritorna il tempo in secondi*/
+long int getTimeS(){
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME,&now);
+    return now.tv_sec - startSimulation.tv_sec;
+}
+
+/*ritorna il tempo in nanosecondi*/
+long int getTimeN(){
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME,&now);
+    return nano*(now.tv_sec-startSimulation.tv_sec) + now.tv_nsec - startSimulation.tv_nsec;
+
+}
+```
+### randomSleep
 
 funzione di nanosleep con un rango tra due numeri:
 min
@@ -315,9 +339,12 @@ min
 ```c Structs.c
 /*si ferma per una quantita random di nano secondi*/
 void randomSleep(int min, int max){
-    /*struct timespec sec,nano = {0,randomlong(min,max)};
-    nanosleep(&sec,&nano);*/
-    nanosleep((const struct timespec[]){{0,randomlong(min,max)}},NULL);
+
+    struct timespec tim;
+    tim.tv_sec =0;
+    tim.tv_nsec=randomlong(min,max);
+    nanosleep(&tim,NULL);
+
 }
 
 ```
@@ -385,8 +412,9 @@ Transazione *mailbox;/*struttura per condividere */
 bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 
 Transazione mainMailbox;
+/*time_t startSimulation;*/
+struct timespec startSimulation;
 
-time_t startSimulation;
 pthread_t *utenti_threads;     /*lista id di processi utenti*/
 pthread_t *nodi_threads;     /*lista id di processi nodi  */
 Configurazione configurazione;
@@ -413,8 +441,11 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
     }else{
         /*legge riga a riga fino alla fine(EOF), mettendo tutti le variabili nell'array 
         delle transazioni programmate.*/
-        while(fscanf(file,"%lf %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
+        while(fscanf(file,"%ld %d %d %d",&programmate[i].timestamp,&programmate[i].sender,&programmate[i].receiver,&programmate[i].quantita) != EOF && i<100){
             programmate[i].reward = programmate[i].quantita * configurazione.SO_REWARD / 100;
+            if(programmate[i].reward < 1){
+                programmate[i].reward =1;
+            }
             i++;
         }
     }
@@ -447,7 +478,7 @@ void* gestore(){
     int i;
     int semvalue;
 
-    while(difftime(time(0), startSimulation) < configurazione.SO_SIM_SEC){
+    while(getTimeS() < configurazione.SO_SIM_SEC){
         if(gestoreOccupato){
             /*resize each list with realloc*/
             poolsizelist=realloc(poolsizelist,(configurazione.SO_NODES_NUM+1)*sizeof(int));
@@ -455,7 +486,7 @@ void* gestore(){
             semafori     =realloc(semafori,(configurazione.SO_NODES_NUM+1)*sizeof(sem_t));
             checkNode    =realloc(checkNode,(configurazione.SO_NODES_NUM+1)*sizeof(bool));
             nodi_threads=realloc(nodi_threads,(configurazione.SO_NODES_NUM+1)*sizeof(pthread_t));
-            mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*(4*sizeof(int)+sizeof(double)));
+            mailbox=realloc(mailbox, (configurazione.SO_NODES_NUM+1)*6*sizeof(int));
 
             rewardlist[configurazione.SO_NODES_NUM]=0;
             poolsizelist[configurazione.SO_NODES_NUM]=0;
@@ -491,9 +522,8 @@ E' il metodo principale del progetto. Il suoi compiti sono
 int main(int argc,char *argv[]){
     int i;
     void *j;
-    float now;
-    bool test;
-    int semvalue;
+    int trascorso;
+    struct timespec now;
     pthread_t thrGestore;
 
 
@@ -536,14 +566,14 @@ int main(int argc,char *argv[]){
         sem_init(&libroluck,configurazione.SO_NODES_NUM,1);/*inizia il semaforo del libromastro*/
         /*sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);*/
         gestoreOccupato=false;
-        startSimulation = time(0);/* el tiempo de inicio*/
+        clock_gettime(CLOCK_REALTIME,&startSimulation);
     
         /*generatore dei nodi*/
         sem_init(&NodeStartSem,configurazione.SO_NODES_NUM,1);
         poolsizelist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
-        mailbox=calloc(configurazione.SO_NODES_NUM , ((4 * sizeof(int)) + sizeof(double)));
+        mailbox=calloc(configurazione.SO_NODES_NUM , 6 * sizeof(int));
         nodi_threads = malloc(configurazione.SO_NODES_NUM * sizeof(pthread_t));
         checkNode = calloc(configurazione.SO_NODES_NUM , sizeof(bool));
         for(i=0;i<configurazione.SO_NODES_NUM;i++){
@@ -562,21 +592,16 @@ int main(int argc,char *argv[]){
         }
 
         
-        now = difftime(time(0), startSimulation);
-
-        while(now < configurazione.SO_SIM_SEC){
+        while(getTimeS() < configurazione.SO_SIM_SEC){
 
             sleep(1);
             clear();
 
-            now = difftime(time(0), startSimulation);
-
             /*show last update*/
-            printf("ultimo aggiornamento: %.0f/%d\n",now,configurazione.SO_SIM_SEC);
+            printf("ultimo aggiornamento: %ld/%d\n",getTimeS(),configurazione.SO_SIM_SEC);
 
 
             if(libroCounter > SO_REGISTRY_SIZE){
-                printf("%f: libro mastro pieno\n",now);
                 break;
             }
             
@@ -588,7 +613,7 @@ int main(int argc,char *argv[]){
 
             /* transazioni programmate mancanti*/
             for(i=0; i< programmateCounter; i++){
-                if(programmate[i].timestamp <= now && programmateChecklist[i]){
+                if(programmate[i].timestamp <= getTimeN() && programmateChecklist[i]){
                     segnale(programmate[i]);
                     programmateChecklist[i] = false;
                 }
@@ -650,7 +675,6 @@ extern bool gestoreOccupato;
 
 
 extern Configurazione configurazione;
-extern time_t startSimulation;
 
 ```
 
@@ -681,7 +705,7 @@ Transazione riasunto(int id, int somma){
     transaction.sender    = defaultSender;
     transaction.receiver  = id; /*id del nodo*/
     transaction.quantita  = somma; /*la somma di tutto il reward generato*/
-    transaction.timestamp = difftime(time(0),startSimulation);/*quanto tempo ha passato dal inizio della simulazione.*/
+    transaction.timestamp = getTimeN();/*quanto tempo ha passato dal inizio della simulazione.*/
     return transaction;
 }
 
@@ -710,7 +734,7 @@ void inviaAdAmico(int *amici,int id){
             if(hops > configurazione.SO_HOPS){
                 if(!gestoreOccupato){
                     gestoreOccupato=true;
-                    mainMailbox=(Transazione)mailbox[id];
+                    mainMailbox=mailbox[id];
                     amici = realloc(amici,(len+1)*sizeof(int));
                     amici[len]= configurazione.SO_NODES_NUM;
                     hops=0;
@@ -808,7 +832,7 @@ void* nodo(){
 
     }
     /*nodo zombie*/
-    while(difftime(time(0),startSimulation)<configurazione.SO_SIM_SEC){
+    while(getTimeS()<configurazione.SO_SIM_SEC){
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             inviaAdAmico(amici,id);
@@ -855,7 +879,6 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 
 extern Configurazione configurazione;
-extern time_t startSimulation;
 extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 
 ```
@@ -940,7 +963,7 @@ Transazione generateTransaction(int id){
     }while(altroUtente==id || !checkUser[altroUtente]);
     transaccion.receiver = altroUtente;
     /*calcola il timestamp in base al tempo di simulazione.*/
-    transaccion.timestamp = difftime(time(0),startSimulation);
+    transaccion.timestamp = getTimeN();
 
     return transaccion;
 }

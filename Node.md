@@ -40,7 +40,6 @@ extern bool gestoreOccupato;
 
 
 extern Configurazione configurazione;
-extern time_t startSimulation;
 
 ```
 
@@ -71,7 +70,7 @@ Transazione riasunto(int id, int somma){
     transaction.sender    = defaultSender;
     transaction.receiver  = id; /*id del nodo*/
     transaction.quantita  = somma; /*la somma di tutto il reward generato*/
-    transaction.timestamp = difftime(time(0),startSimulation);/*quanto tempo ha passato dal inizio della simulazione.*/
+    transaction.timestamp = getTimeN();/*quanto tempo ha passato dal inizio della simulazione.*/
     return transaction;
 }
 
@@ -100,7 +99,7 @@ void inviaAdAmico(int *amici,int id){
             if(hops > configurazione.SO_HOPS){
                 if(!gestoreOccupato){
                     gestoreOccupato=true;
-                    mainMailbox=(Transazione)mailbox[id];
+                    mainMailbox=mailbox[id];
                     amici = realloc(amici,(len+1)*sizeof(int));
                     amici[len]= configurazione.SO_NODES_NUM;
                     hops=0;
@@ -198,7 +197,7 @@ void* nodo(){
 
     }
     /*nodo zombie*/
-    while(difftime(time(0),startSimulation)<configurazione.SO_SIM_SEC){
+    while(getTimeS()<configurazione.SO_SIM_SEC){
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
             inviaAdAmico(amici,id);

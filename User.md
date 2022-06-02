@@ -37,7 +37,6 @@ extern sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
 extern Transazione *mailbox;/*struttura per condividere */
 
 extern Configurazione configurazione;
-extern time_t startSimulation;
 extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 
 ```
@@ -122,7 +121,7 @@ Transazione generateTransaction(int id){
     }while(altroUtente==id || !checkUser[altroUtente]);
     transaccion.receiver = altroUtente;
     /*calcola il timestamp in base al tempo di simulazione.*/
-    transaccion.timestamp = difftime(time(0),startSimulation);
+    transaccion.timestamp = getTimeN();
 
     return transaccion;
 }
