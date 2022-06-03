@@ -1,6 +1,6 @@
 # 1.Compilazione
 
-La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE](Makefile) sono:
+La compilazione avviene tramite il comando __make__  seguito dal numero della configurazione. Le tre opzioni del [MAKEFILE](Makefile) sono:
 
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
@@ -34,7 +34,7 @@ SO_REGISTRY_SIZE = 1000
 
 ### configurazione custom:
 
-opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizati.
+Opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizzati:
 
 ```makefile Makefile
 #setting con entrata libera per block size e registry size
@@ -51,7 +51,7 @@ custom:
 ## significato di ogni flag
  - std=c89: Stabilisce il linguagio standard C89.
 
- - pedantic: Disattiva opzioni del compilatore producendo più errori.
+ - pedantic: Disattiva le opzioni del compilatore producendo più errori.
 
  - pthread: Stabilisce il binario per processare threads.
 
@@ -64,18 +64,18 @@ custom:
 
 # 2.Esecuzione
 Dopo di aver compilato il programma solo ci manca inizializzarlo.
-Per questo si puo fare due maniere diverse: passando un file con 
+Per questo si puo fare in due maniere diverse: passando un file con 
 tutta la configurazione, o scriverla manualmente.
 
 ## con file di configurazione
-Nel caso di inviare un file configuration. si passa come argomento di
+Nel caso d'inviare un file configuration, si passa come argomento di
 esecuzione.
 ```sh
 ./main conf1.dat
 ```
 
 ## scritura manuale 
-Per scrivere la configurazione a manualmente si deve scrivere come secondo 
+Per scrivere la configurazione manualmente si deve scrivere come secondo 
 argomento la parola "mano" o "manuale".
 ```sh
 ./main manual
@@ -83,10 +83,10 @@ argomento la parola "mano" o "manuale".
 
 
 ## aggiunge segnali
-nel caso delle segnali per forzare certe transazioni, non è obbligatorio per inizializare il programma, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
+Nel caso delle segnali per forzare certe transazioni, non è obbligatorio, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
 
 ```sh
 ./main conf1.dat transactions.dat
 ```
-con il file __transactions.dat__ come il file con tutte le transazioni programmate.
+in questo esempio: __transactions.dat__ contiene tutte le transazioni.
 

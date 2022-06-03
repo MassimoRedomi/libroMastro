@@ -11,10 +11,10 @@ dei dati letti del file di configurazione. Questi dati sono:
 
 | variables             | descripcion                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| SO_USERS_NUM          | numero di processi untente                                                                                       |
+| SO_USERS_NUM          | numero di processi utente                                                                                       |
 | SO_NODES_NUM          | numero di processi nodo                                                                                          |
 | SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                                                                       |
-| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
+| SO_REWARD             | percentuale di reward pagata da ogni utente per il processo di una transazione                            |
 | SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
 | SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
 | SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
@@ -25,10 +25,10 @@ dei dati letti del file di configurazione. Questi dati sono:
 | SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                                                                      |
 | SO_SIM_SEC            | durata della simulazione.                                                                                        |
 | SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
-| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
+| SO_HOPS               | numero massimo d'inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 
 
-Anche è vero che si poteva leggere tutte le variabili senza metterlo in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto cosi.
+
 
 ```c Structs.c
 
@@ -53,7 +53,7 @@ extern Configurazione configurazione;
 
 ```
 
-Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perche solo c'è una lettura delle variabili di configurazione.
+Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perchè solo c'è una lettura delle variabili di configurazione.
 ###  Lettura Configurazione
 
 #### Legge File
@@ -171,7 +171,7 @@ typedef struct Transazione{
 
 ### printTrans
 
-Uso generico per stampare una transazioni. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
+Uso generico per stampare una transazione. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
 
 ```c Structs.c
 void prinTrans(Transazione t){
@@ -188,7 +188,7 @@ max. In ogni caso si usano le stesse variabili:
 - min: il numero minimo del rango.
 - max: il numero massimo del rango.
 
-__randomInt__ serve per simplificare ogni volta che si fa una scelta a 
+__randomInt__ serve per semplificare ogni volta che si fa una scelta a 
 caso dentro di ogni thread.
 __randomlong__ per ora solo serve per il random sleep.
 
@@ -205,10 +205,10 @@ long randomlong(long int min, long int max){
 ```
 
 ## Strutture di tempo
-Sezione con tutte le funzione collegate con il timespec o usano il un timespec.
+Sezione con tutte le funzione collegate con il timespec o usano un timespec.
 
 ### getTime
-le funzioni di getTime usano il startSimulation come base del tempo durante tutto il processo. E si puo chiedere tanto secondi come nanosecondi.
+le funzioni di getTime usano il startSimulation come base del tempo durante tutto il processo, e si può chiedere tanti secondi come nanosecondi.
 ```c Structs.c
 #define nano 1000000000L
 extern struct timespec startSimulation;
@@ -231,7 +231,8 @@ long int getTimeN(){
 ### randomSleep
 
 funzione di nanosleep con un rango tra due numeri:
-min
+- min: quantità minima di nanosecondi.
+- max: quantità massima di nanosecondi.
 
 ```c Structs.c
 /*si ferma per una quantita random di nano secondi*/

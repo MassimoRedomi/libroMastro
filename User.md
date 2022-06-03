@@ -1,6 +1,6 @@
 # 6.Utente
 ## import
-Si importa il codice di Node.c che importa tutte le
+S'importa il codice di Node.c che importa tutte le
 funzioni di [Node](#5.Nodo) e [Structs](#3.Strutture).
 
 ```c User.c
@@ -42,7 +42,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID all'utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){
@@ -58,7 +58,7 @@ int trovaUtenteID(){
 
 ## Aggiornamento Libro_Mastro
 
-L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione. 
+L'aggiornamento tramite Libro_Mastro avviene tramite una sola funzione. 
 
 ```c User.c
 /*aggiornamento del budget in base al libro.*/

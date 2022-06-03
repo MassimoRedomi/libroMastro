@@ -1,10 +1,11 @@
 # 7.Prints
 
-Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. Le principali funzioni sono:
+Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. 
+Le principali funzioni sono:
 
-__printStatus__: mostra una tabella con la info degli utenti piu attivi e i nodi. Si usa per mostrare i dati aggiornati in ogni secodo de la simulazione.
+__printStatus__: mostra una tabella con la informazione degli utenti piu attivi e i nodi. Si usa per mostrare i dati aggiornati in ogni secodo de la simulazione.
 
-__finalPrint__: mosta una tabella con tutti gli utenti e tutti i nodi, anche mostra piu dati. Come il nome indica, si usa per stampare tutti i dati alla fine della simulazione. 
+__finalPrint__: mostra una tabella con tutti gli utenti ,utti i nodi, e più dati, come il nome indica, si usa per stampare tutti i dati alla fine della simulazione. 
 
 ## Macros
 
@@ -13,7 +14,7 @@ Lista di macros che ci servono per stampare tutti i valori:
 - __clear__: pulisce lo schermo.
 - __MAX__: ritorna il numero maggiore tra i due.
 - __MIN__: invia il numero minore tra i due. 
-- __boolString__: fa la funzione di %b in altri linguagi di programazione.
+- __boolString__: fa la funzione di %b in altri linguagi di programmmazione.
 
 ```c print.c
 /*macros per il print*/
@@ -43,8 +44,8 @@ extern bool *checkNode;
 
 ```
 ## Compare Function
-Metodo che compara due valori e restituisce un numero positivo se b è piu
-grande di a e negativo se b è piu piccolo di a:
+Metodo che compara due valori e restituisce un numero positivo, se b è piu
+grande di a ,e negativo, se b è piu piccolo di a.
 ```c print.c
 int cmpfunc(const void  *a, const void *b) {
     return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
@@ -53,8 +54,7 @@ int cmpfunc(const void  *a, const void *b) {
 
 
 ## Sort risults
-Metodo di ordinamento del dei processi in modo decrescente
-(dal piu grande al piu piccolo).
+Metodo di ordinamento dei processi in modo decrescente (dal piu grande al piu piccolo).
 
 ```c print.c
 int * sort(){
@@ -71,7 +71,7 @@ int * sort(){
 
 
 ## PrintStatus Nodes and Users
-Questo metodo non solo mostra lo stato di tutti gli utenti e nodi, ritorna anche una variabile boolean per identificare se ci sono ancora utenti disponibili.
+Questo metodo non solo mostra lo stato di tutti gli utenti e i nodi, ritorna anche una variabile boolean per identificare se ci sono ancora utenti disponibili.
 
 ```c print.c
 bool printStatus(int nstamp){
@@ -132,7 +132,7 @@ bool printStatus(int nstamp){
 
 ## final print
 
-Questo metodo fa l'utima stampa del proggetto. Mostrando tutti gli utenti e mostrando anche la grandezza de la Transaction Pool. Serve come riasunto della simulazione.
+Questo metodo fa l'utima stampa del proggetto. Mostrando tutti gli utenti e mostrando anche la grandezza de la Transaction Pool. Serve come riassunto della simulazione.
 
 ```c print.c
 void finalprint(){

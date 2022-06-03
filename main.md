@@ -43,7 +43,7 @@ bool gestoreOccupato;
 
 ## Memoria condivisa 
 
-In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivise servono agli altri processi in qualche momento o almeno sono dati che gli serve al main per stampare lo stato dei processi.
+In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivisi servono ad altri processi in qualche momento, o sono dati servono al main per stampare lo stato dei processi.
 
 
 ### Lista Dati Condivisi tra i threads:
@@ -72,12 +72,13 @@ Configurazione configurazione;
 ```
 ## Transazioni programmate
 
-le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender fa questa transazione.
+Le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender faccia questa transazione.
 
 
 
 ### Lettura del file di transazioni pianificati
-questa funzione non ha bisogno di ritornare un array perche puo essere pasato come parametro della funzione e si scrive direttamente nell'array. per questo motivo il return della funzione ritornera un valore intero che rapressenta la quantita di transazioni programmate.
+questa funzione non ha bisogno di ritornare un array perche può essere passato come parametro della funzione e si scrive direttamente nell'array. 
+Per questo motivo il return della funzione ritornerà un valore intero che rappresenta la quantità di transazioni programmate.
 
 ```c main.c
 
@@ -106,7 +107,7 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 
 ### Segnale
 
-La segnale è una maniera di forzare a un'utente a fare una transazione gia creata dal master con valori predefiniti.
+La segnale è una maniera di forzare un'utente a fare una transazione già creata dal master con valori predefiniti.
 ```c main.c
 
 /*segnale che forza una transazione di un'utente.*/
@@ -121,7 +122,7 @@ void segnale(Transazione programmato){
 
 ## Nuovo nodo
 
-Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
+Funzione che ridimensiona tutte le liste per dopo creare un nuovo nodo e inviare la transazione che non è stata  possibile condividere  con nessun altro nodo.
 ```c main.c
 
 void* gestore(){
@@ -159,10 +160,10 @@ void* gestore(){
 
 ## Funzione Master
 
-E' il metodo principale del progetto. Il suoi compiti sono
+E' il metodo principale del progetto. Il suoi compiti sono:
 
 - leggere la configurazione, sia file o manuale
-- inizializare tutta la memoria condivisa
+- inizzializare tutta la memoria condivisa
 - creare tutti i processi nodo e utente
 - stampare l'informazione dei processi attivi
 - creare un nodo nuovo quando nessun nodo riesce a prendere una transazione dopo HOPS volte.

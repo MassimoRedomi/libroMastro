@@ -44,7 +44,7 @@ extern Configurazione configurazione;
 ```
 
 ## trova ID del Nodo
-Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
+Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID del nodo in base alla posizione del thread nella lista nodi_threads. A differenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantità di cicli che fanno i nodi creati a metà simulazione da parte del main.
 ```c Node.c
 /*cerca la posizione del thread del nodo.*/
 int trovaNodoID(){
@@ -59,8 +59,9 @@ int trovaNodoID(){
 }
 ```
 
-## transazione di riasunto
-Questo metodo genera l'ultima transazione del blocco. Questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in questo blocco. 
+## transazione di riassunto
+Questo metodo genera l'ultima transazione del blocco. 
+Questa transazione fa un riassunto di tutto quello che ha guadagnato il nodo in questo blocco. 
 
 ```c Node.c
 
