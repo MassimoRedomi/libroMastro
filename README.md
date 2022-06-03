@@ -11,7 +11,7 @@
 
 # 1.Compilazione
 
-La compilazione avviene tramite il comando __make__ seguito del numero della configurazione. le tre opzioni del [MAKEFILE](Makefile) sono:
+La compilazione avviene tramite il comando __make__  seguito dal numero della configurazione. Le tre opzioni del [MAKEFILE](Makefile) sono:
 
 ### configurazione 1:  
 SO_BLOCK_SIZE = 100
@@ -45,7 +45,7 @@ SO_REGISTRY_SIZE = 1000
 
 ### configurazione custom:
 
-opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizati.
+Opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizzati:
 
 ```makefile Makefile
 #setting con entrata libera per block size e registry size
@@ -62,7 +62,7 @@ custom:
 ## significato di ogni flag
  - std=c89: Stabilisce il linguagio standard C89.
 
- - pedantic: Disattiva opzioni del compilatore producendo più errori.
+ - pedantic: Disattiva le opzioni del compilatore producendo più errori.
 
  - pthread: Stabilisce il binario per processare threads.
 
@@ -75,18 +75,18 @@ custom:
 
 # 2.Esecuzione
 Dopo di aver compilato il programma solo ci manca inizializzarlo.
-Per questo si puo fare due maniere diverse: passando un file con 
+Per questo si puo fare in due maniere diverse: passando un file con 
 tutta la configurazione, o scriverla manualmente.
 
 ## con file di configurazione
-Nel caso di inviare un file configuration. si passa come argomento di
+Nel caso d'inviare un file configuration, si passa come argomento di
 esecuzione.
 ```sh
 ./main conf1.dat
 ```
 
 ## scritura manuale 
-Per scrivere la configurazione a manualmente si deve scrivere come secondo 
+Per scrivere la configurazione manualmente si deve scrivere come secondo 
 argomento la parola "mano" o "manuale".
 ```sh
 ./main manual
@@ -94,12 +94,12 @@ argomento la parola "mano" o "manuale".
 
 
 ## aggiunge segnali
-nel caso delle segnali per forzare certe transazioni, non è obbligatorio per inizializare il programma, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
+Nel caso delle segnali per forzare certe transazioni, non è obbligatorio, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
 
 ```sh
 ./main conf1.dat transactions.dat
 ```
-con il file __transactions.dat__ come il file con tutte le transazioni programmate.
+in questo esempio: __transactions.dat__ contiene tutte le transazioni.
 
 # 3.Strutture
 
@@ -114,10 +114,10 @@ dei dati letti del file di configurazione. Questi dati sono:
 
 | variables             | descripcion                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| SO_USERS_NUM          | numero di processi untente                                                                                       |
+| SO_USERS_NUM          | numero di processi utente                                                                                       |
 | SO_NODES_NUM          | numero di processi nodo                                                                                          |
 | SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                                                                       |
-| SO_REWARD             | a percentuale di reward pagata da ogni utente per il processamento di una transazione                            |
+| SO_REWARD             | percentuale di reward pagata da ogni utente per il processo di una transazione                            |
 | SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
 | SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
 | SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
@@ -128,10 +128,10 @@ dei dati letti del file di configurazione. Questi dati sono:
 | SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                                                                      |
 | SO_SIM_SEC            | durata della simulazione.                                                                                        |
 | SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
-| SO_HOPS               | numero massimo di inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
+| SO_HOPS               | numero massimo d'inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
 
 
-Anche è vero che si poteva leggere tutte le variabili senza metterlo in una sola struttura. ma mi sembra molto piu ordinato mettendo tutto cosi.
+
 
 ```c Structs.c
 
@@ -156,7 +156,7 @@ extern Configurazione configurazione;
 
 ```
 
-Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perche solo c'è una lettura delle variabili di configurazione.
+Questa struttura è gia dichiarata con la variabile <span class="underline">configurazione</span> perchè solo c'è una lettura delle variabili di configurazione.
 ###  Lettura Configurazione
 
 #### Legge File
@@ -274,7 +274,7 @@ typedef struct Transazione{
 
 ### printTrans
 
-Uso generico per stampare una transazioni. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
+Uso generico per stampare una transazione. E' usato per le transazioni programate(segnali) e anche quando il processo master invia una transazione a un nuovo nodo creato.
 
 ```c Structs.c
 void prinTrans(Transazione t){
@@ -291,7 +291,7 @@ max. In ogni caso si usano le stesse variabili:
 - min: il numero minimo del rango.
 - max: il numero massimo del rango.
 
-__randomInt__ serve per simplificare ogni volta che si fa una scelta a 
+__randomInt__ serve per semplificare ogni volta che si fa una scelta a 
 caso dentro di ogni thread.
 __randomlong__ per ora solo serve per il random sleep.
 
@@ -308,10 +308,10 @@ long randomlong(long int min, long int max){
 ```
 
 ## Strutture di tempo
-Sezione con tutte le funzione collegate con il timespec o usano il un timespec.
+Sezione con tutte le funzione collegate con il timespec o usano un timespec.
 
 ### getTime
-le funzioni di getTime usano il startSimulation come base del tempo durante tutto il processo. E si puo chiedere tanto secondi come nanosecondi.
+le funzioni di getTime usano il startSimulation come base del tempo durante tutto il processo, e si può chiedere tanti secondi come nanosecondi.
 ```c Structs.c
 #define nano 1000000000L
 extern struct timespec startSimulation;
@@ -334,7 +334,8 @@ long int getTimeN(){
 ### randomSleep
 
 funzione di nanosleep con un rango tra due numeri:
-min
+- min: quantità minima di nanosecondi.
+- max: quantità massima di nanosecondi.
 
 ```c Structs.c
 /*si ferma per una quantita random di nano secondi*/
@@ -393,7 +394,7 @@ bool gestoreOccupato;
 
 ## Memoria condivisa 
 
-In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivise servono agli altri processi in qualche momento o almeno sono dati che gli serve al main per stampare lo stato dei processi.
+In base a un grupo di variabili condivise si stabilisce un sistema di comunicazione tra i diversi processi. Questi dati condivisi servono ad altri processi in qualche momento, o sono dati servono al main per stampare lo stato dei processi.
 
 
 ### Lista Dati Condivisi tra i threads:
@@ -422,12 +423,13 @@ Configurazione configurazione;
 ```
 ## Transazioni programmate
 
-le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender fa questa transazione.
+Le transazioni programmate sono una lista di transazioni che vengono letti da un file che contiene una transazione per ogni riga. Ogni riga contiene lo timestamp ,sender, reciever e quantità della transazione. Quando è il momento del timeStamp della transazione viene creata una segnale dal main per forzare che l'utente sender faccia questa transazione.
 
 
 
 ### Lettura del file di transazioni pianificati
-questa funzione non ha bisogno di ritornare un array perche puo essere pasato come parametro della funzione e si scrive direttamente nell'array. per questo motivo il return della funzione ritornera un valore intero che rapressenta la quantita di transazioni programmate.
+questa funzione non ha bisogno di ritornare un array perche può essere passato come parametro della funzione e si scrive direttamente nell'array. 
+Per questo motivo il return della funzione ritornerà un valore intero che rappresenta la quantità di transazioni programmate.
 
 ```c main.c
 
@@ -456,7 +458,7 @@ int leggeLibroDiTransazioni(char fileName[], Transazione programmate[100]){
 
 ### Segnale
 
-La segnale è una maniera di forzare a un'utente a fare una transazione gia creata dal master con valori predefiniti.
+La segnale è una maniera di forzare un'utente a fare una transazione già creata dal master con valori predefiniti.
 ```c main.c
 
 /*segnale che forza una transazione di un'utente.*/
@@ -471,7 +473,7 @@ void segnale(Transazione programmato){
 
 ## Nuovo nodo
 
-Funzione che redimensziona tutte le liste per dopo creare un nuovo nodo e inviarle la transazione che non è stato posibile condividere  con nessun altro nodo.
+Funzione che ridimensiona tutte le liste per dopo creare un nuovo nodo e inviare la transazione che non è stata  possibile condividere  con nessun altro nodo.
 ```c main.c
 
 void* gestore(){
@@ -509,10 +511,10 @@ void* gestore(){
 
 ## Funzione Master
 
-E' il metodo principale del progetto. Il suoi compiti sono
+E' il metodo principale del progetto. Il suoi compiti sono:
 
 - leggere la configurazione, sia file o manuale
-- inizializare tutta la memoria condivisa
+- inizzializare tutta la memoria condivisa
 - creare tutti i processi nodo e utente
 - stampare l'informazione dei processi attivi
 - creare un nodo nuovo quando nessun nodo riesce a prendere una transazione dopo HOPS volte.
@@ -679,7 +681,7 @@ extern Configurazione configurazione;
 ```
 
 ## trova ID del Nodo
-Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID del nodo in base alla posizione del thread nella lista nodi_threads. A diferenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantita di cicli che fanno i nodi creati a metà simulazione da parte del main.
+Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID del nodo in base alla posizione del thread nella lista nodi_threads. A differenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantità di cicli che fanno i nodi creati a metà simulazione da parte del main.
 ```c Node.c
 /*cerca la posizione del thread del nodo.*/
 int trovaNodoID(){
@@ -694,8 +696,9 @@ int trovaNodoID(){
 }
 ```
 
-## transazione di riasunto
-Questo metodo genera l'ultima transazione del blocco. Questa transazione fa un riasunto di tutto quello che ha guadagnato il nodo in questo blocco. 
+## transazione di riassunto
+Questo metodo genera l'ultima transazione del blocco. 
+Questa transazione fa un riassunto di tutto quello che ha guadagnato il nodo in questo blocco. 
 
 ```c Node.c
 
@@ -842,7 +845,7 @@ void* nodo(){
 ```
 # 6.Utente
 ## import
-Si importa il codice di Node.c che importa tutte le
+S'importa il codice di Node.c che importa tutte le
 funzioni di [Node](#5.Nodo) e [Structs](#3.Strutture).
 
 ```c User.c
@@ -884,7 +887,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per pasare argomenti a un thread, e per tanto anche ci impide passarli il ID al utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova il ID dell'utente in base alla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID all'utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){
@@ -900,7 +903,7 @@ int trovaUtenteID(){
 
 ## Aggiornamento Libro_Mastro
 
-L'aggiornamento tramite Libro_Mastro avviene tramie una sola funzione. 
+L'aggiornamento tramite Libro_Mastro avviene tramite una sola funzione. 
 
 ```c User.c
 /*aggiornamento del budget in base al libro.*/
@@ -1014,11 +1017,12 @@ void* utente(){
 ```
 # 7.Prints
 
-Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. Le principali funzioni sono:
+Questa sezione contiene tutto il codice che collega con le funzioni che servono per stampare le funzioni. 
+Le principali funzioni sono:
 
-__printStatus__: mostra una tabella con la info degli utenti piu attivi e i nodi. Si usa per mostrare i dati aggiornati in ogni secodo de la simulazione.
+__printStatus__: mostra una tabella con la informazione degli utenti piu attivi e i nodi. Si usa per mostrare i dati aggiornati in ogni secodo de la simulazione.
 
-__finalPrint__: mosta una tabella con tutti gli utenti e tutti i nodi, anche mostra piu dati. Come il nome indica, si usa per stampare tutti i dati alla fine della simulazione. 
+__finalPrint__: mostra una tabella con tutti gli utenti ,utti i nodi, e più dati, come il nome indica, si usa per stampare tutti i dati alla fine della simulazione. 
 
 ## Macros
 
@@ -1027,7 +1031,7 @@ Lista di macros che ci servono per stampare tutti i valori:
 - __clear__: pulisce lo schermo.
 - __MAX__: ritorna il numero maggiore tra i due.
 - __MIN__: invia il numero minore tra i due. 
-- __boolString__: fa la funzione di %b in altri linguagi di programazione.
+- __boolString__: fa la funzione di %b in altri linguagi di programmmazione.
 
 ```c print.c
 /*macros per il print*/
@@ -1057,8 +1061,8 @@ extern bool *checkNode;
 
 ```
 ## Compare Function
-Metodo che compara due valori e restituisce un numero positivo se b è piu
-grande di a e negativo se b è piu piccolo di a:
+Metodo che compara due valori e restituisce un numero positivo, se b è piu
+grande di a ,e negativo, se b è piu piccolo di a.
 ```c print.c
 int cmpfunc(const void  *a, const void *b) {
     return(budgetlist[*((int*)b)]-budgetlist[*((int*)a)]);
@@ -1067,8 +1071,7 @@ int cmpfunc(const void  *a, const void *b) {
 
 
 ## Sort risults
-Metodo di ordinamento del dei processi in modo decrescente
-(dal piu grande al piu piccolo).
+Metodo di ordinamento dei processi in modo decrescente (dal piu grande al piu piccolo).
 
 ```c print.c
 int * sort(){
@@ -1085,7 +1088,7 @@ int * sort(){
 
 
 ## PrintStatus Nodes and Users
-Questo metodo non solo mostra lo stato di tutti gli utenti e nodi, ritorna anche una variabile boolean per identificare se ci sono ancora utenti disponibili.
+Questo metodo non solo mostra lo stato di tutti gli utenti e i nodi, ritorna anche una variabile boolean per identificare se ci sono ancora utenti disponibili.
 
 ```c print.c
 bool printStatus(int nstamp){
@@ -1146,7 +1149,7 @@ bool printStatus(int nstamp){
 
 ## final print
 
-Questo metodo fa l'utima stampa del proggetto. Mostrando tutti gli utenti e mostrando anche la grandezza de la Transaction Pool. Serve come riasunto della simulazione.
+Questo metodo fa l'utima stampa del proggetto. Mostrando tutti gli utenti e mostrando anche la grandezza de la Transaction Pool. Serve come riassunto della simulazione.
 
 ```c print.c
 void finalprint(){
