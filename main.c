@@ -28,7 +28,6 @@ Transazione *mailbox;/*struttura per condividere */
 bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 
 Transazione mainMailbox;
-/*time_t startSimulation;*/
 struct timespec startSimulation;
 
 pthread_t *utenti_threads;     /*lista id di processi utenti*/
@@ -100,8 +99,6 @@ void* gestore(){
 
 int main(int argc,char *argv[]){
     int i;
-    void *j;
-    int trascorso;
     struct timespec now;
     pthread_t thrGestore;
 
@@ -129,7 +126,7 @@ int main(int argc,char *argv[]){
         }
     
         /*lettura di transazioni programmate*/
-        if(argc >= 3){
+        if(argc == 3){
             programmateCounter = leggeLibroDiTransazioni(argv[2], programmate);
             programmateChecklist = malloc(programmateCounter * sizeof(bool));
             for(i=0; i < programmateCounter; i++){
@@ -148,7 +145,6 @@ int main(int argc,char *argv[]){
         clock_gettime(CLOCK_REALTIME,&startSimulation);
     
         /*generatore dei nodi*/
-        sem_init(&NodeStartSem,configurazione.SO_NODES_NUM,1);
         poolsizelist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
@@ -162,7 +158,6 @@ int main(int argc,char *argv[]){
         pthread_create(&thrGestore,NULL,gestore,NULL);
 
         /*generatore dei utenti*/
-        sem_init(&UserStartSem,configurazione.SO_USERS_NUM,1);
         budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
         utenti_threads = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));

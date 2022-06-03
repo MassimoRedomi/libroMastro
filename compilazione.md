@@ -63,26 +63,22 @@ custom:
 
 
 # 2.Esecuzione
-Dopo di aver compilato il programma solo ci manca inizializzarlo.
-Per questo si puo fare in due maniere diverse: passando un file con 
-tutta la configurazione, o scriverla manualmente.
+Dopo di aver compilato il programma solo ci manca inizializzarlo. Per questo si puo fare in due maniere diverse: passando un file con tutta la configurazione, o scriverla manualmente.
 
-## con file di configurazione
-Nel caso d'inviare un file configuration, si passa come argomento di
-esecuzione.
+### con file di configurazione
+Nel caso d'inviare un file configuration, si passa come argomento di esecuzione.
 ```sh
 ./main conf1.dat
 ```
 
-## scritura manuale 
-Per scrivere la configurazione manualmente si deve scrivere come secondo 
-argomento la parola "mano" o "manuale".
+### scritura manuale 
+Per scrivere la configurazione manualmente si deve scrivere come secondo argomento la parola "mano" o "manuale".
 ```sh
 ./main manual
 ```
 
 
-## aggiunge segnali
+### aggiunge segnali
 Nel caso delle segnali per forzare certe transazioni, non è obbligatorio, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
 
 ```sh

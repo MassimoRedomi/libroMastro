@@ -29,7 +29,6 @@ Importa tutte le variabili condivise
 /*variabili condivise tra diversi thread.*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern bool *checkUser;
-extern sem_t UserStartSem;
 
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/

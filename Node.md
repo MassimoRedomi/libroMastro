@@ -32,11 +32,9 @@ extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 extern pthread_t *nodi_threads;
-extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
 extern bool gestoreOccupato;
-/*extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
 
 
 extern Configurazione configurazione;

@@ -74,26 +74,22 @@ custom:
 
 
 # 2.Esecuzione
-Dopo di aver compilato il programma solo ci manca inizializzarlo.
-Per questo si puo fare in due maniere diverse: passando un file con 
-tutta la configurazione, o scriverla manualmente.
+Dopo di aver compilato il programma solo ci manca inizializzarlo. Per questo si puo fare in due maniere diverse: passando un file con tutta la configurazione, o scriverla manualmente.
 
-## con file di configurazione
-Nel caso d'inviare un file configuration, si passa come argomento di
-esecuzione.
+### con file di configurazione
+Nel caso d'inviare un file configuration, si passa come argomento di esecuzione.
 ```sh
 ./main conf1.dat
 ```
 
-## scritura manuale 
-Per scrivere la configurazione manualmente si deve scrivere come secondo 
-argomento la parola "mano" o "manuale".
+### scritura manuale 
+Per scrivere la configurazione manualmente si deve scrivere come secondo argomento la parola "mano" o "manuale".
 ```sh
 ./main manual
 ```
 
 
-## aggiunge segnali
+### aggiunge segnali
 Nel caso delle segnali per forzare certe transazioni, non è obbligatorio, ma se si aspetta fare questo si aggiunge un terzo argomento con l'indirizzo del file con tutte le transazioni che si aspettano. 
 
 ```sh
@@ -413,7 +409,6 @@ Transazione *mailbox;/*struttura per condividere */
 bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 
 Transazione mainMailbox;
-/*time_t startSimulation;*/
 struct timespec startSimulation;
 
 pthread_t *utenti_threads;     /*lista id di processi utenti*/
@@ -523,8 +518,6 @@ E' il metodo principale del progetto. Il suoi compiti sono:
 ```c main.c
 int main(int argc,char *argv[]){
     int i;
-    void *j;
-    int trascorso;
     struct timespec now;
     pthread_t thrGestore;
 
@@ -552,7 +545,7 @@ int main(int argc,char *argv[]){
         }
     
         /*lettura di transazioni programmate*/
-        if(argc >= 3){
+        if(argc == 3){
             programmateCounter = leggeLibroDiTransazioni(argv[2], programmate);
             programmateChecklist = malloc(programmateCounter * sizeof(bool));
             for(i=0; i < programmateCounter; i++){
@@ -571,7 +564,6 @@ int main(int argc,char *argv[]){
         clock_gettime(CLOCK_REALTIME,&startSimulation);
     
         /*generatore dei nodi*/
-        sem_init(&NodeStartSem,configurazione.SO_NODES_NUM,1);
         poolsizelist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         rewardlist=calloc(configurazione.SO_NODES_NUM , sizeof(int));
         semafori=calloc(configurazione.SO_NODES_NUM , sizeof(sem_t));
@@ -585,7 +577,6 @@ int main(int argc,char *argv[]){
         pthread_create(&thrGestore,NULL,gestore,NULL);
 
         /*generatore dei utenti*/
-        sem_init(&UserStartSem,configurazione.SO_USERS_NUM,1);
         budgetlist=calloc(configurazione.SO_USERS_NUM , sizeof(int));
         utenti_threads = calloc(configurazione.SO_USERS_NUM , sizeof(pthread_t));
         checkUser = calloc(configurazione.SO_USERS_NUM , sizeof(bool));
@@ -669,11 +660,9 @@ extern Transazione *mailbox;/*struttura per condividere */
 extern int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 extern bool *checkNode;
 extern pthread_t *nodi_threads;
-extern sem_t NodeStartSem;
 
 extern Transazione mainMailbox;
 extern bool gestoreOccupato;
-/*extern sem_t mainSem; /*luchetto per accedere solo un nodo alla volta*/
 
 
 extern Configurazione configurazione;
@@ -874,7 +863,6 @@ Importa tutte le variabili condivise
 /*variabili condivise tra diversi thread.*/
 extern int *budgetlist;     /*un registro del budget di ogni utente*/
 extern bool *checkUser;
-extern sem_t UserStartSem;
 
 extern int *rewardlist;     /*un registro publico del reward totale di ogni nodo.*/
 extern int *poolsizelist;  /*un registro del dimensioni occupate pool transaction*/

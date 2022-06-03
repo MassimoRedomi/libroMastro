@@ -1,13 +1,13 @@
 # DOMANDE PER IL PROFESSORE
-- [ ] è valido limitare la grandezza delle transazioni da 2 a budget/2, per prolongare la vita dell'utente attivo?
+- [x] è valido limitare la grandezza delle transazioni da 2 a budget/2, per prolongare la vita dell'utente attivo?
 ## Condizione di compilazione
-- [ ]  si puo aggiungere piu orgomenti alla compilazione?
+- [x]  si puo aggiungere piu orgomenti alla compilazione?
 
-- [ ]  si mettono le variabili nella compilazione come flags?
+- [x]  si mettono le variabili nella compilazione come flags?
 
-- [ ] c'è bisogno di fare piu cose nel Makefile?
+- [x] c'è bisogno di fare piu cose nel Makefile?
 ## Documentazione del codice
-- [ ] si puo usare org-mode o Markdown o unicamente si puo comentare il codice?
+- [x] si puo usare org-mode o Markdown o unicamente si puo comentare il codice?
 
 ## Ingresso Variabili
 
@@ -97,9 +97,9 @@
 
 - [x] enviar transaccion al nodo amigo(30 pts).
 
-- [ ] modo zombie del nodo:
+- [x] modo zombie del nodo:
     se debe rehacer de cero.
 
 # [STRUCTS](Structs.md)
-- [ ] transaction: replace double by timespec struct.
-- [ ] riparare il warning di randomSleep
+- [x] transaction: replace double by timespec struct.
+- [x] riparare il warning di randomSleep
