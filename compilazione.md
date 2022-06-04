@@ -32,22 +32,6 @@ SO_REGISTRY_SIZE = 1000
 	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE=10 -DSO_REGISTRY_SIZE=1000 main.c -o main
 ```
 
-### configurazione custom:
-
-Opzione per scrivere BLOCK_SIZE e REGISTRY_SIZE personalizzati:
-
-```makefile Makefile
-#setting con entrata libera per block size e registry size
-custom:
-	@echo -n "SO_BLOCK_SIZE: "
-	@read block
-	@echo -n "SO_REGISTRY_SIZE: "
-	@read registry
-	gcc -std=c89 -pthread -g -pedantic -D_GNU_SOURCE -DSO_BLOCK_SIZE = $(block) -DSO_REGISTRY_SIZE = $(registry) main.c -o main
-	
-```
-
-
 ## significato di ogni flag
  - std=c89: Stabilisce il linguagio standard C89.
 
