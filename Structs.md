@@ -11,10 +11,10 @@ dei dati letti del file di configurazione. Questi dati sono:
 
 | variables             | descripcion                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| SO_USERS_NUM          | numero di processi utente                                                                                       |
+| SO_USERS_NUM          | numero di processi utente                                                                                        |
 | SO_NODES_NUM          | numero di processi nodo                                                                                          |
 | SO_BUDGET_INIT        | budget iniziale di ciascun processo utente                                                                       |
-| SO_REWARD             | percentuale di reward pagata da ogni utente per il processo di una transazione                            |
+| SO_REWARD             | percentuale di reward pagata da ogni utente per il processo di una transazione                                   |
 | SO_MIN_TRANS_GEN_NSEC | minimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente  |
 | SO_MAX_TRANS_GEN_NSEC | massimo valore del tempo che trascorre fra la generazione di una transazione e la seguente da parte di un utente |
 | SO_RETRY              | numero massimo di fallimenti consecutivi nella generazione di transazioni dopo cui un processo utente termina    |
@@ -25,7 +25,7 @@ dei dati letti del file di configurazione. Questi dati sono:
 | SO_REGISTRY_SIZE      | numero massimo di blocchi nel libro mastro.                                                                      |
 | SO_SIM_SEC            | durata della simulazione.                                                                                        |
 | SO_NUM_FRIENDS        | numero di nodi amici dei processi nodo(solo per la versione full)                                                |
-| SO_HOPS               | numero massimo d'inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo            |
+| SO_HOPS               | numero massimo d'inoltri di una transazione verso nodi amici prima che il master creai un nuovo nodo             |
 
 
 
