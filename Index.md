@@ -7,5 +7,9 @@
 6. [Utente (User.c)](#6.Utente)
 7. [Prints (print.c)](#7.Prints)
 
+#### membri
+- José Adrian Santos Lertora, Matricola:932399, email:josesantosl1607@gmail.com
 
+- Evelyn Andrea Rojas Aranda, Matricola:889996, email:evelyn.rojasaranda@edu.unito.it
 
+- Massimo Alejandro Redomi Poggioli, Matricola:922838, email:massimo.redomi@edu.unito.it
