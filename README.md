@@ -387,12 +387,10 @@ In base a un grupo di variabili condivise si stabilisce un sistema di comunicazi
 /*variabili condivise tra diversi thread.*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 bool *checkUser;     /*mostra lo stato di ogni utente.*/
-sem_t UserStartSem;  /*un semaforo dedicato unicamente per iniziare processi utente*/
 
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-sem_t NodeStartSem;  /*un semaforo dedicato unicamente per iniziare processi nodo*/
 Transazione *mailbox;/*struttura per condividere */
 bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 
@@ -547,7 +545,7 @@ int main(int argc,char *argv[]){
         /*now that we have all the variables we can start the process
         master*/
         sem_init(&libroluck,configurazione.SO_NODES_NUM,1);/*inizia il semaforo del libromastro*/
-        /*sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);*/
+
         gestoreOccupato=false;
         clock_gettime(CLOCK_REALTIME,&startSimulation);
     
@@ -603,13 +601,6 @@ int main(int argc,char *argv[]){
         }
         finalprint();
     
-        /*kill all the threads*/
-        /*for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-            pthread_cancel(nodi_threads[i]);
-        }
-        for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(utenti_threads[i]);
-        }*/
     }
     return 0;
 }
@@ -617,7 +608,7 @@ int main(int argc,char *argv[]){
 # 5.Nodo
 
 ## Importa Variabili Globali
-Importa funzioni e strutture di [Structs](3.Strutture).
+Importa funzioni e strutture di [Structs](#3.Strutture).
 ```c Node.c
 #include "Structs.c"
 #define defaultSender -1
@@ -658,7 +649,7 @@ extern Configurazione configurazione;
 ```
 
 ## trova ID del Nodo
-Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID del nodo in base alla posizione del thread nella lista nodi_threads. A differenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantità di cicli che fanno i nodi creati a metà simulazione da parte del main.
+Per colpa del pedantic nel [Makefile](#1.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID del nodo in base alla posizione del thread nella lista nodi_threads. A differenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantità di cicli che fanno i nodi creati a metà simulazione da parte del main.
 ```c Node.c
 /*cerca la posizione del thread del nodo.*/
 int trovaNodoID(){
@@ -739,8 +730,6 @@ void* nodo(){
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
-    Transazione finalReward;
-    int mythr; 
     int semvalue;/*valore del semaforo*/
     int *amici = calloc(configurazione.SO_FRIENDS_NUM, sizeof(int));
     bool inviaAmico=true;
@@ -753,8 +742,6 @@ void* nodo(){
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
     checkNode[id] = true;
-    /*mythr = pthread_self();
-    /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
     while(checkNode[id]){
@@ -762,7 +749,7 @@ void* nodo(){
         /*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
-            /*printf("hay algo en el mailbox #%d\n",id);*/
+
             /*scrivo la nuova transazione nel blocco e nella pool*/
             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);
@@ -863,7 +850,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID all'utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID dell'utente in base alla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile](#1.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID all'utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){
@@ -956,14 +943,11 @@ Transazione generateTransaction(int id){
 void* utente(){
     int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
-    pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
     int retry=0;
     /*setting default values delle variabili condivise*/
     checkUser[id] = true;
     budgetlist[id] = configurazione.SO_BUDGET_INIT;
-
-    /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
     while(checkUser[id]){
 

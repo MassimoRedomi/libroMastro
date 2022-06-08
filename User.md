@@ -41,7 +41,7 @@ extern pthread_t *utenti_threads;      /*lista id dei processi utenti*/
 ```
 
 ## trova ID del utente
-Per colpa del pedantic nel [Makefile](#Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID all'utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID dell'utente in base alla posizione del thread nella lista utenti_threads.
+Per colpa del pedantic nel [Makefile](#1.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID all'utente come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID dell'utente in base alla posizione del thread nella lista utenti_threads.
 ```c User.c
 /*cerca la posizione del thread del utente.*/
 int trovaUtenteID(){
@@ -134,14 +134,11 @@ Transazione generateTransaction(int id){
 void* utente(){
     int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
-    pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
     int retry=0;
     /*setting default values delle variabili condivise*/
     checkUser[id] = true;
     budgetlist[id] = configurazione.SO_BUDGET_INIT;
-
-    /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
     while(checkUser[id]){
 

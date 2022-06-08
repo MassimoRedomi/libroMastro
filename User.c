@@ -85,14 +85,11 @@ Transazione generateTransaction(int id){
 void* utente(){
     int id = trovaUtenteID();                       /*Id processo utente*/
     int i;
-    pthread_t mythr = pthread_self();          /*Pid thread processo utente*/
     int lastUpdate = 0;                        /*questo controlla l'ultima versione del libro mastro*/
     int retry=0;
     /*setting default values delle variabili condivise*/
     checkUser[id] = true;
     budgetlist[id] = configurazione.SO_BUDGET_INIT;
-
-    /*printf("Utente #%d creato nel thread %d\n",id,mythr);*/
 
     while(checkUser[id]){
 

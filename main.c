@@ -18,12 +18,10 @@ bool gestoreOccupato;
 /*variabili condivise tra diversi thread.*/
 int *budgetlist;     /*un registro del budget di ogni utente*/
 bool *checkUser;     /*mostra lo stato di ogni utente.*/
-sem_t UserStartSem;  /*un semaforo dedicato unicamente per iniziare processi utente*/
 
 int *rewardlist;     /*un registro pubblico del reward totale di ogni nodo.*/
 int *poolsizelist;   /*un registro del dimensioni occupate pool transaction*/
 sem_t *semafori;     /*semafori per accedere/bloccare un nodo*/
-sem_t NodeStartSem;  /*un semaforo dedicato unicamente per iniziare processi nodo*/
 Transazione *mailbox;/*struttura per condividere */
 bool *checkNode;     /*lista che mostra i nodi che sono attivi.*/
 
@@ -140,7 +138,7 @@ int main(int argc,char *argv[]){
         /*now that we have all the variables we can start the process
         master*/
         sem_init(&libroluck,configurazione.SO_NODES_NUM,1);/*inizia il semaforo del libromastro*/
-        /*sem_init(&mainSem,configurazione.SO_NODES_NUM+configurazione.SO_USERS_NUM,1);*/
+
         gestoreOccupato=false;
         clock_gettime(CLOCK_REALTIME,&startSimulation);
     
@@ -196,13 +194,6 @@ int main(int argc,char *argv[]){
         }
         finalprint();
     
-        /*kill all the threads*/
-        /*for(i=0; i<configurazione.SO_NODES_NUM ; i++){
-            pthread_cancel(nodi_threads[i]);
-        }
-        for(i=0; i<configurazione.SO_USERS_NUM; i++){
-            pthread_cancel(utenti_threads[i]);
-        }*/
     }
     return 0;
 }

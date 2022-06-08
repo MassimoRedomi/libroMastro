@@ -1,7 +1,7 @@
 # 5.Nodo
 
 ## Importa Variabili Globali
-Importa funzioni e strutture di [Structs](3.Strutture).
+Importa funzioni e strutture di [Structs](#3.Strutture).
 ```c Node.c
 #include "Structs.c"
 #define defaultSender -1
@@ -42,7 +42,7 @@ extern Configurazione configurazione;
 ```
 
 ## trova ID del Nodo
-Per colpa del pedantic nel [Makefile](#3.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID del nodo in base alla posizione del thread nella lista nodi_threads. A differenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantità di cicli che fanno i nodi creati a metà simulazione da parte del main.
+Per colpa del pedantic nel [Makefile](#1.Compilazione) non possiamo fare un cast da integer a un puntatore void. Questo ci limita per passare argomenti a un thread, e per tanto anche ci impide passare l'ID al nodo come un argomento. Per questo motivo dobbiamo creare una funzione che trova l'ID del nodo in base alla posizione del thread nella lista nodi_threads. A differenza del trovaUtenteID, questa funzione inizia la ricerca da SO_NODES_NUM, lo facciamo per ridurre la quantità di cicli che fanno i nodi creati a metà simulazione da parte del main.
 ```c Node.c
 /*cerca la posizione del thread del nodo.*/
 int trovaNodoID(){
@@ -123,8 +123,6 @@ void* nodo(){
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
-    Transazione finalReward;
-    int mythr; 
     int semvalue;/*valore del semaforo*/
     int *amici = calloc(configurazione.SO_FRIENDS_NUM, sizeof(int));
     bool inviaAmico=true;
@@ -137,8 +135,6 @@ void* nodo(){
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
     checkNode[id] = true;
-    /*mythr = pthread_self();
-    /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
     while(checkNode[id]){
@@ -146,7 +142,7 @@ void* nodo(){
         /*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
-            /*printf("hay algo en el mailbox #%d\n",id);*/
+
             /*scrivo la nuova transazione nel blocco e nella pool*/
             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);

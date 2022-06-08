@@ -80,8 +80,6 @@ void* nodo(){
     int sommaBlocco=0; /*somma delle transazioni del blocco atuale*/
     Transazione blocco[SO_BLOCK_SIZE];
     Transazione pool[1000];/*stabilisce 1000 come la grandezza massima del pool, cmq si ferma in configurazione.SO_TP_SIZE*/
-    Transazione finalReward;
-    int mythr; 
     int semvalue;/*valore del semaforo*/
     int *amici = calloc(configurazione.SO_FRIENDS_NUM, sizeof(int));
     bool inviaAmico=true;
@@ -94,8 +92,6 @@ void* nodo(){
     rewardlist[id]=0;/*set il reward di questo nodo in 0*/
     poolsizelist[id]=0;/*set full space available*/
     checkNode[id] = true;
-    /*mythr = pthread_self();
-    /*printf("Nodo #%d creato nel thread %d\n",id,mythr);*/
     
     /*inizio del funzionamento*/
     while(checkNode[id]){
@@ -103,7 +99,7 @@ void* nodo(){
         /*aggiorno il valore del semaforo*/
         sem_getvalue(&semafori[id],&semvalue);
         if(semvalue <= 0){
-            /*printf("hay algo en el mailbox #%d\n",id);*/
+
             /*scrivo la nuova transazione nel blocco e nella pool*/
             if(counterBlock==SO_BLOCK_SIZE/2 && inviaAmico){
                 inviaAdAmico(amici,id);
